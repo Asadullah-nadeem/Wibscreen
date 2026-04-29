@@ -18,6 +18,11 @@ Route::get('/', fn() => view('pages.home'))->name('home');
 Route::get('/login',  fn() => view('pages.login'))->name('login');
 Route::get('/signup', fn() => view('pages.signup'))->name('signup');
 
+/* ── Dashboard (Workspace) ──────────────────────── */
+Route::get('/dashboard',     fn() => view('pages.dashboard'))->name('dashboard');
+Route::get('/dasboard',      fn() => view('pages.dashboard'));      // typo alias
+Route::get('/dasboard.html', fn() => view('pages.dashboard'));      // legacy .html alias
+
 /* ── Main Pages ─────────────────────────────────────── */
 Route::get('/about',   fn() => view('pages.about'))->name('about');
 Route::get('/pricing', fn() => view('pages.pricing'))->name('pricing');

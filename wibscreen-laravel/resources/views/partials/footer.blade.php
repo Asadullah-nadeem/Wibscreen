@@ -42,5 +42,12 @@
         <a href="{{ route('security') }}" class="small text-body-secondary text-decoration-none">Security</a>
       </div>
     </div>
+    <div class="border-top pt-3 mt-1 text-center" style="border-color:var(--wb-border)!important;">
+      <span class="small text-body-secondary">
+        Developed &amp; Designed by
+        <a href="https://codeaxe.co.in" target="_blank" rel="noopener" class="text-decoration-none fw-semibold" style="color:var(--wb-primary);">CodeAxe Technologies</a>
+        — Built with <span style="color:#ef4444;">❤️</span> in India
+      </span>
+    </div>
   </div>
 </footer>

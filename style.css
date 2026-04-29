@@ -167,6 +167,53 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 
 .tab-card-title { color: var(--text-main); font-weight: 700; font-size: 0.95rem; }
 
+/* Collection Sections */
+.collection-section {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 3rem;
+    margin-bottom: 3rem !important;
+}
+
+.collection-section:last-child {
+    border-bottom: none;
+}
+
+.collection-section .badge {
+    background: var(--bg-input) !important;
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+}
+
+.empty-placeholder {
+    background: rgba(0,0,0,0.15);
+    border: 2px dashed var(--border-color);
+    transition: var(--transition-standard);
+}
+
+.empty-placeholder:hover {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+/* Sidebar Actions */
+.group:hover .nav-actions {
+    display: flex !important;
+}
+
+.nav-actions i {
+    opacity: 0.5;
+    transition: var(--transition-standard);
+}
+
+.nav-actions i:hover {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+.delete-col-btn:hover { color: var(--error-red) !important; }
+
 /* Settings Modal UI */
 .settings-section {
     margin-bottom: 24px;

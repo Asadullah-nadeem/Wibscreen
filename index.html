@@ -58,11 +58,11 @@
             <!-- URL / Search Bar -->
             <header class="browser-header px-4 py-3 d-flex align-items-center gap-3">
                 <div class="url-bar w-100 d-flex align-items-center px-3 py-2">
-                    <i class="fas fa-shield-halved text-success me-2"></i>
-                    <input type="text" id="main-url-input" class="form-control-plaintext small" placeholder="https://" readonly>
-                    <div class="ms-auto d-flex gap-3 text-muted">
-                        <i id="refresh-btn" class="fas fa-rotate-right cursor-pointer" title="Refresh"></i>
-                        <i id="home-btn" class="fas fa-house cursor-pointer" title="Home"></i>
+                    <i class="fas fa-shield-check text-primary me-2"></i>
+                    <input type="text" id="main-url-input" class="form-control-plaintext small fw-medium" placeholder="Enter URL or search..." readonly>
+                    <div class="ms-auto d-flex gap-3 text-muted align-items-center">
+                        <i id="refresh-btn" class="fas fa-rotate-right cursor-pointer fs-6" title="Refresh"></i>
+                        <i id="home-btn" class="fas fa-house-user cursor-pointer fs-6" title="Home"></i>
                     </div>
                 </div>
             </header>
@@ -72,15 +72,15 @@
                 <!-- Tab Manager Grid -->
                 <div id="tab-manager" class="tab-dashboard h-100 p-4 p-xl-5 overflow-auto">
                     <div class="container-fluid">
-                        <div class="d-flex justify-content-between align-items-end mb-4">
+                        <div class="d-flex justify-content-between align-items-end mb-5">
                             <div>
-                                <h1 id="current-collection-name" class="h3 fw-bold mb-1">My Workspace</h1>
-                                <p class="text-muted small mb-0">Manage your live browser sessions</p>
+                                <h1 id="current-collection-name" class="h2 fw-bold mb-1 text-white">Workspace Dashboard</h1>
+                                <p class="text-muted small mb-0">Select a card to resume your session</p>
                             </div>
                         </div>
                         
-                        <div id="tabs-grid" class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-                            <!-- Cards injected here -->
+                        <div id="tabs-grid" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3">
+                            <!-- Small cards injected here -->
                         </div>
                     </div>
                 </div>
@@ -90,57 +90,84 @@
 
                 <!-- Placeholder -->
                 <div id="browser-placeholder" class="position-absolute top-50 start-50 translate-middle text-center">
-                    <i class="fas fa-compass display-1 text-muted opacity-10 mb-4"></i>
-                    <h2 class="h4 fw-bold">Explore your Workspace</h2>
-                    <p class="text-muted">Select a tab from your collection to start browsing</p>
+                    <i class="fas fa-compass display-1 text-primary opacity-25 mb-4"></i>
+                    <h2 class="h4 fw-bold text-white">Explore your Workspace</h2>
+                    <p class="text-muted">No active session. Select a collection or add a website to start.</p>
                 </div>
             </div>
         </main>
 
-        <!-- Floating Action Controls -->
-        <div class="floating-controls d-flex flex-column gap-3 p-4">
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-navbar">
+            <div class="me-auto d-flex align-items-center gap-3 text-muted small">
+                <i class="fas fa-circle-check text-success"></i>
+                <span id="status-text" class="fw-medium">Workspace Engine Active</span>
+            </div>
+            
             <button id="add-website-btn" class="btn btn-primary btn-fab shadow-lg" title="Add Website">
                 <i class="fas fa-plus"></i>
             </button>
             <button id="tab-switcher-btn" class="btn btn-dark btn-fab shadow-lg position-relative" title="Switch Tabs">
-                <i class="fas fa-grip-vertical"></i>
+                <i class="fas fa-grip"></i>
                 <span id="tab-count-badge" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">0</span>
             </button>
-        </div>
+        </nav>
 
-        <!-- Bootstrap Modal: Add Website -->
+        <!-- Modal: Add Website -->
         <div class="modal fade" id="addWebsiteModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg">
                     <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="modal-title fw-bold">Add Website</h5>
+                        <h5 class="modal-title fw-bold">Add New Website</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">WEBSITE URL</label>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">DESTINATION URL</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-dark border-0 text-muted"><i class="fas fa-link"></i></span>
-                                <input type="text" id="new-url-input" class="form-control bg-dark border-0 text-white p-3" placeholder="https://example.com">
+                                <span class="input-group-text bg-dark border-0 text-muted"><i class="fas fa-globe"></i></span>
+                                <input type="text" id="new-url-input" class="form-control bg-dark border-0 p-3" placeholder="https://example.com">
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted">DISPLAY NAME</label>
-                                <input type="text" id="new-name-input" class="form-control bg-dark border-0 text-white p-3" placeholder="Optional">
+                                <input type="text" id="new-name-input" class="form-control bg-dark border-0 p-3" placeholder="Optional">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted">COLLECTION</label>
-                                <select id="new-collection-select" class="form-select bg-dark border-0 text-white p-3">
-                                    <option value="un-categorized">Default</option>
+                                <select id="new-collection-select" class="form-select bg-dark border-0 p-3">
+                                    <!-- Options injected here -->
                                 </select>
                             </div>
                         </div>
-                        <p id="validation-message" class="text-danger small mt-2 mb-0"></p>
+                        <p id="validation-message" class="text-danger small mt-3 mb-0"></p>
                     </div>
-                    <div class="modal-footer border-0 p-4 pt-0 gap-2">
+                    <div class="modal-footer border-0 p-4 pt-0 gap-3">
                         <button type="button" class="btn btn-link text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" id="load-website-btn" class="btn btn-primary px-4 py-2 fw-bold">Add to Collection</button>
+                        <button type="button" id="load-website-btn" class="btn btn-primary px-4 py-3 fw-bold flex-grow-1">Add to Workspace</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Create Folder -->
+        <div class="modal fade" id="createFolderModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg p-2">
+                    <div class="modal-header border-0 p-4 pb-0">
+                        <h5 class="modal-title fw-bold">Create New Folder</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">FOLDER NAME</label>
+                            <input type="text" id="new-folder-input" class="form-control bg-dark border-0 p-3" placeholder="Enter folder name...">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0 gap-3">
+                        <button type="button" class="btn btn-link text-muted text-decoration-none px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirm-create-folder" class="btn btn-primary px-4 py-3 fw-bold flex-grow-1">Create Folder</button>
                     </div>
                 </div>
             </div>

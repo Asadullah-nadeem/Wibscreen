@@ -21,7 +21,7 @@ Route::get('/signup', fn() => view('pages.signup'))->name('signup');
 /* ── Dashboard (Workspace) ──────────────────────── */
 Route::get('/dashboard',     fn() => view('pages.dashboard'))->name('dashboard');
 Route::get('/dasboard',      fn() => view('pages.dashboard'));      // typo alias
-Route::get('/dasboard.html', fn() => view('pages.dashboard'));      // legacy .html alias
+Route::get('/dasboard', fn() => view('pages.dashboard'));      // legacy .html alias
 
 /* ── Main Pages ─────────────────────────────────────── */
 Route::get('/about',   fn() => view('pages.about'))->name('about');

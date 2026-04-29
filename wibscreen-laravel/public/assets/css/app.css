@@ -307,40 +307,59 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 }
 
 /* ── 11. Sort + FAB Group ────────────────────────── */
-.wb-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.wb-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.wb-sort-group {
+  border-radius: 10px;
+  overflow: hidden;
+}
 
 .wb-sort-group .btn {
   font-size: 0.8rem;
-  padding: 7px 14px;
-  border-radius: 9px !important;
-  min-height: 38px;
+  padding: 0 14px;
+  height: 38px;
+  min-width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Restore Bootstrap btn-group corner rounding — do NOT override per-button */
+  border-radius: 0 !important;
 }
+
+/* First and last buttons get outer rounded corners */
+.wb-sort-group .btn:first-child { border-radius: 9px 0 0 9px !important; }
+.wb-sort-group .btn:last-child  { border-radius: 0 9px 9px 0 !important; }
 
 .wb-sort-group .btn.active {
   background: var(--wb-primary) !important;
   color: #fff !important;
   border-color: var(--wb-primary) !important;
+  box-shadow: none !important;
 }
 
 .wb-fab {
-  width: 48px; height: 48px;
-  border-radius: 50%;
+  width: 38px; height: 38px;
+  border-radius: 11px;
   background: var(--wb-primary);
   color: #fff;
-  border: none; font-size: 1.15rem;
+  border: none; font-size: 1rem;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 18px rgba(99,102,241,0.4);
+  box-shadow: 0 4px 14px rgba(99,102,241,0.35);
   transition: background var(--wb-speed), transform 0.18s, box-shadow 0.2s;
   flex-shrink: 0;
-  /* Touch feedback */
   -webkit-tap-highlight-color: transparent;
 }
 
 .wb-fab:hover, .wb-fab:focus {
   background: var(--wb-primary-hover);
-  transform: scale(1.08);
-  box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+  transform: scale(1.06);
+  box-shadow: 0 6px 22px rgba(99,102,241,0.45);
 }
 
 .wb-fab:active { transform: scale(0.96); }

@@ -423,6 +423,10 @@
 
 <script>
   const _root = document.documentElement;
+  const DB_STATE = {
+      collections: @json($collections),
+      userPlan: "{{ auth()->user()->plan }}"
+  };
 
   document.getElementById('wb-accent-color').addEventListener('input', function () {
     _root.style.setProperty('--wb-primary', this.value);

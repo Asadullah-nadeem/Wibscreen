@@ -549,9 +549,34 @@ $(function () {
      PERSISTENCE
   ═══════════════════════════════════════════════════ */
   function loadState () {
+    // Priority: Database (DB_STATE) > LocalStorage > Default
     const saved = loadJSON(STORAGE_STATE, {});
-    state.collections = saved.collections?.length ? saved.collections : [...DEFAULT_COLLECTIONS];
-    state.websites    = saved.websites    || [];
+    
+    if (typeof DB_STATE !== 'undefined' && DB_STATE.collections.length > 0) {
+        state.collections = DB_STATE.collections.map(c => ({
+            id: c.id,
+            name: c.name,
+            icon: c.icon
+        }));
+        
+        state.websites = [];
+        DB_STATE.collections.forEach(c => {
+            if (c.tabs) {
+                c.tabs.forEach(t => {
+                    state.websites.push({
+                        id: t.id,
+                        url: t.url,
+                        title: t.title,
+                        collectionId: c.id
+                    });
+                });
+            }
+        });
+    } else {
+        state.collections = saved.collections?.length ? saved.collections : [...DEFAULT_COLLECTIONS];
+        state.websites    = saved.websites    || [];
+    }
+
     state.activeTabId = saved.activeTabId || null;
 
     state.websites.forEach(mountIframe);

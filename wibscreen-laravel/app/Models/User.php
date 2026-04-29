@@ -46,4 +46,20 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the collections for the user.
+     */
+    public function collections()
+    {
+        return $this->hasMany(Collection::class);
+    }
+
+    /**
+     * Get the workspace tabs for the user.
+     */
+    public function tabs()
+    {
+        return $this->hasMany(WorkspaceTab::class);
+    }
 }

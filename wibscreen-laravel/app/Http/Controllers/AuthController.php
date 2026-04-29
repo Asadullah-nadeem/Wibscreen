@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Collection;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -36,7 +37,14 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'plan' => $request->plan,
+            'plan' => $request->plan ?? 'free',
+        ]);
+
+        // Create Default Collection
+        Collection::create([
+            'user_id' => $user->id,
+            'name' => 'Work',
+            'icon' => 'fas fa-briefcase',
         ]);
 
         event(new Registered($user));

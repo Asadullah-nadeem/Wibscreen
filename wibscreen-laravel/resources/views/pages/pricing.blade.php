@@ -1,0 +1,162 @@
+@extends('layouts.app')
+@section('title', 'Pricing — Wibscreen')
+@section('meta_desc', 'Simple transparent pricing. Free, Pro and Business plans for every need.')
+
+@push('styles')
+<style>
+  .plan-card { background: var(--wb-surface); border: 1px solid var(--wb-border); border-radius: 24px; padding: 36px 28px; height: 100%; position: relative; transition: all .3s ease; }
+  .plan-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,.18); }
+  .plan-card.popular { border-color: #6366f1; box-shadow: 0 0 0 1px #6366f1, 0 20px 50px rgba(99,102,241,.15); }
+  .popular-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #6366f1; color: #fff; padding: 4px 20px; border-radius: 50px; font-size: .75rem; font-weight: 700; letter-spacing: .5px; white-space: nowrap; }
+  .plan-price { font-family: 'Manrope', sans-serif; font-size: 3rem; font-weight: 900; line-height: 1; }
+  .plan-feature { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--wb-border); font-size: .9rem; }
+  .plan-feature:last-child { border-bottom: none; }
+  .plan-feature i { margin-top: 2px; flex-shrink: 0; }
+  .plan-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 16px; }
+  .faq-item { border-bottom: 1px solid var(--wb-border); padding: 18px 0; }
+  .faq-item:last-child { border-bottom: none; }
+  .compare-table th { font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; opacity: .6; font-weight: 700; }
+  .compare-table td { vertical-align: middle; font-size: .9rem; padding: 14px 16px; }
+  .compare-table tbody tr:hover { background: rgba(99,102,241,.04); }
+  .tick { color: #22c55e; } .cross { color: #ef4444; opacity: .5; }
+</style>
+@endpush
+
+@section('content')
+@include('partials.navbar')
+
+<section class="wb-hero pb-4">
+  <div class="container">
+    <span class="wb-section-label">Pricing</span>
+    <h1 class="wb-hero-title mb-3">Simple, transparent pricing</h1>
+    <p class="wb-hero-sub text-body-secondary">Start free. Upgrade when you need more power. No hidden fees.</p>
+    <div class="d-flex align-items-center justify-content-center gap-3 mt-4">
+      <span class="small fw-semibold">Monthly</span>
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="billing-toggle" style="width:44px;height:22px;cursor:pointer;">
+      </div>
+      <span class="small fw-semibold">Annual <span class="badge bg-success ms-1 rounded-pill" style="font-size:.65rem;">Save 20%</span></span>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="row g-4 justify-content-center align-items-stretch">
+      {{-- Free --}}
+      <div class="col-md-4">
+        <div class="plan-card">
+          <div class="plan-icon" style="background:rgba(100,116,139,.12);color:#64748b;"><i class="fas fa-seedling"></i></div>
+          <div class="small fw-bold text-body-secondary text-uppercase mb-1" style="letter-spacing:.8px;">Free</div>
+          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price">$0</span><span class="text-body-secondary mb-2">/mo</span></div>
+          <p class="small text-body-secondary mb-4">Perfect for personal use and getting started.</p>
+          <a href="{{ route('signup') }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Get Started Free</a>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>1</b> Workspace</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Tabs per workspace</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Email accounts</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>~150 hours</b> monthly login time</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Bot support — <b>10 queries/mo</b></span></div>
+          <div class="plan-feature"><i class="fas fa-rectangle-ad" style="color:#f59e0b;"></i><span>Ads displayed in workspace</span></div>
+          <div class="plan-feature"><i class="fas fa-xmark cross"></i><span class="opacity-50">Priority support</span></div>
+        </div>
+      </div>
+      {{-- Pro --}}
+      <div class="col-md-4">
+        <div class="plan-card popular">
+          <div class="popular-badge"><i class="fas fa-star me-1"></i> Most Popular</div>
+          <div class="plan-icon" style="background:rgba(99,102,241,.15);color:#6366f1;"><i class="fas fa-bolt"></i></div>
+          <div class="small fw-bold text-uppercase mb-1" style="letter-spacing:.8px;color:#6366f1;">Pro</div>
+          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price" id="pro-price">$9</span><span class="text-body-secondary mb-2" id="pro-period">/mo</span></div>
+          <p class="small text-body-secondary mb-4">For power users who need more workspace and no distractions.</p>
+          <a href="{{ route('signup') }}" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Start Pro Trial</a>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Workspaces</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Tabs</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Email accounts</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>720 hours</b> (full month) login time</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Bot support — <b>Unlimited</b></span></div>
+          <div class="plan-feature"><i class="fas fa-ban text-success"></i><span><b>No ads</b> — clean workspace</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Priority email support</span></div>
+        </div>
+      </div>
+      {{-- Business --}}
+      <div class="col-md-4">
+        <div class="plan-card">
+          <div class="plan-icon" style="background:rgba(234,179,8,.12);color:#eab308;"><i class="fas fa-building"></i></div>
+          <div class="small fw-bold text-body-secondary text-uppercase mb-1" style="letter-spacing:.8px;">Business</div>
+          <div class="mb-1" style="padding-top:6px;"><span class="plan-price" style="font-size:2rem;">Contact Sales</span></div>
+          <p class="small text-body-secondary mb-4">Custom solutions for teams, agencies, and enterprises.</p>
+          <a href="{{ route('support') }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Us</a>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Workspaces</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Tabs & Collections</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Team members</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Always-on</b> login (no time limit)</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Dedicated account manager</span></div>
+          <div class="plan-feature"><i class="fas fa-ban text-success"></i><span><b>Zero ads</b>, white-label option</span></div>
+          <div class="plan-feature"><i class="fas fa-check tick"></i><span>SLA & 24/7 priority support</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{-- Comparison Table --}}
+<section class="py-5 border-top" style="background:var(--wb-surface-2);">
+  <div class="container">
+    <div class="text-center mb-4">
+      <span class="wb-section-label">Compare Plans</span>
+      <h2 class="h3 fw-bold" style="font-family:'Manrope',sans-serif;">Full feature breakdown</h2>
+    </div>
+    <div class="wb-page-card p-0 overflow-hidden">
+      <div class="table-responsive">
+        <table class="table compare-table mb-0">
+          <thead class="border-bottom"><tr><th class="py-3 px-4">Feature</th><th class="py-3 px-4 text-center">Free</th><th class="py-3 px-4 text-center" style="color:#6366f1;">Pro</th><th class="py-3 px-4 text-center">Business</th></tr></thead>
+          <tbody>
+            <tr><td class="px-4">Workspaces</td><td class="text-center">1</td><td class="text-center fw-semibold" style="color:#6366f1;">10</td><td class="text-center">Unlimited</td></tr>
+            <tr><td class="px-4">Tabs per workspace</td><td class="text-center">10</td><td class="text-center fw-semibold" style="color:#6366f1;">Unlimited</td><td class="text-center">Unlimited</td></tr>
+            <tr><td class="px-4">Email accounts</td><td class="text-center">10</td><td class="text-center fw-semibold" style="color:#6366f1;">Unlimited</td><td class="text-center">Unlimited</td></tr>
+            <tr><td class="px-4">Monthly login hours</td><td class="text-center">~150 hrs</td><td class="text-center fw-semibold" style="color:#6366f1;">720 hrs</td><td class="text-center">Always-on</td></tr>
+            <tr><td class="px-4">Bot support queries</td><td class="text-center">10/mo</td><td class="text-center fw-semibold" style="color:#6366f1;">Unlimited</td><td class="text-center">Unlimited</td></tr>
+            <tr><td class="px-4">Ads shown</td><td class="text-center"><i class="fas fa-check tick"></i></td><td class="text-center"><i class="fas fa-xmark cross"></i></td><td class="text-center"><i class="fas fa-xmark cross"></i></td></tr>
+            <tr><td class="px-4">Priority support</td><td class="text-center"><i class="fas fa-xmark cross"></i></td><td class="text-center"><i class="fas fa-check tick"></i></td><td class="text-center">24/7 SLA</td></tr>
+            <tr><td class="px-4">White-label option</td><td class="text-center"><i class="fas fa-xmark cross"></i></td><td class="text-center"><i class="fas fa-xmark cross"></i></td><td class="text-center"><i class="fas fa-check tick"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{-- FAQ --}}
+<section class="py-5"><div class="container" style="max-width:700px;">
+  <div class="text-center mb-4"><span class="wb-section-label">FAQ</span><h2 class="h3 fw-bold" style="font-family:'Manrope',sans-serif;">Common questions</h2></div>
+  <div class="wb-page-card">
+    <div class="faq-item"><div class="fw-semibold mb-1">Can I upgrade from Free to Pro anytime?</div><p class="text-body-secondary small mb-0">Yes. Your workspace data and collections carry over automatically.</p></div>
+    <div class="faq-item"><div class="fw-semibold mb-1">What happens if I exceed my login hours on Free?</div><p class="text-body-secondary small mb-0">You'll be prompted to upgrade or your session will reset at the monthly cycle. Your saved data stays intact.</p></div>
+    <div class="faq-item"><div class="fw-semibold mb-1">Are the ads intrusive on the Free plan?</div><p class="text-body-secondary small mb-0">Ads on the Free plan are minimal — displayed in a dedicated area, not overlapping your workspace content.</p></div>
+    <div class="faq-item"><div class="fw-semibold mb-1">How do I contact Business sales?</div><p class="text-body-secondary small mb-0">Use our <a href="{{ route('support') }}" class="text-primary">Support page</a> and select "Business Inquiry". Our team responds within 24 hours.</p></div>
+  </div>
+</div></section>
+
+<section class="py-5 border-top text-center" style="border-color:var(--wb-border)!important;">
+  <div class="container">
+    <h2 class="h3 fw-bold mb-2" style="font-family:'Manrope',sans-serif;">Start building your workspace today</h2>
+    <p class="text-body-secondary mb-4">Free plan available — no credit card required.</p>
+    <a href="{{ route('signup') }}" class="btn btn-primary px-5 py-2 fw-semibold me-2">Get Started Free</a>
+    <a href="{{ route('support') }}" class="btn btn-outline-secondary px-4 py-2">Talk to Sales</a>
+  </div>
+</section>
+
+@include('partials.footer')
+@endsection
+
+@push('scripts')
+<script>
+const toggle = document.getElementById('billing-toggle');
+const priceEl = document.getElementById('pro-price');
+const periodEl = document.getElementById('pro-period');
+toggle.addEventListener('change', function() {
+  priceEl.textContent = this.checked ? '$7' : '$9';
+  periodEl.textContent = this.checked ? '/mo, billed annually' : '/mo';
+});
+</script>
+@endpush

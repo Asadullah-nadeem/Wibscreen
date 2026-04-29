@@ -66,6 +66,16 @@
 
     <!-- Footer -->
     <div class="wb-sidebar-footer d-flex flex-column gap-2">
+      <!-- Profile Block -->
+      <button id="wb-profile-btn" class="btn btn-sm text-start d-flex align-items-center gap-2 w-100 p-2 rounded-3" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);">
+        <div id="wb-avatar" style="width:32px;height:32px;border-radius:10px;background:var(--wb-primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;color:#fff;flex-shrink:0;font-family:'Manrope',sans-serif;">U</div>
+        <div class="text-start overflow-hidden">
+          <div class="small fw-semibold text-truncate" id="wb-profile-name" style="max-width:140px;">My Account</div>
+          <div style="font-size:.68rem;opacity:.55;" id="wb-profile-plan">Free Plan</div>
+        </div>
+        <i class="fas fa-chevron-right ms-auto opacity-40 small"></i>
+      </button>
+
       <button id="wb-theme-btn" class="btn btn-outline-secondary btn-sm text-start">
         <i id="wb-theme-icon" class="fas fa-moon me-2"></i>
         <span id="wb-theme-label">Night Mode</span>
@@ -73,6 +83,9 @@
       <button id="wb-settings-btn" class="btn btn-outline-secondary btn-sm text-start">
         <i class="fas fa-cog me-2"></i>Settings
       </button>
+      <a href="pricing.html" class="btn btn-outline-secondary btn-sm text-start text-decoration-none">
+        <i class="fas fa-crown me-2" style="color:#eab308;"></i>Upgrade Plan
+      </a>
       <div class="d-flex align-items-center gap-2 mt-1 ps-1">
         <div class="wb-status-dot"></div>
         <span class="small text-body-secondary">System Active</span>
@@ -262,6 +275,72 @@
   </div>
 </div>
 
+<!-- Profile Modal -->
+<div class="modal fade" id="wb-modal-profile" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fw-bold">My Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <!-- Avatar + Name -->
+        <div class="text-center mb-4">
+          <div id="modal-avatar" style="width:72px;height:72px;border-radius:20px;background:var(--wb-primary);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.5rem;color:#fff;margin:0 auto 12px;font-family:'Manrope',sans-serif;">U</div>
+          <h5 class="fw-bold mb-0" id="modal-profile-name">My Account</h5>
+          <p class="small text-body-secondary mb-2" id="modal-profile-email">user@example.com</p>
+          <span class="badge rounded-pill px-3 py-2" id="modal-plan-badge" style="background:rgba(99,102,241,.15);color:#6366f1;font-weight:700;"><i class="fas fa-seedling me-1"></i>Free Plan</span>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+          <div class="col-4">
+            <div class="text-center p-2 rounded-3" style="background:var(--bs-body-bg);border:1px solid var(--wb-border);">
+              <div class="fw-bold" id="stat-workspaces">1</div>
+              <div class="small text-body-secondary">Workspaces</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="text-center p-2 rounded-3" style="background:var(--bs-body-bg);border:1px solid var(--wb-border);">
+              <div class="fw-bold" id="stat-tabs">0</div>
+              <div class="small text-body-secondary">Tabs</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="text-center p-2 rounded-3" style="background:var(--bs-body-bg);border:1px solid var(--wb-border);">
+              <div class="fw-bold" id="stat-folders">0</div>
+              <div class="small text-body-secondary">Folders</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Name -->
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Display Name</label>
+          <input type="text" id="profile-name-input" class="form-control" placeholder="Your name">
+        </div>
+
+        <!-- Plan Info -->
+        <div class="p-3 rounded-3 mb-3" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="small fw-bold" id="plan-name-text">Free Plan</div>
+              <div class="small text-body-secondary" id="plan-desc-text">1 workspace · 10 tabs · 150hrs/mo</div>
+            </div>
+            <a href="pricing.html" class="btn btn-primary btn-sm fw-semibold px-3">Upgrade</a>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top-0 pt-0 justify-content-between">
+        <button type="button" class="btn btn-sm btn-outline-danger" id="wb-logout-btn">
+          <i class="fas fa-arrow-right-from-bracket me-1"></i>Log Out
+        </button>
+        <button type="button" class="btn btn-primary fw-semibold px-4" id="wb-save-profile">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 3. jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <!-- 4. Bootstrap Bundle JS -->
@@ -289,6 +368,70 @@
 
   document.getElementById('wb-settings-theme-btn').addEventListener('click', function () {
     document.getElementById('wb-theme-btn').click();
+  });
+
+  // ── Auth Guard ──────────────────────────────
+  (function () {
+    if (!localStorage.getItem('wb_logged_in')) {
+      window.location.href = 'login.html';
+    }
+  })();
+
+  // ── Profile Logic ────────────────────────────
+  $(function () {
+    const modalProfile = new bootstrap.Modal(document.getElementById('wb-modal-profile'));
+
+    function loadProfile () {
+      const email = localStorage.getItem('wb_user_email') || 'user@example.com';
+      const name  = localStorage.getItem('wb_user_name')  || email.split('@')[0];
+      const plan  = localStorage.getItem('wb_plan')        || 'free';
+
+      // Avatar initials
+      const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      $('#wb-avatar, #modal-avatar').text(initials);
+      $('#wb-profile-name, #modal-profile-name').text(name);
+      $('#modal-profile-email').text(email);
+      $('#profile-name-input').val(name);
+
+      // Plan badge
+      const plans = {
+        free:     { label: 'Free Plan',     icon: 'fa-seedling', color: '#64748b', desc: '1 workspace · 10 tabs · 150hrs/mo' },
+        pro:      { label: 'Pro Plan',      icon: 'fa-bolt',     color: '#6366f1', desc: '10 workspaces · Unlimited tabs · 720hrs/mo' },
+        business: { label: 'Business Plan', icon: 'fa-building', color: '#eab308', desc: 'Unlimited everything · 24/7 support' }
+      };
+      const p = plans[plan] || plans.free;
+      $('#wb-profile-plan').text(p.label);
+      $('#modal-plan-badge').html('<i class="fas ' + p.icon + ' me-1"></i>' + p.label).css('color', p.color);
+      $('#plan-name-text').text(p.label);
+      $('#plan-desc-text').text(p.desc);
+
+      // Stats from state
+      try {
+        const state = JSON.parse(localStorage.getItem('wb_state_v8') || '{}');
+        $('#stat-folders').text((state.collections || []).length);
+        $('#stat-tabs').text((state.websites || []).length);
+      } catch(_) {}
+    }
+
+    $('#wb-profile-btn').on('click', function () { loadProfile(); modalProfile.show(); });
+
+    $('#wb-save-profile').on('click', function () {
+      const newName = $('#profile-name-input').val().trim();
+      if (newName) {
+        localStorage.setItem('wb_user_name', newName);
+        loadProfile();
+        modalProfile.hide();
+      }
+    });
+
+    $('#wb-logout-btn').on('click', function () {
+      if (confirm('Log out of Wibscreen?')) {
+        localStorage.removeItem('wb_logged_in');
+        window.location.href = 'login.html';
+      }
+    });
+
+    loadProfile();
   });
 </script>
 </body>

@@ -147,8 +147,49 @@
         <div id="wb-dashboard"></div>
       </div>
 
-      <!-- Iframe Layer -->
-      <div id="wb-iframe-layer" class="wb-iframe-layer"></div>
+      <!-- Iframe Layer / Browser Panel -->
+      <div id="wb-iframe-layer" class="wb-iframe-layer">
+
+        <!-- Browser Toolbar -->
+        <div class="wb-browser-toolbar">
+          <button class="wb-browser-btn" id="wb-browser-back" title="Back to Workspace" aria-label="Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <button class="wb-browser-btn" id="wb-browser-refresh" title="Refresh" aria-label="Refresh">
+            <i class="fas fa-rotate-right"></i>
+          </button>
+          <div class="wb-browser-url">
+            <i class="fas fa-shield-halved text-primary" style="font-size:.8rem;flex-shrink:0;"></i>
+            <span class="wb-browser-url-text" id="wb-browser-url-text">Loading…</span>
+          </div>
+          <button class="wb-browser-btn" id="wb-browser-newtab" title="Open in new tab" aria-label="Open in new tab">
+            <i class="fas fa-arrow-up-right-from-square"></i>
+          </button>
+          <button class="wb-browser-btn close-btn" id="wb-browser-close" title="Close browser" aria-label="Close">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Loading bar -->
+        <div class="wb-load-bar" id="wb-load-bar"></div>
+
+        <!-- Content area: iframes + blocked message -->
+        <div class="wb-iframe-content">
+
+          <!-- Blocked site fallback -->
+          <div class="wb-iframe-blocked" id="wb-iframe-blocked">
+            <div class="wb-iframe-blocked-icon"><i class="fas fa-shield-halved"></i></div>
+            <h5 class="fw-bold mb-1">Site cannot be embedded</h5>
+            <p class="text-body-secondary small mb-3" id="wb-blocked-domain" style="max-width:340px;">
+              This website blocks embedding for security reasons (X-Frame-Options). You can still open it in a new tab.
+            </p>
+            <button class="btn btn-primary fw-semibold px-4" id="wb-open-newtab-btn">
+              <i class="fas fa-arrow-up-right-from-square me-2"></i>Open in New Tab
+            </button>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <!-- Bottom Bar -->

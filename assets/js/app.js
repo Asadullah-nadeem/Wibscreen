@@ -35,8 +35,9 @@ $(function () {
   const $colSelect   = $('#wb-col-select');
   const $dashboard   = $('#wb-dashboard');
   const $dashTitle   = $('#wb-dash-title');
-  const $iframeLayer = $('#wb-iframe-layer');
-  const $urlDisplay  = $('#wb-url-display');
+  const $iframeLayer   = $('#wb-iframe-layer');
+  const $iframeContent = $('.wb-iframe-content');
+  const $urlDisplay    = $('#wb-url-display');
   const $searchInput = $('#wb-search');
   const $tabBadge    = $('#wb-tab-badge');
   const $statusText  = $('#wb-status-text');
@@ -120,6 +121,24 @@ $(function () {
     /* ── Settings ── */
     $('#wb-settings-btn').on('click', () => modalSettings.show());
 
+    /* ── Browser toolbar ── */
+    $('#wb-browser-back, #wb-browser-close').on('click', showDashboard);
+
+    $('#wb-browser-refresh').on('click', () => {
+      if (state.activeTabId) {
+        const $f = $(`#iframe-${state.activeTabId}`);
+        if ($f.length) {
+          showLoadBar();
+          try { $f[0].contentWindow.location.reload(); } catch (_) {}
+        }
+      }
+    });
+
+    $('#wb-browser-newtab, #wb-open-newtab-btn').on('click', () => {
+      const site = findSite(state.activeTabId);
+      if (site) window.open(site.url, '_blank', 'noopener');
+    });
+
     /* ── Home ── */
     $('#wb-home-btn').on('click', () => {
       state.currentCollection = 'all';
@@ -195,13 +214,8 @@ $(function () {
     $('#wb-sort-newest').on('click', () => setSortBy('newest'));
     $('#wb-sort-alpha').on('click',  () => setSortBy('alpha'));
 
-    /* ── Refresh ── */
-    $('#wb-refresh-btn').on('click', () => {
-      if (state.activeTabId) {
-        const $f = $(`#iframe-${state.activeTabId}`);
-        if ($f.length) $f[0].contentWindow.location.reload();
-      }
-    });
+    /* ── Refresh (topbar) ── */
+    $('#wb-refresh-btn').on('click', () => $('#wb-browser-refresh').trigger('click'));
 
     /* ── Close sidebar on resize to desktop ── */
     $(window).on('resize', debounce(() => {
@@ -315,8 +329,9 @@ $(function () {
   }
 
   function cardHTML (s) {
-    const fav = `https://www.google.com/s2/favicons?sz=64&domain=${hostname(s.url)}`;
-    const cls = s.id === state.activeTabId ? ' active-tab' : '';
+    const fav   = `https://www.google.com/s2/favicons?sz=64&domain=${hostname(s.url)}`;
+    const thumb = `https://image.thum.io/get/width/400/crop/280/noanimate/${encodeURIComponent(s.url)}`;
+    const cls   = s.id === state.activeTabId ? ' active-tab' : '';
     return `
       <div class="wb-card${cls}" data-id="${s.id}" data-url="${s.url}" role="button" tabindex="0" aria-label="${escHtml(s.title)}">
         <div class="wb-card-header">
@@ -327,7 +342,15 @@ $(function () {
             <i class="fas fa-xmark"></i>
           </button>
         </div>
-        <div class="wb-card-preview"><iframe data-src="${s.url}" title="${escHtml(s.title)}" loading="lazy"></iframe></div>
+        <div class="wb-card-preview">
+          <div class="wb-thumb-skeleton"></div>
+          <img class="wb-thumb-img"
+               src="${thumb}"
+               alt="${escHtml(s.title)} preview"
+               loading="lazy"
+               onload="this.classList.add('loaded');this.previousElementSibling.style.display='none';"
+               onerror="this.style.display='none';this.previousElementSibling.innerHTML='<i class=\'fas fa-globe\'></i><span>${escHtml(hostname(s.url))}</span>';this.previousElementSibling.classList.add('wb-thumb-fallback');">
+        </div>
       </div>`;
   }
 
@@ -351,16 +374,8 @@ $(function () {
       </div>`;
   }
 
-  /* ─── Lazy Load ──────────────────────────────────── */
-  const lazyObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      $(entry.target).find('iframe[data-src]').each(function () {
-        $(this).attr('src', $(this).data('src')).removeAttr('data-src');
-      });
-      lazyObserver.unobserve(entry.target);
-    });
-  }, { threshold: 0.05 });
+  /* ─── Lazy Load (screenshots load natively via img loading=lazy) ─── */
+  const lazyObserver = new IntersectionObserver(() => {}, {});
 
   /* ═══════════════════════════════════════════════════
      ACTIONS
@@ -415,15 +430,68 @@ $(function () {
     const site = findSite(id);
     if (!site) return;
 
+    // Show browser panel
     $iframeLayer.addClass('active');
-    $iframeLayer.find('.wb-tab-iframe').removeClass('active');
-    $(`#iframe-${id}`).addClass('active');
-    $urlDisplay.val(site.originalUrl || site.url);
+    $('#wb-iframe-blocked').removeClass('show');
+    $iframeContent.find('.wb-tab-iframe').removeClass('active');
+
+    // Update browser URL bar
+    $('#wb-browser-url-text').text(site.url);
+    $urlDisplay.val(site.url);
+
+    // Mount iframe if not already
+    mountIframe(site);
+    const $frame = $(`#iframe-${id}`);
+
+    // Show load bar
+    showLoadBar();
+
+    // Listen for load / block
+    $frame.off('load.wb error.wb').on('load.wb', function () {
+      doneLoadBar();
+      // Check if iframe was blocked (blank srcdoc / 0 width body = blocked)
+      try {
+        const doc = this.contentDocument || this.contentWindow.document;
+        // If same-origin empty page
+        if (doc && doc.body && doc.body.innerHTML === '') showBlocked(site);
+      } catch (e) {
+        // Cross-origin means it LOADED (no error thrown by load event for blocked by CSP)
+        doneLoadBar();
+      }
+    }).on('error.wb', function () {
+      doneLoadBar();
+      showBlocked(site);
+    });
+
+    $frame.addClass('active');
+
     saveState(); renderSidebar(); updateBottomBar();
+  }
+
+  function showBlocked (site) {
+    $(`#iframe-${site.id}`).removeClass('active');
+    $('#wb-blocked-domain').text(
+      `"${hostname(site.url)}" blocks embedding. You can open it directly in a new tab.`
+    );
+    $('#wb-iframe-blocked').addClass('show');
+  }
+
+  function showLoadBar () {
+    const $bar = $('#wb-load-bar');
+    $bar.removeClass('loading done').css('opacity', 1);
+    requestAnimationFrame(() => $bar.addClass('loading'));
+  }
+
+  function doneLoadBar () {
+    const $bar = $('#wb-load-bar');
+    $bar.removeClass('loading').addClass('done');
+    setTimeout(() => $bar.removeClass('done'), 800);
   }
 
   function showDashboard () {
     $iframeLayer.removeClass('active');
+    $('#wb-iframe-blocked').removeClass('show');
+    state.activeTabId = null;
     $urlDisplay.val('Workspace Ready');
     render();
   }
@@ -441,7 +509,7 @@ $(function () {
 
   function mountIframe (site) {
     if ($(`#iframe-${site.id}`).length) return;
-    $iframeLayer.append(
+    $iframeContent.append(
       `<iframe id="iframe-${site.id}" class="wb-tab-iframe" src="${site.url}"
                title="${escHtml(site.title)}" loading="lazy"></iframe>`
     );

@@ -513,12 +513,71 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
   overflow: hidden;
 }
 
-.wb-card-preview iframe {
-  width: 300%; height: 300%;
-  transform: scale(0.3333);
-  transform-origin: top left;
-  border: none; pointer-events: none;
+/* Shimmer skeleton while screenshot loads */
+.wb-thumb-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--wb-surface-2) 25%,
+    rgba(99,102,241,0.06) 50%,
+    var(--wb-surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: wbShimmer 1.6s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.72rem;
+  opacity: 0.4;
 }
+
+@keyframes wbShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Actual screenshot image */
+.wb-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: block;
+}
+
+.wb-thumb-img.loaded {
+  opacity: 1;
+}
+
+/* Fallback when screenshot fails */
+.wb-thumb-skeleton.wb-thumb-fallback {
+  animation: none;
+  opacity: 1;
+  background: var(--wb-surface-2);
+  font-size: 0.72rem;
+  color: var(--bs-secondary-color);
+}
+
+.wb-thumb-fallback i {
+  font-size: 1.4rem;
+  opacity: 0.15;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.wb-thumb-fallback span {
+  opacity: 0.3;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
 
 /* ── 15. Empty State ─────────────────────────────── */
 .wb-empty {
@@ -535,19 +594,121 @@ html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sa
 .wb-empty-text { font-size: 0.88rem; font-weight: 600; opacity: 0.55; margin: 0 0 4px; }
 .wb-empty-sub  { font-size: 0.78rem; opacity: 0.35; margin: 0; }
 
-/* ── 16. Iframe Layer ────────────────────────────── */
+/* ── 16. Iframe Layer / Browser Panel ───────────── */
 .wb-iframe-layer {
   position: absolute; inset: 0;
-  display: none; z-index: 50;
+  display: none;
+  z-index: 50;
+  flex-direction: column;
+  background: var(--wb-surface-2);
 }
 
-.wb-iframe-layer.active { display: block; }
+.wb-iframe-layer.active { display: flex; }
+
+/* Browser toolbar inside the panel */
+.wb-browser-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--wb-surface);
+  border-bottom: 1px solid var(--wb-border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.wb-browser-url {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--wb-surface-2);
+  border: 1px solid var(--wb-border);
+  border-radius: 40px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+  overflow: hidden;
+}
+
+.wb-browser-url-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.wb-browser-btn {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--wb-border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  transition: all var(--wb-speed);
+  flex-shrink: 0;
+  opacity: 0.65;
+}
+
+.wb-browser-btn:hover { opacity: 1; background: rgba(99,102,241,.1); border-color: var(--wb-primary); color: var(--wb-primary); }
+.wb-browser-btn.close-btn:hover { background: rgba(239,68,68,.1); border-color: #ef4444; color: #ef4444; }
+
+/* Loading bar */
+.wb-load-bar {
+  height: 2px;
+  background: var(--wb-primary);
+  width: 0;
+  transition: width 0.8s ease;
+  flex-shrink: 0;
+  border-radius: 0 2px 2px 0;
+}
+
+.wb-load-bar.loading { width: 70%; }
+.wb-load-bar.done    { width: 100%; opacity: 0; transition: width 0.3s ease, opacity 0.4s ease 0.3s; }
+
+/* Iframe content area */
+.wb-iframe-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
 
 .wb-tab-iframe {
-  width: 100%; height: 100%; border: none; display: none;
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: none;
+  display: none;
 }
 
 .wb-tab-iframe.active { display: block; }
+
+/* Blocked site message */
+.wb-iframe-blocked {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  gap: 12px;
+  background: var(--wb-surface-2);
+}
+
+.wb-iframe-blocked.show { display: flex; }
+
+.wb-iframe-blocked-icon {
+  width: 64px; height: 64px;
+  border-radius: 20px;
+  background: rgba(99,102,241,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  color: var(--wb-primary);
+  margin-bottom: 8px;
+}
 
 /* ── 17. Bottom Bar ──────────────────────────────── */
 .wb-bottombar {

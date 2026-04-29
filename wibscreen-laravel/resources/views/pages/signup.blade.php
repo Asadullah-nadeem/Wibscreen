@@ -13,7 +13,7 @@
   <div class="wb-auth-card">
     <div class="text-center mb-4">
       <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-3">
-        <div class="wb-logo-badge">WS</div>
+        <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:36px;height:36px;border-radius:10px;">
         <span class="fw-bold" style="font-family:'Manrope',sans-serif;font-size:1.1rem;color:inherit;">Wibscreen</span>
       </a>
       <h1 class="h4 fw-bold mb-1">Create your account</h1>

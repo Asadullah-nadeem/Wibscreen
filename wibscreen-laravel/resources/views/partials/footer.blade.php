@@ -3,7 +3,7 @@
     <div class="row g-4 mb-4">
       <div class="col-sm-6 col-lg-3">
         <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="wb-logo-badge" style="width:30px;height:30px;font-size:.7rem;">WS</div>
+          <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:30px;height:30px;border-radius:8px;">
           <span class="fw-bold" style="font-family:'Manrope',sans-serif;">Wibscreen</span>
         </div>
         <p class="small text-body-secondary mb-0">Your personal browser workspace. Organize the web your way.</p>

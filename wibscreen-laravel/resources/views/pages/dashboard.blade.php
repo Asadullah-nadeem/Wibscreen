@@ -34,7 +34,7 @@
 
     <!-- Header -->
     <div class="wb-sidebar-header d-flex align-items-center gap-3">
-      <div class="wb-logo-badge">WS</div>
+      <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:30px;height:30px;border-radius:8px;">
       <span class="fw-bold flex-grow-1" style="font-family:'Manrope',sans-serif;font-size:1.05rem;">Wibscreen</span>
       <button class="wb-icon-btn d-md-none" id="wb-sidebar-close" aria-label="Close menu">
         <i class="fas fa-xmark"></i>

@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title', 'Wibscreen — Your Personal Browser Workspace')</title>
+  <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
+  <link rel="apple-touch-icon" href="{{ asset('assets/img/favicon.png') }}">
 
   <!-- SEO -->
   <meta name="description" content="@yield('meta_desc', 'Wibscreen is your personal browser workspace. Organize websites into collections, open them in-app, and manage your digital life.')">

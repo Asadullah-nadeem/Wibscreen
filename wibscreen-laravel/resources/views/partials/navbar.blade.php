@@ -1,7 +1,7 @@
 <nav class="wb-navbar">
   <div class="container d-flex align-items-center justify-content-between gap-3">
     <a href="{{ route('home') }}" class="d-flex align-items-center gap-2 text-decoration-none" style="color:inherit;">
-      <div class="wb-logo-badge">WS</div>
+      <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:32px;height:32px;border-radius:8px;">
       <span class="fw-bold" style="font-family:'Manrope',sans-serif;font-size:1.05rem;">Wibscreen</span>
     </a>
 

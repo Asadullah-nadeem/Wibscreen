@@ -43,58 +43,68 @@
 <section class="pb-5">
   <div class="container">
     <div class="row g-4 justify-content-center align-items-stretch">
-      {{-- Free --}}
+      @foreach($plans as $plan)
+      @php
+        $icons = [
+          'free' => ['icon' => 'fa-seedling', 'bg' => 'rgba(100,116,139,.12)', 'color' => '#64748b'],
+          'pro' => ['icon' => 'fa-bolt', 'bg' => 'rgba(99,102,241,.15)', 'color' => '#6366f1'],
+          'business' => ['icon' => 'fa-building', 'bg' => 'rgba(234,179,8,.12)', 'color' => '#eab308']
+        ];
+        $style = $icons[$plan->slug] ?? $icons['free'];
+      @endphp
       <div class="col-md-4">
-        <div class="plan-card">
-          <div class="plan-icon" style="background:rgba(100,116,139,.12);color:#64748b;"><i class="fas fa-seedling"></i></div>
-          <div class="small fw-bold text-body-secondary text-uppercase mb-1" style="letter-spacing:.8px;">Free</div>
-          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price">₹0</span><span class="text-body-secondary mb-2">/month</span></div>
-          <p class="small text-body-secondary mb-4">Perfect for personal use and getting started.</p>
-          <a href="{{ route('signup') }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Get Started Free</a>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>1</b> Workspace</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Tabs per workspace</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Email accounts</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>~150 hours</b> monthly login time</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Bot support — <b>10 queries/mo</b></span></div>
-          <div class="plan-feature"><i class="fas fa-rectangle-ad" style="color:#f59e0b;"></i><span>Ads displayed in workspace</span></div>
-          <div class="plan-feature"><i class="fas fa-xmark cross"></i><span class="opacity-50">Priority support</span></div>
+        <div class="plan-card {{ $plan->is_popular ? 'popular' : '' }}">
+          @if($plan->is_popular)
+            <div class="popular-badge"><i class="fas fa-star me-1"></i> Most Popular</div>
+          @endif
+          <div class="plan-icon" style="background:{{ $style['bg'] }};color:{{ $style['color'] }};"><i class="fas {{ $style['icon'] }}"></i></div>
+          <div class="small fw-bold text-uppercase mb-1" style="letter-spacing:.8px;color:{{ $style['color'] }};">{{ $plan->name }}</div>
+          
+          <div class="d-flex align-items-end gap-1 mb-1">
+            @if($plan->slug === 'business')
+              <span class="plan-price" style="font-size:2rem;">Contact Sales</span>
+            @else
+              <span class="plan-price" id="{{ $plan->slug }}-price">₹{{ $plan->price_monthly }}</span>
+              <span class="text-body-secondary mb-2" id="{{ $plan->slug }}-period">/month</span>
+            @endif
+          </div>
+          
+          <p class="small text-body-secondary mb-4">{{ $plan->description }}</p>
+
+          @auth
+            @if(auth()->user()->plan === $plan->slug)
+              <button class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3" disabled>Current Plan</button>
+            @else
+              @if($plan->slug === 'pro')
+                <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
+              @elseif($plan->slug === 'business')
+                <a href="{{ route('support', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Us</a>
+              @else
+                <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
+              @endif
+            @endif
+          @else
+            @if($plan->slug === 'business')
+              <a href="{{ route('support', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Us</a>
+            @else
+              <a href="{{ route('signup', ['plan' => $plan->slug]) }}" class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">{{ $plan->slug === 'pro' ? 'Start Pro Trial' : 'Get Started Free' }}</a>
+            @endif
+          @endauth
+
+          @foreach($plan->features as $feature)
+            <div class="plan-feature">
+              @if(isset($feature['cross']) && $feature['cross'])
+                <i class="fas fa-xmark cross"></i>
+                <span class="opacity-50">{{ $feature['text'] }}</span>
+              @else
+                <i class="fas {{ $feature['icon'] ?? 'fa-check' }} {{ $feature['color'] ?? 'tick' }}" style="{{ isset($feature['color']) && str_starts_with($feature['color'], '#') ? 'color:'.$feature['color'] : '' }}"></i>
+                <span>{!! (isset($feature['bold']) && $feature['bold']) ? '<b>'.preg_replace('/^(\d+|~?\d+\s\w+)/', '<b>$1</b>', $feature['text']).'</b>' : $feature['text'] !!}</span>
+              @endif
+            </div>
+          @endforeach
         </div>
       </div>
-      {{-- Pro --}}
-      <div class="col-md-4">
-        <div class="plan-card popular">
-          <div class="popular-badge"><i class="fas fa-star me-1"></i> Most Popular</div>
-          <div class="plan-icon" style="background:rgba(99,102,241,.15);color:#6366f1;"><i class="fas fa-bolt"></i></div>
-          <div class="small fw-bold text-uppercase mb-1" style="letter-spacing:.8px;color:#6366f1;">Pro</div>
-          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price" id="pro-price">₹199</span><span class="text-body-secondary mb-2" id="pro-period">/month</span></div>
-          <p class="small text-body-secondary mb-4">For power users who need more workspace and no distractions.</p>
-          <a href="{{ route('signup') }}" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Start Pro Trial</a>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Workspaces</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Tabs</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Email accounts</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>720 hours</b> (full month) login time</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Bot support — <b>Unlimited</b></span></div>
-          <div class="plan-feature"><i class="fas fa-ban text-success"></i><span><b>No ads</b> — clean workspace</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Priority email support</span></div>
-        </div>
-      </div>
-      {{-- Business --}}
-      <div class="col-md-4">
-        <div class="plan-card">
-          <div class="plan-icon" style="background:rgba(234,179,8,.12);color:#eab308;"><i class="fas fa-building"></i></div>
-          <div class="small fw-bold text-body-secondary text-uppercase mb-1" style="letter-spacing:.8px;">Business</div>
-          <div class="mb-1" style="padding-top:6px;"><span class="plan-price" style="font-size:2rem;">Contact Sales</span></div>
-          <p class="small text-body-secondary mb-4">Custom solutions for teams, agencies, and enterprises.</p>
-          <a href="{{ route('support') }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Us</a>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Workspaces</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Tabs & Collections</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Unlimited</b> Team members</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>Always-on</b> login (no time limit)</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span>Dedicated account manager</span></div>
-          <div class="plan-feature"><i class="fas fa-ban text-success"></i><span><b>Zero ads</b>, white-label option</span></div>
-          <div class="plan-feature"><i class="fas fa-check tick"></i><span>SLA & 24/7 priority support</span></div>
-        </div>
-      </div>
+      @endforeach
     </div>
   </div>
 </section>
@@ -150,13 +160,61 @@
 @endsection
 
 @push('scripts')
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 const toggle = document.getElementById('billing-toggle');
-const priceEl = document.getElementById('pro-price');
-const periodEl = document.getElementById('pro-period');
-toggle.addEventListener('change', function() {
-  priceEl.textContent = this.checked ? '₹1,999' : '₹199';
-  periodEl.textContent = this.checked ? '/year' : '/month';
-});
+const plans = @json($plans);
+
+if(toggle) {
+  toggle.addEventListener('change', function() {
+    const isAnnual = this.checked;
+    
+    plans.forEach(plan => {
+      const priceEl = document.getElementById(plan.slug + '-price');
+      const periodEl = document.getElementById(plan.slug + '-period');
+      
+      if (priceEl && periodEl && plan.slug !== 'business') {
+        const price = isAnnual ? plan.price_yearly : plan.price_monthly;
+        const period = isAnnual ? '/year' : '/month';
+        
+        // Format with comma
+        priceEl.textContent = '₹' + price.toLocaleString('en-IN');
+        periodEl.textContent = period;
+      }
+    });
+  });
+}
+
+const rzpProBtn = document.getElementById('rzp-button-pro');
+if(rzpProBtn) {
+  rzpProBtn.onclick = function(e) {
+    const isAnnual = toggle ? toggle.checked : false;
+    const proPlan = plans.find(p => p.slug === 'pro');
+    const amount = isAnnual ? (proPlan ? proPlan.price_yearly : 1999) : (proPlan ? proPlan.price_monthly : 199);
+    
+    const options = {
+      "key": "{{ env('RAZORPAY_KEY') }}",
+      "amount": amount * 100, // in paise
+      "currency": "INR",
+      "name": "Wibscreen",
+      "description": "Pro Plan Subscription",
+      "image": "{{ asset('assets/img/logo.png') }}",
+      "handler": function (response){
+          const duration = isAnnual ? '1 Year' : '1 Month';
+          window.location.href = "{{ route('upgrade') }}?plan=pro&payment_id=" + response.razorpay_payment_id + "&duration=" + duration;
+      },
+      "prefill": {
+          "name": "{{ auth()->user()->name ?? '' }}",
+          "email": "{{ auth()->user()->email ?? '' }}"
+      },
+      "theme": {
+          "color": "#6366f1"
+      }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+    e.preventDefault();
+  }
+}
 </script>
 @endpush

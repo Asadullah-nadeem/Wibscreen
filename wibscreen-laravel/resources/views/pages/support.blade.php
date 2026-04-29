@@ -10,15 +10,39 @@
 <section class="py-5"><div class="container" style="max-width:700px;">
   <div class="wb-page-card mb-4">
     <h2 class="h5 fw-bold mb-4">Send a Message</h2>
-    <div id="support-success" class="alert alert-success d-none">Message sent! We'll respond within 24 hours.</div>
-    <form id="support-form" novalidate>
-      <div class="mb-3"><label class="form-label small fw-semibold">Category</label>
-        <select class="form-select" id="s-cat"><option value="">Select a category…</option><option>General Question</option><option>Bug Report</option><option>Feature Request</option><option>Billing</option><option>Business Inquiry</option></select>
+    @if(session('success'))
+      <div class="alert alert-success border-0 py-2 small" style="background:rgba(34,197,94,.1);color:#22c55e;">
+        <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
       </div>
-      <div class="row g-3 mb-3"><div class="col-sm-6"><label class="form-label small fw-semibold">Your Name</label><input type="text" id="s-name" class="form-control" placeholder="Name"></div>
-      <div class="col-sm-6"><label class="form-label small fw-semibold">Email</label><input type="email" id="s-email" class="form-control" placeholder="you@example.com"></div></div>
-      <div class="mb-3"><label class="form-label small fw-semibold">Message</label><textarea id="s-msg" class="form-control" rows="5" placeholder="Describe your issue or question…"></textarea></div>
-      <button type="submit" class="btn btn-primary fw-semibold px-4">Send Message</button>
+    @endif
+    <form action="{{ url('/support') }}" method="POST">
+      @csrf
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">Category</label>
+        <select name="category" class="form-select @error('category') is-invalid @enderror" required>
+          <option value="">Select a category…</option>
+          <option>General Question</option>
+          <option>Bug Report</option>
+          <option>Feature Request</option>
+          <option>Billing</option>
+          <option>Business Inquiry</option>
+        </select>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label class="form-label small fw-semibold">Your Name</label>
+          <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', auth()->user()->name) }}" placeholder="Name" required>
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label small fw-semibold">Email</label>
+          <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', auth()->user()->email) }}" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small fw-semibold">Message</label>
+        <textarea name="message" class="form-control @error('message') is-invalid @enderror" rows="5" placeholder="Describe your issue or question…" required>{{ old('message') }}</textarea>
+      </div>
+      <button type="submit" class="btn btn-primary fw-semibold px-4 py-2 rounded-3 shadow-sm">Send Message</button>
     </form>
   </div>
   <div class="wb-page-card">
@@ -38,13 +62,3 @@
 </div></section>
 @include('partials.footer')
 @endsection
-@push('scripts')
-<script>
-document.getElementById('support-form').addEventListener('submit',function(e){
-  e.preventDefault();
-  document.getElementById('support-success').classList.remove('d-none');
-  this.reset();
-  setTimeout(()=>document.getElementById('support-success').classList.add('d-none'),5000);
-});
-</script>
-@endpush

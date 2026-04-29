@@ -19,13 +19,24 @@
       <h1 class="h4 fw-bold mb-1">Welcome back</h1>
       <p class="text-body-secondary small">Sign in to your workspace</p>
     </div>
-    <div id="auth-alert" class="alert alert-danger d-none small py-2"></div>
-    <form id="login-form" novalidate>
-      <div class="mb-3"><label class="form-label small fw-semibold">Email</label><input type="email" id="login-email" class="form-control" placeholder="you@example.com" required></div>
+    @if ($errors->any())
+      <div class="alert alert-danger small py-2">
+        @foreach ($errors->all() as $error)
+          <div>{{ $error }}</div>
+        @endforeach
+      </div>
+    @endif
+    <form id="login-form" method="POST" action="{{ url('/login') }}">
+      @csrf
+      <div class="mb-3"><label class="form-label small fw-semibold">Email</label><input type="email" name="email" id="login-email" class="form-control" placeholder="you@example.com" value="{{ old('email') }}" required></div>
       <div class="mb-3"><label class="form-label small fw-semibold">Password</label>
-        <div class="wb-pass-wrap"><input type="password" id="login-pass" class="form-control pe-5" placeholder="••••••••" required>
+        <div class="wb-pass-wrap"><input type="password" name="password" id="login-pass" class="form-control pe-5" placeholder="••••••••" required>
           <button type="button" class="wb-pass-toggle" id="toggle-pass"><i class="fas fa-eye" id="eye-icon"></i></button>
         </div>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" name="remember" class="form-check-input" id="remember">
+        <label class="form-check-label small" for="remember">Remember me</label>
       </div>
       <button type="submit" class="btn btn-primary w-100 fw-semibold py-2 mt-1">Sign In</button>
     </form>
@@ -40,14 +51,6 @@ document.getElementById('toggle-pass').addEventListener('click',function(){
   const p=document.getElementById('login-pass'),i=document.getElementById('eye-icon');
   p.type=p.type==='password'?'text':'password';
   i.className=p.type==='password'?'fas fa-eye':'fas fa-eye-slash';
-});
-document.getElementById('login-form').addEventListener('submit',function(e){
-  e.preventDefault();
-  const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value,a=document.getElementById('auth-alert');
-  a.classList.add('d-none');
-  if(!email||!pass){a.textContent='Please fill all fields.';a.classList.remove('d-none');return;}
-  localStorage.setItem('wb_logged_in','1');localStorage.setItem('wb_user_email',email);
-  window.location.href='/dasboard';
 });
 </script>
 @endpush

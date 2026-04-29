@@ -1,32 +1,49 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| Wibscreen — Web Routes
-|--------------------------------------------------------------------------
-| All public static routes for the Wibscreen platform.
-| No database required — all views are pure Blade templates.
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SupportController;
+use App\Models\Plan;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 /* ── Home ───────────────────────────────────────────── */
 Route::get('/', fn() => view('pages.home'))->name('home');
 
 /* ── Auth ───────────────────────────────────────────── */
-Route::get('/login',  fn() => view('pages.login'))->name('login');
-Route::get('/signup', fn() => view('pages.signup'))->name('signup');
+Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
+Route::post('/signup', [AuthController::class, 'signup']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/upgrade', [AuthController::class, 'upgrade'])->name('upgrade')->middleware('auth');
+
+/* ── Email Verification ────────────────────────────── */
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/dashboard');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 /* ── Dashboard (Workspace) ──────────────────────── */
-Route::get('/dashboard',     fn() => view('pages.dashboard'))->name('dashboard');
-Route::get('/dasboard',      fn() => view('pages.dashboard'));      // typo alias
-Route::get('/dasboard', fn() => view('pages.dashboard'));      // legacy .html alias
+Route::get('/dashboard', fn() => view('pages.dashboard'))->name('dashboard')->middleware(['auth', 'verified']);
+Route::get('/dasboard', fn() => redirect()->route('dashboard')); // Redirect typo to real route
 
 /* ── Main Pages ─────────────────────────────────────── */
 Route::get('/about',   fn() => view('pages.about'))->name('about');
-Route::get('/pricing', fn() => view('pages.pricing'))->name('pricing');
-Route::get('/support', fn() => view('pages.support'))->name('support');
+Route::get('/pricing', function () {
+    $plans = Plan::all();
+    return view('pages.pricing', compact('plans'));
+})->name('pricing');
+Route::get('/support', fn() => view('pages.support'))->name('support')->middleware(['auth', 'verified']);
+Route::post('/support', [SupportController::class, 'send'])->middleware(['auth', 'verified']);
 
 /* ── Legal Pages ────────────────────────────────────── */
 Route::get('/privacy',  fn() => view('pages.privacy'))->name('privacy');

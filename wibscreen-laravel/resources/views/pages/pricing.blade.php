@@ -48,7 +48,7 @@
         <div class="plan-card">
           <div class="plan-icon" style="background:rgba(100,116,139,.12);color:#64748b;"><i class="fas fa-seedling"></i></div>
           <div class="small fw-bold text-body-secondary text-uppercase mb-1" style="letter-spacing:.8px;">Free</div>
-          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price">$0</span><span class="text-body-secondary mb-2">/mo</span></div>
+          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price">₹0</span><span class="text-body-secondary mb-2">/month</span></div>
           <p class="small text-body-secondary mb-4">Perfect for personal use and getting started.</p>
           <a href="{{ route('signup') }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Get Started Free</a>
           <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>1</b> Workspace</span></div>
@@ -66,7 +66,7 @@
           <div class="popular-badge"><i class="fas fa-star me-1"></i> Most Popular</div>
           <div class="plan-icon" style="background:rgba(99,102,241,.15);color:#6366f1;"><i class="fas fa-bolt"></i></div>
           <div class="small fw-bold text-uppercase mb-1" style="letter-spacing:.8px;color:#6366f1;">Pro</div>
-          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price" id="pro-price">$9</span><span class="text-body-secondary mb-2" id="pro-period">/mo</span></div>
+          <div class="d-flex align-items-end gap-1 mb-1"><span class="plan-price" id="pro-price">₹199</span><span class="text-body-secondary mb-2" id="pro-period">/month</span></div>
           <p class="small text-body-secondary mb-4">For power users who need more workspace and no distractions.</p>
           <a href="{{ route('signup') }}" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Start Pro Trial</a>
           <div class="plan-feature"><i class="fas fa-check tick"></i><span><b>10</b> Workspaces</span></div>
@@ -155,8 +155,8 @@ const toggle = document.getElementById('billing-toggle');
 const priceEl = document.getElementById('pro-price');
 const periodEl = document.getElementById('pro-period');
 toggle.addEventListener('change', function() {
-  priceEl.textContent = this.checked ? '$7' : '$9';
-  periodEl.textContent = this.checked ? '/mo, billed annually' : '/mo';
+  priceEl.textContent = this.checked ? '₹1,999' : '₹199';
+  periodEl.textContent = this.checked ? '/year' : '/month';
 });
 </script>
 @endpush

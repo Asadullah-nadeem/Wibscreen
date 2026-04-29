@@ -48,7 +48,7 @@ document.getElementById('signup-form').addEventListener('submit',function(e){
   if(p.length<8){a.textContent='Password must be at least 8 characters.';a.classList.remove('d-none');return;}
   if(!t){a.textContent='Please accept the terms.';a.classList.remove('d-none');return;}
   localStorage.setItem('wb_logged_in','1');localStorage.setItem('wb_user_email',em);localStorage.setItem('wb_user_name',n);
-  window.location.href='/dasboard.html';
+  window.location.href='/dasboard';
 });
 </script>
 @endpush

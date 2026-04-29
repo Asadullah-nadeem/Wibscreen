@@ -47,7 +47,7 @@ document.getElementById('login-form').addEventListener('submit',function(e){
   a.classList.add('d-none');
   if(!email||!pass){a.textContent='Please fill all fields.';a.classList.remove('d-none');return;}
   localStorage.setItem('wb_logged_in','1');localStorage.setItem('wb_user_email',email);
-  window.location.href='/dasboard.html';
+  window.location.href='/dasboard';
 });
 </script>
 @endpush

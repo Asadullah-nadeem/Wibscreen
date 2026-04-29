@@ -18,54 +18,52 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body class="dark-theme">
+<body data-theme="night">
     <div class="app-container d-flex">
         <!-- Sidebar Panel -->
         <aside class="sidebar d-flex flex-column flex-shrink-0">
             <div class="sidebar-header p-4 d-flex align-items-center gap-3">
-                <i class="fas fa-layer-group text-primary fs-4"></i>
-                <span class="h5 mb-0 fw-bold">Wibscreen</span>
+                <div class="badge-initials">WS</div>
+                <span class="h5 mb-0 fw-bold heading-title">Wibscreen</span>
             </div>
             
             <div class="sidebar-content px-3 flex-grow-1 overflow-auto">
-                <div class="search-container mb-4">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="global-search" class="form-control-plaintext" placeholder="Search tabs...">
+                <div class="search-container mb-4 px-2">
+                    <div class="d-flex align-items-center bg-input rounded-3 px-3 py-2">
+                        <i class="fas fa-search text-muted me-2 small"></i>
+                        <input type="text" id="global-search" class="form-control-plaintext small text-white" placeholder="Search tabs...">
+                    </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-2 px-2">
-                    <span class="text-uppercase small fw-bold text-muted letter-spacing-1">Collections</span>
+                <div class="px-2 mb-2">
+                    <span class="text-uppercase small fw-bold text-muted opacity-50" style="letter-spacing: 1px;">Collections</span>
                 </div>
-                <ul id="collections-list" class="nav nav-pills flex-column gap-1 mb-4">
-                    <!-- Collections injected here -->
+                <ul class="nav flex-column mb-auto" id="collections-list">
+                    <!-- Nav items injected via JS -->
                 </ul>
-                
-                <button id="add-collection-btn" class="btn btn-outline-secondary btn-sm w-100 border-dashed py-2">
+
+                <button class="btn btn-outline-secondary btn-sm w-100 mt-4 py-2 border-dashed rounded-3" id="add-collection-btn">
                     <i class="fas fa-plus me-2"></i> New Folder
                 </button>
             </div>
 
-            <div class="sidebar-footer p-4 d-flex flex-column gap-2">
-                <button id="theme-toggle-btn" class="btn btn-outline-secondary btn-sm w-100 text-start px-3">
+            <div class="sidebar-footer p-3 border-top border-secondary border-opacity-10">
+                <button id="theme-toggle-btn" class="btn btn-outline-secondary btn-sm w-100 text-start px-3 mb-2">
                     <i class="fas fa-moon me-2"></i> <span>Night Mode</span>
                 </button>
                 <button id="open-settings-btn" class="btn btn-outline-secondary btn-sm w-100 text-start px-3">
                     <i class="fas fa-cog me-2"></i> Settings
                 </button>
-                <div class="d-flex align-items-center gap-3 mt-3 px-1">
-                    <div class="status-dot"></div>
-                    <span id="sidebar-status-text" class="small fw-bold text-muted">System Active</span>
-                </div>
             </div>
         </aside>
 
         <!-- Main Content Area -->
         <main class="main-content flex-grow-1 d-flex flex-column">
             <!-- URL / Search Bar -->
-            <header class="browser-header px-4 py-3 d-flex align-items-center gap-3">
-                <div class="url-bar w-100 d-flex align-items-center px-3 py-2">
-                    <i class="fas fa-shield-check text-primary me-2"></i>
-                    <input type="text" id="main-url-input" class="form-control-plaintext small fw-bold" placeholder="Workspace Ready" readonly>
+            <header class="browser-header px-4 py-3 d-flex align-items-center gap-3 border-bottom">
+                <div class="url-bar w-100 d-flex align-items-center px-3 py-2 bg-input rounded-pill">
+                    <i class="fas fa-shield-halved text-primary me-2"></i>
+                    <input type="text" id="main-url-input" class="form-control-plaintext small fw-bold text-white" placeholder="Workspace Ready" readonly>
                     <div class="ms-auto d-flex gap-3 text-muted align-items-center">
                         <i id="refresh-btn" class="fas fa-rotate-right cursor-pointer fs-6" title="Refresh"></i>
                         <i id="home-btn" class="fas fa-house-user cursor-pointer fs-6" title="Home"></i>
@@ -75,239 +73,190 @@
 
             <!-- Workspace Viewport -->
             <div class="workspace-viewport flex-grow-1 position-relative">
-                <!-- Tab Manager Grid -->
-                <div id="tab-manager" class="tab-dashboard h-100 p-4 p-xl-5 overflow-auto">
-                    <div class="container-fluid">
-                        <div class="d-flex justify-content-between align-items-end mb-5">
-                            <div>
-                                <h1 id="current-collection-name" class="h2 fw-bold mb-1">My Workspace</h1>
-                                <p class="text-muted small mb-0">Manage your collections and saved tabs</p>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="btn-group btn-group-sm">
-                                    <button type="button" id="sort-newest" class="btn btn-outline-secondary border-0 px-3" title="Sort by Newest">
-                                        <i class="fas fa-clock"></i>
-                                    </button>
-                                    <button type="button" id="sort-alphabetical" class="btn btn-outline-secondary border-0 px-3" title="Sort Alphabetically">
-                                        <i class="fas fa-sort-alpha-down"></i>
-                                    </button>
-                                </div>
-                            </div>
+                <div id="tab-manager" class="h-100 overflow-auto">
+                    <!-- Dashboard Header -->
+                    <div class="workspace-header">
+                        <div>
+                            <h1 id="current-collection-name" class="display-5 fw-bold mb-1 heading-title">Explore Workspace</h1>
+                            <p class="text-muted mb-0">Manage your collections and saved tabs</p>
                         </div>
-                        
-                        <div id="tabs-grid" class="row g-4">
-                            <!-- Collection Sections injected here -->
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="btn-group shadow-sm bg-input rounded-3">
+                                <button type="button" id="sort-newest" class="btn btn-link text-muted px-3" title="Newest">
+                                    <i class="fas fa-clock"></i>
+                                </button>
+                                <button type="button" id="sort-alphabetical" class="btn btn-link text-muted px-3" title="A-Z">
+                                    <i class="fas fa-sort-alpha-down"></i>
+                                </button>
+                            </div>
+                            <button class="btn btn-primary rounded-circle shadow-lg" id="add-website-btn" style="width: 48px; height: 48px;">
+                                <i class="fas fa-plus fs-5"></i>
+                            </button>
                         </div>
+                    </div>
+
+                    <!-- Content Grid -->
+                    <div id="tabs-grid" class="fade-in">
+                        <!-- Collection sections injected here -->
                     </div>
                 </div>
 
                 <!-- Live Iframe Area -->
                 <div id="iframes-container" class="h-100"></div>
 
-                <!-- Placeholder -->
+                <!-- Global Placeholder -->
                 <div id="browser-placeholder" class="position-absolute top-50 start-50 translate-middle text-center fade-in">
-                    <i class="fas fa-compass display-1 text-primary opacity-25 mb-4"></i>
-                    <h2 class="h4 fw-bold">Explore your Workspace</h2>
-                    <p class="text-muted">Personalize your environment in Settings</p>
+                    <div class="empty-placeholder">
+                        <i class="fas fa-compass display-1 text-primary opacity-25 mb-4"></i>
+                        <h2 class="h3 fw-bold">Ready to Explore</h2>
+                        <p class="text-muted">Select a collection or add a new tab to start browsing.</p>
+                    </div>
                 </div>
             </div>
+
+            <!-- Bottom Quick Nav -->
+            <footer class="p-3 border-top d-flex justify-content-between align-items-center bg-card">
+                <div class="d-flex align-items-center gap-3">
+                    <span id="tab-count-badge" class="badge rounded-pill bg-primary">0</span>
+                    <span class="small fw-bold opacity-50">Tabs Active</span>
+                </div>
+                <div id="desktop-indicator" class="px-3 py-1 bg-input rounded-pill small fw-bold">Desktop 1</div>
+            </footer>
         </main>
+    </div>
 
-        <!-- Bottom Navigation Bar -->
-        <nav class="bottom-navbar">
-            <div class="me-auto d-flex align-items-center gap-3 text-muted small">
-                <i class="fas fa-circle-check text-success"></i>
-                <span id="status-text" class="fw-bold">Ready</span>
-            </div>
-            
-            <button id="add-website-btn" class="btn btn-primary btn-fab shadow-lg" title="Add Website">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button id="tab-switcher-btn" class="btn btn-dark btn-fab shadow-lg position-relative" title="Switch Tabs">
-                <i class="fas fa-grip"></i>
-                <span id="tab-count-badge" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">0</span>
-            </button>
-        </nav>
-
-        <!-- Modal: Settings -->
-        <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="modal-title fw-bold">Workspace Appearance</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Modals Section -->
+    
+    <!-- Modal: Add Website -->
+    <div class="modal fade" id="addWebsiteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title fw-bold">Add New Tab</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-2">Website URL</label>
+                        <input type="text" id="new-url-input" class="form-control p-3" placeholder="https://example.com">
                     </div>
-                    <div class="modal-body p-4 overflow-auto" style="max-height: 70vh;">
-                        
-                        <!-- Theme Mode -->
-                        <div class="settings-section">
-                            <span class="settings-label">Appearance Mode</span>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="theme-mode" id="theme-day" value="day">
-                                <label class="btn btn-outline-primary py-3" for="theme-day"><i class="fas fa-sun me-2"></i> Day Mode</label>
-                                
-                                <input type="radio" class="btn-check" name="theme-mode" id="theme-night" value="night" checked>
-                                <label class="btn btn-outline-primary py-3" for="theme-night"><i class="fas fa-moon me-2"></i> Night Mode</label>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-2">Display Name</label>
+                        <input type="text" id="new-name-input" class="form-control p-3" placeholder="My Favorite Site">
+                    </div>
+                    <div>
+                        <label class="small fw-bold text-muted mb-2">Collection</label>
+                        <select id="new-collection-select" class="form-select bg-input border-0 text-white p-3 rounded-3 shadow-none">
+                            <!-- Options injected -->
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" id="load-website-btn" class="btn btn-primary w-100 py-3 fw-bold rounded-3">Add to Workspace</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: New Folder -->
+    <div class="modal fade" id="createFolderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title fw-bold">Create Collection</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <input type="text" id="new-folder-input" class="form-control p-3" placeholder="Work, Social, Personal...">
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" id="confirm-create-folder" class="btn btn-primary w-100 py-3 fw-bold rounded-3">Create Collection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Rename Folder -->
+    <div class="modal fade" id="renameFolderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title fw-bold">Rename Collection</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <input type="text" id="rename-folder-input" class="form-control p-3">
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" id="confirm-rename-folder" class="btn btn-primary w-100 py-3 fw-bold rounded-3">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Settings -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title fw-bold">Workspace Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3 small opacity-50 text-uppercase">Typography</h6>
+                            <div class="mb-3">
+                                <label class="small mb-1">Font Size</label>
+                                <select id="set-font-size" class="form-select bg-input border-0 text-white">
+                                    <option value="12px">Small</option>
+                                    <option value="14px" selected>Normal</option>
+                                    <option value="16px">Large</option>
+                                    <option value="18px">Extra Large</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small mb-1">Font Weight</label>
+                                <select id="set-font-weight" class="form-select bg-input border-0 text-white">
+                                    <option value="400">Regular</option>
+                                    <option value="500" selected>Medium</option>
+                                    <option value="600">Semi Bold</option>
+                                    <option value="700">Bold</option>
+                                </select>
                             </div>
                         </div>
-
-                        <!-- Text Settings -->
-                        <div class="settings-section">
-                            <span class="settings-label">Typography Controls</span>
-                            <div class="row g-3">
-                                <div class="col-6 col-md-3">
-                                    <label class="small text-muted mb-2 d-block">Font Size</label>
-                                    <select id="set-font-size" class="form-select border-0">
-                                        <option value="12px">Small</option>
-                                        <option value="14px" selected>Normal</option>
-                                        <option value="16px">Large</option>
-                                        <option value="18px">Extra Large</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="small text-muted mb-2 d-block">Font Weight</label>
-                                    <select id="set-font-weight" class="form-select border-0">
-                                        <option value="400">Regular</option>
-                                        <option value="500" selected>Medium</option>
-                                        <option value="600">Semi Bold</option>
-                                        <option value="700">Bold</option>
-                                    </select>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="small text-muted mb-2 d-block">Text Color</label>
-                                    <input type="color" id="set-text-color" class="form-control form-control-color w-100 border-0" value="#f8fafc">
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="small text-muted mb-2 d-block">Font Style</label>
-                                    <select id="set-font-style" class="form-select border-0">
-                                        <option value="normal">Normal</option>
-                                        <option value="italic">Italic</option>
-                                    </select>
-                                </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3 small opacity-50 text-uppercase">Theme Colors</h6>
+                            <div class="mb-3">
+                                <label class="small mb-1">Accent Color</label>
+                                <input type="color" id="set-primary-color" class="form-control form-control-color w-100 border-0" value="#6366f1">
+                            </div>
+                            <div class="mb-3">
+                                <label class="small mb-1">Text Color</label>
+                                <input type="color" id="set-text-color" class="form-control form-control-color w-100 border-0" value="#f8fafc">
                             </div>
                         </div>
-
-                        <!-- Color Customization -->
-                        <div class="settings-section">
-                            <span class="settings-label">Primary & Accent Colors</span>
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="small text-muted mb-2 d-block">Primary Color</label>
-                                    <input type="color" id="set-primary-color" class="form-control form-control-color w-100 border-0" value="#6366f1">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="small text-muted mb-2 d-block">Background Color</label>
-                                    <input type="color" id="set-bg-color" class="form-control form-control-color w-100 border-0" value="#0f172a">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="small text-muted mb-2 d-block">Card Background</label>
-                                    <input type="color" id="set-card-bg" class="form-control form-control-color w-100 border-0" value="#1e293b">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card Appearance -->
-                        <div class="settings-section">
-                            <span class="settings-label">Card & Layout Controls</span>
+                        <div class="col-12">
+                            <h6 class="fw-bold mb-3 small opacity-50 text-uppercase">Layout</h6>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="small text-muted mb-2 d-block">Card Corner Radius</label>
-                                    <input type="range" id="set-card-radius" class="form-range" min="0" max="40" value="16">
+                                    <label class="small mb-1">Card Radius</label>
+                                    <input type="range" id="set-card-radius" class="form-range" min="0" max="40" value="20">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="small text-muted mb-2 d-block">Sidebar Width</label>
-                                    <input type="range" id="set-sidebar-width" class="form-range" min="200" max="400" value="260">
+                                    <label class="small mb-1">Sidebar Width</label>
+                                    <input type="range" id="set-sidebar-width" class="form-range" min="200" max="400" value="280">
                                 </div>
                             </div>
                         </div>
-
                     </div>
-                    <div class="modal-footer border-0 p-4 pt-0 gap-3">
-                        <button type="button" id="reset-settings-btn" class="btn btn-link text-danger text-decoration-none px-4">Reset Defaults</button>
-                        <button type="button" class="btn btn-primary px-5 py-3 fw-bold flex-grow-1" data-bs-dismiss="modal">Apply & Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" id="reset-settings-btn" class="btn btn-link text-muted small">Reset Defaults</button>
+                    <button type="button" class="btn btn-primary px-4 py-2 fw-bold rounded-3" data-bs-dismiss="modal">Apply Settings</button>
                 </div>
             </div>
         </div>
-
-        <!-- Existing Modals below (Add Website, Create Folder) -->
-        <div class="modal fade" id="addWebsiteModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="modal-title fw-bold">Add Website</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">DESTINATION URL</label>
-                            <input type="text" id="new-url-input" class="form-control border-0 p-3" placeholder="https://example.com">
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">DISPLAY NAME</label>
-                                <input type="text" id="new-name-input" class="form-control border-0 p-3" placeholder="Optional">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">COLLECTION</label>
-                                <select id="new-collection-select" class="form-select border-0 p-3"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" id="load-website-btn" class="btn btn-primary w-100 py-3 fw-bold">Add to Workspace</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="createFolderModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="modal-title fw-bold">New Collection</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <input type="text" id="new-folder-input" class="form-control border-0 p-3" placeholder="Folder Name">
-                    </div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" id="confirm-create-folder" class="btn btn-primary w-100 py-3 fw-bold">Create Folder</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal: Rename Folder -->
-        <div class="modal fade" id="renameFolderModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header border-0 p-4 pb-0">
-                        <h5 class="modal-title fw-bold">Rename Collection</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <input type="text" id="rename-folder-input" class="form-control border-0 p-3" placeholder="Enter new name...">
-                    </div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" id="confirm-rename-folder" class="btn btn-primary w-100 py-3 fw-bold">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Custom Context Menu -->
-        <div id="context-menu" class="dropdown-menu shadow-lg p-2">
-            <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2" id="ctx-rename" href="#">
-                <i class="fas fa-pen-to-square text-muted small"></i> Rename
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item rounded d-flex align-items-center gap-2 py-2 text-danger" id="ctx-delete" href="#">
-                <i class="fas fa-trash-can small"></i> Delete
-            </a>
-        </div>
-
-        <div id="toast-container" class="toast-container position-fixed bottom-0 start-50 translate-middle-x mb-4"></div>
     </div>
 
     <script src="script.js"></script>

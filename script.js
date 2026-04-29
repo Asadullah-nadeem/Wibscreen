@@ -3,7 +3,7 @@ $(document).ready(function() {
     const defaultSettings = {
         theme: 'night', fontSize: '14px', fontWeight: '500', fontStyle: 'normal',
         textColor: '#f8fafc', primaryColor: '#6366f1', bgColor: '#0f172a',
-        cardBg: '#1e293b', cardRadius: '16px', sidebarWidth: '260px'
+        cardBg: '#1e293b', cardRadius: '20px', sidebarWidth: '280px'
     };
     let settings = { ...defaultSettings };
 
@@ -19,7 +19,7 @@ $(document).ready(function() {
         activeTabId: null,
         currentCollectionId: 'all',
         searchQuery: '',
-        sortBy: 'newest' // 'newest', 'alphabetical'
+        sortBy: 'newest'
     };
     let state = { ...defaultState };
 
@@ -44,10 +44,8 @@ $(document).ready(function() {
         
         inputs: {
             fontSize: $('#set-font-size'), fontWeight: $('#set-font-weight'),
-            fontStyle: $('#set-font-style'), textColor: $('#set-text-color'),
-            primaryColor: $('#set-primary-color'), bgColor: $('#set-bg-color'),
-            cardBg: $('#set-card-bg'), cardRadius: $('#set-card-radius'),
-            sidebarWidth: $('#set-sidebar-width')
+            textColor: $('#set-text-color'), primaryColor: $('#set-primary-color'),
+            cardRadius: $('#set-card-radius'), sidebarWidth: $('#set-sidebar-width')
         }
     };
 
@@ -80,7 +78,31 @@ $(document).ready(function() {
     }
 
     function setupEvents() {
-        // Fix: Improved Search Interaction
+        // Fix: Robust Global Event Binding for Edit/Delete
+        $(document).on('click', '.edit-col-btn', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            targetEditId = $(this).data('id');
+            const col = state.collections.find(c => c.id === targetEditId);
+            if (col) {
+                $('#rename-folder-input').val(col.name);
+                UI.renameModal.show();
+            }
+        });
+
+        $(document).on('click', '.delete-col-btn', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            const id = $(this).data('id');
+            if (confirm("Delete this collection and all its tabs?")) {
+                deleteCollection(id);
+            }
+        });
+
+        $(document).on('click', '.close-tab-btn', function(e) {
+            e.preventDefault(); e.stopPropagation();
+            deleteWebsite($(this).data('id'));
+        });
+
+        // Search
         UI.globalSearch.on('input', debounce(() => {
             state.searchQuery = UI.globalSearch.val().toLowerCase().trim();
             refreshUI();
@@ -94,30 +116,14 @@ $(document).ready(function() {
             toggleView(true);
         });
 
-        // Collection Actions
-        UI.collectionsList.on('click', '.delete-col-btn', function(e) {
-            e.stopPropagation();
-            if (confirm("Delete this collection?")) deleteCollection($(this).data('id'));
-        });
-
-        UI.collectionsList.on('click', '.edit-col-btn', function(e) {
-            e.stopPropagation();
-            targetEditId = $(this).data('id');
-            const col = state.collections.find(c => c.id === targetEditId);
-            $('#rename-folder-input').val(col.name);
-            UI.renameModal.show();
-        });
-
+        // Dashboard Actions
         UI.tabsGrid.on('click', '.tab-card', function() { loadInBrowser($(this).data('id')); });
-        UI.tabsGrid.on('click', '.close-tab-btn', function(e) { e.stopPropagation(); deleteWebsite($(this).data('id')); });
 
         $('#home-btn').on('click', () => { state.currentCollectionId = 'all'; refreshUI(); toggleView(true); });
         $('#open-settings-btn').on('click', () => UI.settingsModal.show());
         $('#theme-toggle-btn').on('click', toggleTheme);
-        $('input[name="theme-mode"]').on('change', function() { updateTheme($(this).val()); });
         $('#reset-settings-btn').on('click', resetSettings);
         
-        // Sorting Control
         $('#sort-alphabetical').on('click', () => { state.sortBy = 'alphabetical'; refreshUI(); });
         $('#sort-newest').on('click', () => { state.sortBy = 'newest'; refreshUI(); });
 
@@ -141,14 +147,13 @@ $(document).ready(function() {
         updateUIState();
     }
 
+    // --- Appearance ---
     function applySettings() {
         const r = document.documentElement.style;
         r.setProperty('--font-size-base', settings.fontSize);
         r.setProperty('--font-weight-base', settings.fontWeight);
         r.setProperty('--text-main', settings.textColor);
         r.setProperty('--primary-color', settings.primaryColor);
-        r.setProperty('--bg-app', settings.bgColor);
-        r.setProperty('--bg-card', settings.cardBg);
         r.setProperty('--card-radius', settings.cardRadius);
         r.setProperty('--sidebar-width', settings.sidebarWidth);
         saveSettings();
@@ -157,20 +162,16 @@ $(document).ready(function() {
     function updateTheme(m) {
         settings.theme = m;
         UI.body.attr('data-theme', m);
-        if (m === 'day') { settings.textColor = '#0f172a'; settings.bgColor = '#f8fafc'; settings.cardBg = '#ffffff'; }
-        else { settings.textColor = '#f8fafc'; settings.bgColor = '#0f172a'; settings.cardBg = '#1e293b'; }
         syncSettingsToUI(); applySettings();
     }
 
     function toggleTheme() {
         const next = settings.theme === 'night' ? 'day' : 'night';
-        $(`#theme-${next}`).prop('checked', true);
         updateTheme(next);
     }
 
     function syncSettingsToUI() {
         Object.keys(UI.inputs).forEach(k => UI.inputs[k].val(parseInt(settings[k]) || settings[k]));
-        $('#theme-' + settings.theme).prop('checked', true);
         const icon = settings.theme === 'day' ? 'sun' : 'moon';
         $('#theme-toggle-btn i').attr('class', `fas fa-${icon} me-2`);
         $('#theme-toggle-btn span').text(settings.theme === 'day' ? 'Day Mode' : 'Night Mode');
@@ -185,7 +186,6 @@ $(document).ready(function() {
         
         frag.appendChild(createNavItem('all', 'All Workspace', 'fas fa-shapes', state.currentCollectionId === 'all', true));
 
-        // Sort Collections for Sidebar if needed
         let cols = [...state.collections];
         if (state.sortBy === 'alphabetical') cols.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -199,15 +199,17 @@ $(document).ready(function() {
 
     function createNavItem(id, name, icon, active, isSystem = false) {
         const li = document.createElement('li');
-        li.className = 'nav-item position-relative group';
+        li.className = 'nav-item position-relative group fade-in';
+        const initials = getInitials(name);
+        
         li.innerHTML = `
             <a href="#" class="nav-link ${active ? 'active' : ''}" data-id="${id}">
                 <i class="${icon}"></i>
-                <span class="flex-grow-1">${name}</span>
+                <span class="flex-grow-1 text-truncate">${name}</span>
                 ${!isSystem ? `
-                    <div class="nav-actions d-none group-hover-flex">
-                        <i class="fas fa-edit edit-col-btn me-2 cursor-pointer" data-id="${id}"></i>
-                        <i class="fas fa-trash delete-col-btn cursor-pointer" data-id="${id}"></i>
+                    <div class="nav-actions d-none group-hover-flex align-items-center">
+                        <i class="fas fa-edit edit-col-btn me-2 small cursor-pointer" data-id="${id}"></i>
+                        <i class="fas fa-trash delete-col-btn small cursor-pointer" data-id="${id}"></i>
                     </div>
                 ` : ''}
             </a>
@@ -223,12 +225,9 @@ $(document).ready(function() {
         $('#current-collection-name').text(isAll ? 'Explore Workspace' : getCollectionName(state.currentCollectionId));
 
         let targetCols = isAll ? [...state.collections] : state.collections.filter(c => c.id === state.currentCollectionId);
-        
-        // Fix: Apply Sorting to Collections
         if (state.sortBy === 'alphabetical') targetCols.sort((a, b) => a.name.localeCompare(b.name));
 
         targetCols.forEach(col => {
-            // Fix: Improved Search Logic (Title + URL)
             let websites = state.websites.filter(w => {
                 const matchCol = w.collectionId === col.id;
                 const matchSearch = !state.searchQuery || 
@@ -237,44 +236,36 @@ $(document).ready(function() {
                 return matchCol && matchSearch;
             });
 
-            // If searching and collection name matches, show all websites in it
-            if (state.searchQuery && col.name.toLowerCase().includes(state.searchQuery)) {
-                websites = state.websites.filter(w => w.collectionId === col.id);
-            }
-
-            // In 'All' mode, hide collections that don't match search at all
             if (isAll && state.searchQuery && websites.length === 0 && !col.name.toLowerCase().includes(state.searchQuery)) return;
 
             const section = $(`
-                <div class="col-12 mb-5 collection-section fade-in">
-                    <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="collection-section slide-up">
+                    <div class="collection-header">
                         <i class="${col.icon} text-primary fs-4"></i>
-                        <h3 class="h4 fw-bold mb-0">${col.name}</h3>
-                        <span class="badge rounded-pill bg-dark border text-muted">${websites.length} tabs</span>
-                        <div class="ms-auto d-flex gap-3 text-muted">
+                        <h3 class="h4 fw-bold mb-0 heading-title">${col.name}</h3>
+                        <span class="badge rounded-pill bg-input text-muted small">${websites.length} tabs</span>
+                        <div class="collection-actions">
                             <i class="fas fa-pen edit-col-btn cursor-pointer small" data-id="${col.id}" title="Rename"></i>
-                            <i class="fas fa-trash-alt delete-col-btn cursor-pointer small" data-id="${col.id}" title="Delete"></i>
+                            <i class="fas fa-trash delete-col-btn cursor-pointer small" data-id="${col.id}" title="Delete"></i>
                         </div>
                     </div>
-                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-3"></div>
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
                 </div>
             `);
 
             const row = section.find('.row');
-            
-            // Fix: Apply Sorting to Websites
             if (state.sortBy === 'alphabetical') websites.sort((a, b) => a.title.localeCompare(b.title));
-            else websites.sort((a, b) => b.id.split('-')[1] - a.id.split('-')[1]); // Newest first
+            else websites.sort((a, b) => b.id.split('-')[1] - a.id.split('-')[1]);
 
             if (websites.length > 0) {
                 websites.forEach(site => row.append(`<div class="col">${createTabCardHTML(site)}</div>`));
             } else {
                 row.append(`
                     <div class="col-12">
-                        <div class="empty-placeholder p-5 rounded-4 text-center">
+                        <div class="empty-placeholder">
                             <i class="fas fa-layer-group opacity-25 display-6 mb-3 d-block"></i>
-                            <p class="text-muted mb-0 fw-medium">No websites matching your search.</p>
-                            <span class="small text-muted opacity-50">Try a different keyword or add a new tab.</span>
+                            <p class="text-muted mb-0 fw-medium">No websites found</p>
+                            <span class="small text-muted opacity-50">Add a new tab to this collection.</span>
                         </div>
                     </div>
                 `);
@@ -290,10 +281,10 @@ $(document).ready(function() {
         const isActive = s.id === state.activeTabId;
         const fav = `https://www.google.com/s2/favicons?sz=64&domain=${new URL(s.url).hostname}`;
         return `
-            <div class="tab-card loading ${isActive ? 'active' : ''}" data-id="${s.id}" data-url="${s.url}">
+            <div class="tab-card loading ${isActive ? 'active' : ''} fade-in" data-id="${s.id}" data-url="${s.url}">
                 <div class="tab-card-header">
                     <img src="${fav}" class="tab-favicon" onerror="this.src='https://favicons.githubusercontent.com/github.com'">
-                    <span class="tab-card-title">${s.title}</span>
+                    <span class="tab-card-title text-truncate">${s.title}</span>
                     <button class="btn btn-link text-muted p-0 ms-auto close-tab-btn" data-id="${s.id}"><i class="fas fa-xmark"></i></button>
                 </div>
                 <div class="tab-card-preview"><iframe></iframe></div>
@@ -314,8 +305,10 @@ $(document).ready(function() {
         const name = $('#rename-folder-input').val().trim();
         if (name && targetEditId) {
             const col = state.collections.find(c => c.id === targetEditId);
-            if (col) col.name = name;
-            UI.renameModal.hide(); saveState(); refreshUI();
+            if (col) {
+                col.name = name;
+                UI.renameModal.hide(); saveState(); refreshUI();
+            }
         }
     }
 
@@ -364,12 +357,13 @@ $(document).ready(function() {
     function extractTitle(u) { try { const h = new URL(u).hostname.replace('www.','').split('.')[0]; return h.charAt(0).toUpperCase() + h.slice(1); } catch(_) { return "Website"; } }
     function getCollectionName(id) { return state.collections.find(x => x.id === id)?.name || 'Default'; }
     function debounce(f, w) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => f.apply(this, a), w); }; }
+    function getInitials(name) { return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2); }
     
-    function saveSettings() { localStorage.setItem('wib_settings_v5', JSON.stringify(settings)); }
-    function loadSettings() { const s = JSON.parse(localStorage.getItem('wib_settings_v5') || '{}'); settings = { ...settings, ...s }; syncSettingsToUI(); }
-    function saveState() { localStorage.setItem('wib_state_v5', JSON.stringify(state)); }
+    function saveSettings() { localStorage.setItem('wib_settings_v6', JSON.stringify(settings)); }
+    function loadSettings() { const s = JSON.parse(localStorage.getItem('wib_settings_v6') || '{}'); settings = { ...settings, ...s }; syncSettingsToUI(); }
+    function saveState() { localStorage.setItem('wib_state_v6', JSON.stringify(state)); }
     function loadState() {
-        const s = JSON.parse(localStorage.getItem('wib_state_v5') || '{}');
+        const s = JSON.parse(localStorage.getItem('wib_state_v6') || '{}');
         if (s.collections) state.collections = s.collections;
         if (!state.collections || state.collections.length === 0) state.collections = [...defaultState.collections];
         if (s.websites) { state.websites = s.websites; state.websites.forEach(w => createIframe(w)); }

@@ -1,0 +1,630 @@
+/* =====================================================
+   Wibscreen — app.css  (Responsive Edition)
+   Bootstrap 5.3 custom layer
+   ===================================================== */
+
+/* ── 1. CSS Variables ────────────────────────────── */
+:root {
+  --wb-primary:       #6366f1;
+  --wb-primary-hover: #4f46e5;
+  --wb-sidebar-w:     280px;
+  --wb-card-radius:   16px;
+  --wb-speed:         0.25s;
+  --wb-ease:          cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-bs-theme="dark"] {
+  --wb-surface:   #1e293b;
+  --wb-surface-2: #0f172a;
+  --wb-border:    rgba(255,255,255,0.08);
+  --wb-muted:     #94a3b8;
+}
+
+[data-bs-theme="light"] {
+  --wb-surface:   #ffffff;
+  --wb-surface-2: #f1f5f9;
+  --wb-border:    rgba(0,0,0,0.09);
+  --wb-muted:     #64748b;
+}
+
+/* ── 2. Root Layout ──────────────────────────────── */
+html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; }
+
+.wb-app {
+  display: flex;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── 3. Sidebar ───────────────────────────────────── */
+.wb-sidebar {
+  width: var(--wb-sidebar-w);
+  min-width: var(--wb-sidebar-w);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--wb-surface);
+  border-right: 1px solid var(--wb-border);
+  transition: transform var(--wb-speed) var(--wb-ease),
+              background-color var(--wb-speed);
+  flex-shrink: 0;
+  z-index: 200;
+}
+
+/* Mobile: sidebar slides off-screen */
+@media (max-width: 767.98px) {
+  .wb-sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  .wb-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.25);
+  }
+}
+
+/* Tablet: compact sidebar */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  :root { --wb-sidebar-w: 240px; }
+}
+
+.wb-sidebar-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}
+
+.wb-sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+}
+
+.wb-sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid var(--wb-border);
+  flex-shrink: 0;
+}
+
+/* ── 4. Sidebar Overlay (mobile) ────────────────── */
+.wb-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.wb-overlay.show { display: block; }
+
+/* ── 5. Logo Badge ───────────────────────────────── */
+.wb-logo-badge {
+  width: 36px; height: 36px;
+  background: var(--wb-primary);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-weight: 800; font-size: 0.8rem;
+  flex-shrink: 0;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* ── 6. Nav Items ────────────────────────────────── */
+.wb-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: 0.4;
+  padding: 4px 12px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.wb-nav-item { position: relative; }
+
+.wb-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+  transition: all var(--wb-speed) var(--wb-ease);
+  cursor: pointer;
+  user-select: none;
+  /* Touch-friendly min height */
+  min-height: 44px;
+}
+
+.wb-nav-link:hover, .wb-nav-link:focus {
+  background-color: rgba(99,102,241,0.1);
+  color: var(--wb-primary);
+  outline: none;
+}
+
+.wb-nav-link.active {
+  background-color: var(--wb-primary);
+  color: #fff !important;
+}
+
+.wb-nav-icon { width: 20px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+.wb-nav-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.wb-nav-actions { display: none; gap: 4px; align-items: center; flex-shrink: 0; }
+.wb-nav-item:hover .wb-nav-actions { display: flex; }
+
+.wb-icon-btn {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 7px; font-size: 0.7rem;
+  border: none; background: transparent; color: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: all var(--wb-speed);
+  /* Touch target */
+  min-width: 44px; min-height: 44px;
+  margin: -9px -9px;
+  padding: 9px;
+}
+
+.wb-icon-btn:hover { opacity: 1; background: rgba(99,102,241,0.12); color: var(--wb-primary); }
+.wb-icon-btn.delete:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+/* ── 7. Main Area ────────────────────────────────── */
+.wb-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── 8. Top Bar ──────────────────────────────────── */
+.wb-topbar {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--wb-border);
+  background-color: var(--wb-surface);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wb-menu-btn {
+  display: none;
+  width: 40px; height: 40px;
+  align-items: center; justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--wb-border);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: background var(--wb-speed);
+}
+
+.wb-menu-btn:hover { background: var(--wb-surface-2); }
+
+@media (max-width: 767.98px) {
+  .wb-menu-btn { display: flex; }
+}
+
+.wb-url-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--wb-surface-2);
+  border: 1px solid var(--wb-border);
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  min-width: 0;
+  transition: border-color var(--wb-speed);
+}
+
+.wb-url-bar:focus-within { border-color: var(--wb-primary); }
+
+.wb-url-bar input {
+  background: transparent; border: none; outline: none;
+  flex: 1; color: inherit; font-size: inherit; min-width: 0;
+}
+
+.wb-topbar-icon {
+  cursor: pointer; opacity: 0.5; font-size: 1rem;
+  transition: opacity var(--wb-speed);
+  /* Touch target */
+  padding: 6px;
+}
+
+.wb-topbar-icon:hover { opacity: 1; }
+
+/* Hide URL text on very small mobile */
+@media (max-width: 380px) {
+  .wb-url-bar { padding: 8px 12px; }
+  .wb-url-bar input { font-size: 0.78rem; }
+}
+
+/* ── 9. Workspace ────────────────────────────────── */
+.wb-workspace {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.wb-dashboard {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Padding-bottom: leave room for bottom bar */
+  padding: 28px 28px 100px;
+  -webkit-overflow-scrolling: touch; /* smooth inertial scroll on iOS */
+}
+
+@media (max-width: 767.98px) {
+  .wb-dashboard { padding: 20px 16px 100px; }
+}
+
+@media (min-width: 1400px) {
+  .wb-dashboard { padding: 40px 48px 120px; }
+}
+
+/* ── 10. Dashboard Header ────────────────────────── */
+.wb-dashboard-header {
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.wb-dashboard-title {
+  font-family: 'Manrope', sans-serif;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 0 0 4px;
+}
+
+.wb-dashboard-sub {
+  font-size: 0.85rem;
+  opacity: 0.55;
+  margin: 0;
+}
+
+/* ── 11. Sort + FAB Group ────────────────────────── */
+.wb-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.wb-sort-group .btn {
+  font-size: 0.8rem;
+  padding: 7px 14px;
+  border-radius: 9px !important;
+  min-height: 38px;
+}
+
+.wb-sort-group .btn.active {
+  background: var(--wb-primary) !important;
+  color: #fff !important;
+  border-color: var(--wb-primary) !important;
+}
+
+.wb-fab {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--wb-primary);
+  color: #fff;
+  border: none; font-size: 1.15rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(99,102,241,0.4);
+  transition: background var(--wb-speed), transform 0.18s, box-shadow 0.2s;
+  flex-shrink: 0;
+  /* Touch feedback */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wb-fab:hover, .wb-fab:focus {
+  background: var(--wb-primary-hover);
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+}
+
+.wb-fab:active { transform: scale(0.96); }
+
+/* ── 12. Collection Section ──────────────────────── */
+.wb-section {
+  margin-bottom: 48px;
+  animation: wbFadeUp 0.35s ease-out both;
+}
+
+@media (max-width: 767.98px) {
+  .wb-section { margin-bottom: 32px; }
+}
+
+.wb-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--wb-border);
+  flex-wrap: nowrap;
+}
+
+.wb-section-title {
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: 'Manrope', sans-serif;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.wb-section-badge {
+  font-size: 0.7rem;
+  padding: 3px 9px;
+  border-radius: 50px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.wb-section-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--wb-speed);
+}
+
+.wb-section-header:hover .wb-section-actions { opacity: 1; }
+
+/* On mobile, always show actions */
+@media (max-width: 767.98px) {
+  .wb-section-actions { opacity: 0.6; }
+}
+
+.wb-section-action-btn {
+  min-width: 32px; min-height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; font-size: 0.75rem;
+  cursor: pointer;
+  border: 1px solid var(--wb-border);
+  background: transparent; color: var(--bs-secondary-color);
+  transition: all var(--wb-speed);
+  padding: 6px;
+}
+
+.wb-section-action-btn:hover { background: rgba(99,102,241,0.12); color: var(--wb-primary); border-color: var(--wb-primary); }
+.wb-section-action-btn.delete:hover { background: rgba(239,68,68,0.1); color: #ef4444; border-color: #ef4444; }
+
+/* ── 13. Card Grid (Responsive) ──────────────────── */
+.wb-card-grid {
+  display: grid;
+  gap: 14px;
+  /* Mobile: 1 col */
+  grid-template-columns: 1fr;
+}
+
+/* 2-col: 480px+ */
+@media (min-width: 480px) {
+  .wb-card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 3-col: tablet 768px+ */
+@media (min-width: 768px) {
+  .wb-card-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+
+/* 4-col: desktop 1200px+ */
+@media (min-width: 1200px) {
+  .wb-card-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* 5-col: wide desktop 1600px+ */
+@media (min-width: 1600px) {
+  .wb-card-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ── 14. Tab Cards ───────────────────────────────── */
+.wb-card {
+  border-radius: var(--wb-card-radius);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--wb-border);
+  background-color: var(--wb-surface);
+  transition: transform 0.26s var(--wb-ease), box-shadow 0.26s var(--wb-ease), border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* No hover lift on touch devices */
+@media (hover: hover) {
+  .wb-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.14);
+    border-color: var(--wb-primary);
+  }
+}
+
+.wb-card:active { transform: scale(0.98); }
+
+.wb-card.active-tab {
+  border-color: var(--wb-primary);
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.4);
+}
+
+.wb-card-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--wb-border);
+  min-width: 0;
+}
+
+.wb-card-favicon {
+  width: 18px; height: 18px;
+  border-radius: 4px; flex-shrink: 0; object-fit: contain;
+}
+
+.wb-card-title {
+  flex: 1; font-size: 0.8rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  min-width: 0;
+}
+
+.wb-card-close {
+  flex-shrink: 0;
+  min-width: 28px; min-height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; font-size: 0.7rem;
+  border: none; background: transparent; color: inherit;
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--wb-speed);
+}
+
+.wb-card:hover .wb-card-close { opacity: 0.55; }
+.wb-card-close:hover { opacity: 1 !important; background: rgba(239,68,68,0.12); color: #ef4444; }
+
+/* Always visible close on touch */
+@media (hover: none) {
+  .wb-card-close { opacity: 0.45; }
+}
+
+.wb-card-preview {
+  position: relative;
+  aspect-ratio: 16/10;
+  background-color: var(--wb-surface-2);
+  overflow: hidden;
+}
+
+.wb-card-preview iframe {
+  width: 300%; height: 300%;
+  transform: scale(0.3333);
+  transform-origin: top left;
+  border: none; pointer-events: none;
+}
+
+/* ── 15. Empty State ─────────────────────────────── */
+.wb-empty {
+  border: 2px dashed var(--wb-border);
+  border-radius: var(--wb-card-radius);
+  padding: 40px 20px;
+  text-align: center;
+  transition: border-color var(--wb-speed);
+}
+
+.wb-empty:hover { border-color: rgba(99,102,241,0.4); }
+
+.wb-empty-icon { font-size: 2rem; opacity: 0.15; margin-bottom: 12px; }
+.wb-empty-text { font-size: 0.88rem; font-weight: 600; opacity: 0.55; margin: 0 0 4px; }
+.wb-empty-sub  { font-size: 0.78rem; opacity: 0.35; margin: 0; }
+
+/* ── 16. Iframe Layer ────────────────────────────── */
+.wb-iframe-layer {
+  position: absolute; inset: 0;
+  display: none; z-index: 50;
+}
+
+.wb-iframe-layer.active { display: block; }
+
+.wb-tab-iframe {
+  width: 100%; height: 100%; border: none; display: none;
+}
+
+.wb-tab-iframe.active { display: block; }
+
+/* ── 17. Bottom Bar ──────────────────────────────── */
+.wb-bottombar {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px;
+  border-top: 1px solid var(--wb-border);
+  background-color: var(--wb-surface);
+  font-size: 0.82rem;
+  /* Respect safe area inset on iPhone */
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/* ── 18. Search Input ────────────────────────────── */
+.wb-search-wrap { position: relative; }
+.wb-search-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem; opacity: 0.35; pointer-events: none;
+}
+
+.wb-search-input {
+  padding-left: 34px !important;
+  border-radius: 10px !important;
+  font-size: 0.85rem !important;
+  min-height: 40px;
+}
+
+/* ── 19. Modals (Responsive) ─────────────────────── */
+.modal-content {
+  border-radius: 20px !important;
+  border: 1px solid var(--wb-border) !important;
+}
+
+/* Full-sheet modal on mobile */
+@media (max-width: 575.98px) {
+  .modal-dialog {
+    margin: 0 !important;
+    align-items: flex-end !important;
+    min-height: 100%;
+    display: flex !important;
+  }
+
+  .modal-content {
+    border-radius: 24px 24px 0 0 !important;
+    width: 100vw;
+  }
+
+  .modal.show .modal-dialog { transform: none; }
+}
+
+/* ── 20. Scrollbar ───────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.4); }
+
+/* ── 21. Animations ──────────────────────────────── */
+@keyframes wbFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wbSlideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── 22. Utility ─────────────────────────────────── */
+.cursor-pointer { cursor: pointer; }
+.border-dashed { border-style: dashed !important; }
+.bg-wb-surface  { background-color: var(--wb-surface)  !important; }
+.bg-wb-surface2 { background-color: var(--wb-surface-2) !important; }
+.text-wb-muted  { color: var(--wb-muted) !important; }
+.wb-status-dot  {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+  flex-shrink: 0;
+}

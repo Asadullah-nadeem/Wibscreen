@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support & Feedback — Wibscreen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+</head>
+<body>
+<nav class="wb-navbar"><div class="container d-flex align-items-center justify-content-between">
+  <a href="index.html" class="d-flex align-items-center gap-2 text-decoration-none" style="color:inherit;"><div class="wb-logo-badge">WS</div><span class="fw-bold" style="font-family:'Manrope',sans-serif;">Wibscreen</span></a>
+  <div class="d-flex gap-2"><a href="login.html" class="btn btn-outline-secondary btn-sm">Sign In</a><a href="signup.html" class="btn btn-primary btn-sm">Get Started</a></div>
+</div></nav>
+
+<section class="wb-hero pb-4">
+  <div class="container">
+    <span class="wb-section-label">Help Center</span>
+    <h1 class="wb-hero-title mb-3">Support & Feedback</h1>
+    <p class="wb-hero-sub text-body-secondary">We're here to help. Choose how you'd like to reach us or send feedback directly below.</p>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+
+    <!-- Support Options -->
+    <div class="row g-4 mb-5">
+      <div class="col-sm-6 col-lg-3">
+        <div class="wb-support-card h-100">
+          <div class="wb-support-icon"><i class="fas fa-book-open"></i></div>
+          <h5 class="fw-bold mb-2">Documentation</h5>
+          <p class="small text-body-secondary mb-0">Read guides on how to use collections, tabs, and workspace settings.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="wb-support-card h-100">
+          <div class="wb-support-icon"><i class="fas fa-bug"></i></div>
+          <h5 class="fw-bold mb-2">Report a Bug</h5>
+          <p class="small text-body-secondary mb-0">Found something broken? Use the form below to tell us what happened.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="wb-support-card h-100">
+          <div class="wb-support-icon"><i class="fas fa-lightbulb"></i></div>
+          <h5 class="fw-bold mb-2">Feature Request</h5>
+          <p class="small text-body-secondary mb-0">Have an idea? We want to hear it. Tell us what you'd love to see next.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="wb-support-card h-100">
+          <div class="wb-support-icon"><i class="fas fa-envelope"></i></div>
+          <h5 class="fw-bold mb-2">General Help</h5>
+          <p class="small text-body-secondary mb-0">Any other question or concern — just send us a message below.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Form -->
+    <div class="row g-5 justify-content-center">
+      <div class="col-lg-7">
+        <div class="wb-page-card">
+          <span class="wb-section-label">Send a Message</span>
+          <h2 class="h4 fw-bold mb-4" style="font-family:'Manrope',sans-serif;">We read every message</h2>
+
+          <div id="form-success" class="wb-alert" style="display:none;background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#22c55e;border-radius:12px;padding:14px 18px;border:1px solid;font-size:.88rem;margin-bottom:20px;">
+            <i class="fas fa-circle-check me-2"></i>Your message was sent! We'll get back to you soon.
+          </div>
+
+          <form id="support-form" novalidate>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Your Name</label>
+              <input id="sf-name" type="text" class="form-control wb-form-control" placeholder="John Doe">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Email Address</label>
+              <input id="sf-email" type="email" class="form-control wb-form-control" placeholder="you@example.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Type</label>
+              <select id="sf-type" class="form-select wb-form-control">
+                <option value="">Select a category…</option>
+                <option>Bug Report</option>
+                <option>Feature Request</option>
+                <option>General Question</option>
+                <option>Security Issue</option>
+                <option>Feedback</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-semibold">Message</label>
+              <textarea id="sf-msg" class="form-control wb-form-control" rows="5" placeholder="Describe your issue or feedback in detail…"></textarea>
+            </div>
+            <button type="submit" class="wb-btn-primary" id="sf-submit">
+              <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="col-lg-5">
+        <div class="wb-page-card">
+          <span class="wb-section-label">Quick Answers</span>
+          <h2 class="h5 fw-bold mb-4" style="font-family:'Manrope',sans-serif;">Common Questions</h2>
+          <div class="accordion accordion-flush" id="faq">
+            <div class="accordion-item" style="background:transparent;border:none;border-bottom:1px solid var(--wb-border);">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" style="background:transparent;color:inherit;box-shadow:none;padding:16px 0;">Why won't some sites load?</button></h2>
+              <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body px-0 pt-0 text-body-secondary small">Some websites (like Google and Facebook) block embedding in iframes using X-Frame-Options headers. This is a browser security feature — not a Wibscreen bug.</div></div>
+            </div>
+            <div class="accordion-item" style="background:transparent;border:none;border-bottom:1px solid var(--wb-border);">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" style="background:transparent;color:inherit;box-shadow:none;padding:16px 0;">Is my data backed up?</button></h2>
+              <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body px-0 pt-0 text-body-secondary small">Data is stored in localStorage. Clearing browser data will erase it. We recommend exporting regularly. Cloud sync is coming in a future update.</div></div>
+            </div>
+            <div class="accordion-item" style="background:transparent;border:none;border-bottom:1px solid var(--wb-border);">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" style="background:transparent;color:inherit;box-shadow:none;padding:16px 0;">Can I use it on mobile?</button></h2>
+              <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body px-0 pt-0 text-body-secondary small">Yes. Wibscreen is fully responsive and works on mobile, tablet, and desktop. The sidebar collapses on mobile for a clean touch-friendly experience.</div></div>
+            </div>
+            <div class="accordion-item" style="background:transparent;border:none;">
+              <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" style="background:transparent;color:inherit;box-shadow:none;padding:16px 0;">Is Wibscreen free?</button></h2>
+              <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body px-0 pt-0 text-body-secondary small">Yes, completely free. No subscription, no trial, no credit card required. Core features stay free forever.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="wb-footer"><div class="container d-flex flex-wrap justify-content-between gap-3">
+  <span class="text-body-secondary small">© 2024 Wibscreen</span>
+  <div class="d-flex flex-wrap gap-3">
+    <a href="index.html">Home</a><a href="about.html">About</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="security.html">Security</a><a href="cookies.html">Cookies</a>
+  </div>
+</div></footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+$('#support-form').on('submit', function(e) {
+  e.preventDefault();
+  const name  = $('#sf-name').val().trim();
+  const email = $('#sf-email').val().trim();
+  const msg   = $('#sf-msg').val().trim();
+  const $btn  = $('#sf-submit');
+  if (!name || !email || !msg) {
+    alert('Please fill in Name, Email, and Message.'); return;
+  }
+  $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Sending…').prop('disabled', true);
+  setTimeout(() => {
+    $('#support-form')[0].reset();
+    $btn.html('<i class="fas fa-paper-plane"></i> Send Message').prop('disabled', false);
+    $('#form-success').fadeIn(300);
+    setTimeout(() => $('#form-success').fadeOut(400), 5000);
+  }, 1000);
+});
+</script>
+</body></html>

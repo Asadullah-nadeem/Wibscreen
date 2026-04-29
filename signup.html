@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sign Up — Wibscreen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+</head>
+<body>
+
+<div class="wb-auth-wrap">
+  <div style="width:100%;max-width:440px;">
+
+    <div class="text-center mb-4">
+      <a href="about.html" class="d-inline-flex align-items-center gap-2 wb-brand mb-3">
+        <div class="wb-logo-badge">WS</div>
+        <span>Wibscreen</span>
+      </a>
+    </div>
+
+    <div class="wb-auth-card">
+      <h1 class="wb-auth-title">Create account</h1>
+      <p class="wb-auth-sub">Join Wibscreen and organize your web world</p>
+
+      <div id="signup-alert" class="wb-alert" style="display:none;"></div>
+
+      <form id="signup-form" novalidate>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" for="signup-name">Full Name</label>
+          <input id="signup-name" type="text" class="form-control wb-form-control"
+                 placeholder="John Doe" autocomplete="name" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" for="signup-email">Email address</label>
+          <input id="signup-email" type="email" class="form-control wb-form-control"
+                 placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small fw-semibold" for="signup-pwd">Password</label>
+          <div class="wb-pwd-wrap">
+            <input id="signup-pwd" type="password" class="form-control wb-form-control"
+                   placeholder="Min. 8 characters" autocomplete="new-password" required>
+            <button type="button" class="wb-pwd-toggle" id="signup-pwd-toggle" aria-label="Toggle password">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <!-- Strength indicator -->
+          <div class="mt-2 d-flex gap-1" id="pwd-strength-bars">
+            <div class="flex-fill rounded" id="bar1" style="height:3px;background:var(--wb-border);transition:background .3s;"></div>
+            <div class="flex-fill rounded" id="bar2" style="height:3px;background:var(--wb-border);transition:background .3s;"></div>
+            <div class="flex-fill rounded" id="bar3" style="height:3px;background:var(--wb-border);transition:background .3s;"></div>
+            <div class="flex-fill rounded" id="bar4" style="height:3px;background:var(--wb-border);transition:background .3s;"></div>
+          </div>
+          <div class="small mt-1 text-body-secondary" id="pwd-strength-label"></div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small fw-semibold" for="signup-confirm">Confirm Password</label>
+          <div class="wb-pwd-wrap">
+            <input id="signup-confirm" type="password" class="form-control wb-form-control"
+                   placeholder="Re-enter password" autocomplete="new-password" required>
+            <button type="button" class="wb-pwd-toggle" id="signup-confirm-toggle" aria-label="Toggle confirm">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-4 d-flex align-items-start gap-2">
+          <input class="form-check-input mt-1" type="checkbox" id="signup-terms" style="width:18px;height:18px;border-radius:5px;" required>
+          <label class="form-check-label small" for="signup-terms">
+            I agree to the <a href="terms.html" class="text-primary text-decoration-none">Terms & Conditions</a>
+            and <a href="privacy.html" class="text-primary text-decoration-none">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="submit" class="wb-btn-primary" id="signup-submit">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+      <div class="text-center mt-4 small text-body-secondary">
+        Already have an account?
+        <a href="index.html" class="text-primary text-decoration-none fw-semibold">Sign In</a>
+      </div>
+    </div>
+
+    <div class="text-center mt-4 small text-body-secondary d-flex flex-wrap justify-content-center gap-3">
+      <a href="privacy.html" class="text-body-secondary text-decoration-none">Privacy</a>
+      <a href="terms.html"   class="text-body-secondary text-decoration-none">Terms</a>
+      <a href="security.html" class="text-body-secondary text-decoration-none">Security</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Password toggles
+['signup-pwd', 'signup-confirm'].forEach(function(id) {
+  $('#' + id + '-toggle').on('click', function() {
+    const $f = $('#' + id);
+    const show = $f.attr('type') === 'password';
+    $f.attr('type', show ? 'text' : 'password');
+    $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+  });
+});
+
+// Password strength
+$('#signup-pwd').on('input', function() {
+  const val = $(this).val();
+  let strength = 0;
+  if (val.length >= 8)           strength++;
+  if (/[A-Z]/.test(val))         strength++;
+  if (/[0-9]/.test(val))         strength++;
+  if (/[^A-Za-z0-9]/.test(val))  strength++;
+
+  const colors = ['', '#ef4444', '#f97316', '#eab308', '#22c55e'];
+  const labels  = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+
+  for (let i = 1; i <= 4; i++) {
+    $('#bar' + i).css('background', i <= strength ? colors[strength] : 'var(--wb-border)');
+  }
+  $('#pwd-strength-label').text(val.length ? labels[strength] || '' : '').css('color', colors[strength] || '');
+});
+
+// Form submit
+$('#signup-form').on('submit', function(e) {
+  e.preventDefault();
+
+  const name    = $('#signup-name').val().trim();
+  const email   = $('#signup-email').val().trim();
+  const pwd     = $('#signup-pwd').val();
+  const confirm = $('#signup-confirm').val();
+  const terms   = $('#signup-terms').is(':checked');
+  const $btn    = $('#signup-submit');
+  const $alert  = $('#signup-alert');
+
+  const showErr = (msg) => {
+    $alert.html('<i class="fas fa-circle-exclamation me-2"></i>' + msg)
+          .css({'display':'flex','background':'rgba(239,68,68,0.1)','border-color':'rgba(239,68,68,0.3)','color':'#ef4444','border-radius':'12px','padding':'14px 18px','border':'1px solid','font-size':'0.88rem','margin-bottom':'20px'})
+          .fadeIn(200);
+  };
+
+  $alert.hide();
+
+  if (!name) { showErr('Please enter your full name.'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { showErr('Please enter a valid email.'); return; }
+  if (pwd.length < 8) { showErr('Password must be at least 8 characters.'); return; }
+  if (pwd !== confirm) { showErr('Passwords do not match.'); return; }
+  if (!terms) { showErr('Please agree to the Terms & Conditions.'); return; }
+
+  $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Creating account…').prop('disabled', true);
+
+  setTimeout(() => {
+    localStorage.setItem('wb_logged_in', '1');
+    localStorage.setItem('wb_user_email', email);
+    localStorage.setItem('wb_user_name', name);
+    window.location.href = 'dasboard.html';
+  }, 1200);
+});
+</script>
+</body>
+</html>

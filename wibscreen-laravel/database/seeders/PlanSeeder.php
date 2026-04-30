@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Plan;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,9 +13,8 @@ class PlanSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Plan::create([
+        Plan::updateOrCreate(['slug' => 'free'], [
             'name' => 'Free',
-            'slug' => 'free',
             'price_monthly' => 0,
             'price_yearly' => 0,
             'description' => 'Perfect for personal use and getting started.',
@@ -30,9 +30,8 @@ class PlanSeeder extends Seeder
             'is_popular' => false,
         ]);
 
-        \App\Models\Plan::create([
+        Plan::updateOrCreate(['slug' => 'pro'], [
             'name' => 'Pro',
-            'slug' => 'pro',
             'price_monthly' => 199,
             'price_yearly' => 1999,
             'description' => 'For power users who need more workspace and no distractions.',
@@ -48,9 +47,8 @@ class PlanSeeder extends Seeder
             'is_popular' => true,
         ]);
 
-        \App\Models\Plan::create([
+        Plan::updateOrCreate(['slug' => 'business'], [
             'name' => 'Business',
-            'slug' => 'business',
             'price_monthly' => 0, // Contact Sales
             'price_yearly' => 0,
             'description' => 'Custom solutions for teams, agencies, and enterprises.',

@@ -12,4 +12,9 @@ class Collection extends Model
     {
         return $this->hasMany(WorkspaceTab::class);
     }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
 }

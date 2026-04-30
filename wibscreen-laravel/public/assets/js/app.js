@@ -19,12 +19,13 @@ $(function () {
 
   /* ─── State ──────────────────────────────────────── */
   let settings = loadJSON(STORAGE_SETTINGS, DEFAULT_SETTINGS);
-  let state = {
-    collections:       [],
-    websites:          [],
-    activeTabId:       null,
-    currentCollection: 'all',
-    query:             ''
+  const state = {
+    collections: [],
+    websites:    [],
+    notes:       [],
+    activeTabId: null,
+    currentCollection: 'all', // 'all' or id
+    query: ''
   };
 
   /* ─── DOM ────────────────────────────────────────── */
@@ -197,7 +198,47 @@ $(function () {
       e.preventDefault(); e.stopPropagation();
       const id  = $(this).data('id');
       const col = findCol(id);
-      if (col && confirm(`Delete "${col.name}" and all its tabs?`)) deleteCollection(id);
+      if (col && confirm(`Delete "${col.name}" and all its tabs/notes?`)) deleteCollection(id);
+    });
+
+    /* ── Add Note ── */
+    $(document).on('click', '.wb-add-note-btn', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      const colId = $(this).data('id');
+      const content = prompt("Enter your note content:");
+      if (!content) return;
+      
+      $.post('/notes', {
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        collection_id: colId,
+        title: "Note",
+        content: content
+      }).done(note => {
+        state.notes.push({
+            id: note.id,
+            collectionId: note.collection_id,
+            title: note.title,
+            content: note.content,
+            color: note.color
+        });
+        render();
+      });
+    });
+
+    /* ── Delete Note ── */
+    $(document).on('click', '.delete-note-btn', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      const id = $(this).data('id');
+      if (confirm("Delete this note?")) {
+        $.ajax({
+          url: `/notes/${id}`,
+          method: 'DELETE',
+          data: { _token: $('meta[name="csrf-token"]').attr('content') }
+        }).done(() => {
+          state.notes = state.notes.filter(n => n.id != id);
+          render();
+        });
+      }
     });
 
     /* ── Card click → browser ── */
@@ -325,6 +366,9 @@ $(function () {
             <h2 class="wb-section-title">${escHtml(col.name)}</h2>
             <span class="wb-section-badge badge bg-secondary-subtle text-secondary-emphasis">${sites.length}</span>
             <div class="wb-section-actions">
+              <button class="wb-section-action-btn wb-add-note-btn" data-id="${col.id}" title="Add Note" aria-label="Add Note">
+                <i class="fas fa-sticky-note"></i>
+              </button>
               <button class="wb-section-action-btn wb-edit-btn"   data-id="${col.id}" title="Rename" aria-label="Rename">
                 <i class="fas fa-pen"></i>
               </button>
@@ -339,9 +383,18 @@ $(function () {
 
       const $grid = $section.find('.wb-card-grid');
 
+      // Render Tabs
       if (sites.length > 0) {
         sites.forEach(site => $grid.append(cardHTML(site)));
-      } else {
+      }
+
+      // Render Notes
+      const notes = notesForCol(col.id);
+      if (notes.length > 0) {
+        notes.forEach(note => $grid.append(noteHTML(note)));
+      }
+
+      if (sites.length === 0 && notes.length === 0) {
         $grid.append(emptyColHTML());
       }
 
@@ -351,6 +404,23 @@ $(function () {
     /* Lazy-load iframes */
     lazyObserver.disconnect();
     $dashboard.find('.wb-card').each(function () { lazyObserver.observe(this); });
+  }
+
+  function notesForCol (colId) {
+    return state.notes.filter(n => n.collectionId == colId);
+  }
+
+  function noteHTML (n) {
+    return `
+      <div class="wb-card note-card" style="border-top: 4px solid ${n.color || '#6366f1'}; min-height: 180px;">
+        <div class="wb-card-header border-0 pb-0">
+          <span class="wb-card-title fw-bold">${escHtml(n.title)}</span>
+          <button class="wb-card-close delete-note-btn" data-id="${n.id}" aria-label="Delete Note">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+        <div class="p-3 pt-2 small text-body-secondary" style="white-space: pre-wrap;">${escHtml(n.content)}</div>
+      </div>`;
   }
 
   function cardHTML (s) {
@@ -704,14 +774,26 @@ $(function () {
         }));
         
         state.websites = [];
-        DB_STATE.collections.forEach(c => {
-            if (c.tabs) {
-                c.tabs.forEach(t => {
-                    state.websites.push({
-                        id: t.id,
-                        url: t.url,
-                        title: t.title,
-                        collectionId: c.id
+        state.notes = [];
+        DB_STATE.collections.forEach(col => {
+            col.tabs.forEach(tab => {
+                state.websites.push({
+                    id: tab.id,
+                    collectionId: col.id,
+                    title: tab.title,
+                    url: tab.url
+                });
+            });
+            
+            // Load Notes
+            if (col.notes) {
+                col.notes.forEach(note => {
+                    state.notes.push({
+                        id: note.id,
+                        collectionId: col.id,
+                        title: note.title,
+                        content: note.content,
+                        color: note.color
                     });
                 });
             }

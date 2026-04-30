@@ -44,7 +44,7 @@ Route::post('/email/verification-notification', function (Request $request) {
 
 /* ── Dashboard (Workspace) ──────────────────────── */
 Route::get('/dashboard', function () {
-    $collections = auth()->user()->collections()->with('tabs')->get();
+    $collections = auth()->user()->collections()->with(['tabs', 'notes'])->get();
     return view('pages.dashboard', compact('collections'));
 })->name('dashboard')->middleware(['auth', 'verified']);
 Route::get('/dasboard', fn() => redirect()->route('dashboard')); // Redirect typo to real route
@@ -66,6 +66,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/tabs', [WorkspaceController::class, 'createTab'])->name('tabs.create');
     Route::delete('/tabs/{id}', [WorkspaceController::class, 'deleteTab'])->name('tabs.delete');
+
+    // Notes
+    Route::post('/notes', [\App\Http\Controllers\NoteController::class, 'store']);
+    Route::put('/notes/{id}', [\App\Http\Controllers\NoteController::class, 'update']);
+    Route::delete('/notes/{id}', [\App\Http\Controllers\NoteController::class, 'destroy']);
+
     Route::post('/track-usage', [WorkspaceController::class, 'trackUsage'])->name('usage.track');
 });
 

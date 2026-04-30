@@ -78,14 +78,14 @@
               @if($plan->slug === 'pro')
                 <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
               @elseif($plan->slug === 'business')
-                <a href="{{ route('support', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Us</a>
+                <a href="{{ route('upgrade', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Sales</a>
               @else
                 <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
               @endif
             @endif
           @else
             @if($plan->slug === 'business')
-              <a href="{{ route('support', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Us</a>
+              <a href="{{ route('upgrade', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Sales</a>
             @else
               <a href="{{ route('signup', ['plan' => $plan->slug]) }}" class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">{{ $plan->slug === 'pro' ? 'Start Pro Trial' : 'Get Started Free' }}</a>
             @endif

@@ -146,6 +146,27 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size:.5rem;padding:1rem;"></button>
               </div>
             @endif
+
+            @if(session('success'))
+              <div class="alert alert-success alert-dismissible fade show small py-2 mt-2 border-0" role="alert" style="background:rgba(34,197,94,.1);color:#22c55e;">
+                <i class="fas fa-circle-check me-2"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size:.5rem;padding:1rem;"></button>
+              </div>
+            @endif
+
+            @if(session('info'))
+              <div class="alert alert-info alert-dismissible fade show small py-2 mt-2 border-0" role="alert" style="background:rgba(9,150,243,.1);color:#0996f3;">
+                <i class="fas fa-circle-info me-2"></i> {{ session('info') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size:.5rem;padding:1rem;"></button>
+              </div>
+            @endif
+
+            @if(session('error'))
+              <div class="alert alert-danger alert-dismissible fade show small py-2 mt-2 border-0" role="alert" style="background:rgba(239,68,68,.1);color:#ef4444;">
+                <i class="fas fa-circle-exclamation me-2"></i> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size:.5rem;padding:1rem;"></button>
+              </div>
+            @endif
           </div>
           <div class="wb-topbar-actions">
             <div class="btn-group wb-sort-group" role="group">

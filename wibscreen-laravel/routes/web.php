@@ -9,13 +9,22 @@ use Illuminate\Http\Request;
 /* ── Home ───────────────────────────────────────────── */
 Route::get('/', fn() => view('pages.home'))->name('home');
 
+use App\Http\Controllers\SubscriptionController;
+// use App\Models\Plan;
+
+/* ── Pricing ────────────────────────────────────────── */
+Route::get('/pricing', function () {
+    $plans = Plan::all();
+    return view('pages.pricing', compact('plans'));
+})->name('pricing');
+
 /* ── Auth ───────────────────────────────────────────── */
-Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/upgrade', [AuthController::class, 'upgrade'])->name('upgrade')->middleware('auth');
+Route::get('/upgrade', [SubscriptionController::class, 'upgrade'])->name('upgrade')->middleware('auth');
 
 /* ── Email Verification ────────────────────────────── */
 Route::get('/email/verify', function () {
@@ -33,14 +42,14 @@ Route::post('/email/verification-notification', function (Request $request) {
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 /* ── Dashboard (Workspace) ──────────────────────── */
-Route::get('/dashboard', function() {
+Route::get('/dashboard', function () {
     $collections = auth()->user()->collections()->with('tabs')->get();
     return view('pages.dashboard', compact('collections'));
 })->name('dashboard')->middleware(['auth', 'verified']);
 Route::get('/dasboard', fn() => redirect()->route('dashboard')); // Redirect typo to real route
 
 /* ── Main Pages ─────────────────────────────────────── */
-Route::get('/about',   fn() => view('pages.about'))->name('about');
+Route::get('/about', fn() => view('pages.about'))->name('about');
 Route::get('/pricing', function () {
     $plans = Plan::all();
     return view('pages.pricing', compact('plans'));
@@ -49,7 +58,7 @@ Route::get('/support', fn() => view('pages.support'))->name('support')->middlewa
 Route::post('/support', [SupportController::class, 'send'])->middleware(['auth', 'verified']);
 
 /* ── Legal Pages ────────────────────────────────────── */
-Route::get('/privacy',  fn() => view('pages.privacy'))->name('privacy');
-Route::get('/terms',    fn() => view('pages.terms'))->name('terms');
+Route::get('/privacy', fn() => view('pages.privacy'))->name('privacy');
+Route::get('/terms', fn() => view('pages.terms'))->name('terms');
 Route::get('/security', fn() => view('pages.security'))->name('security');
-Route::get('/cookies',  fn() => view('pages.cookies'))->name('cookies');
+Route::get('/cookies', fn() => view('pages.cookies'))->name('cookies');

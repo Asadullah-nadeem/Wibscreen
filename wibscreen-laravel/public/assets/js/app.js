@@ -380,9 +380,38 @@ $(function () {
   /* ═══════════════════════════════════════════════════
      ACTIONS
   ═══════════════════════════════════════════════════ */
+  function checkLimit (type) {
+    const plan = (typeof DB_STATE !== 'undefined') ? DB_STATE.userPlan : 'free';
+    
+    if (type === 'workspace') {
+      const count = state.collections.length;
+      const limit = plan === 'pro' ? 10 : (plan === 'business' ? 999 : 1);
+      if (count >= limit) {
+        alert(`Limit Reached: Your ${plan} plan allows only ${limit} workspace(s). Please upgrade for more.`);
+        return false;
+      }
+    }
+    
+    if (type === 'email') {
+      const limit = (plan === 'pro' || plan === 'business') ? 99999 : 10;
+      // return false if count >= limit (logic placeholder)
+    }
+
+    if (type === 'bot') {
+      const limit = (plan === 'pro' || plan === 'business') ? 99999 : 10;
+      // return false if count >= limit (logic placeholder)
+    }
+
+    return true;
+  }
+
   function handleCreateFolder () {
     const name = $('#wb-folder-input').val().trim();
     if (!name) { $('#wb-folder-input').focus(); return; }
+    
+    // Check Plan Limit
+    if (!checkLimit('workspace')) return;
+
     state.collections.push({ id: 'col-' + Date.now(), name, icon: 'fas fa-folder' });
     modalNewFolder.hide();
     saveState(); render();
@@ -409,13 +438,25 @@ $(function () {
     if (!url) { $('#wb-url-input').focus(); return; }
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
+    const colId = $colSelect.val() || (state.collections[0]?.id ?? 'work');
+    
+    // Check Tab Limit for this collection
+    const plan = (typeof DB_STATE !== 'undefined') ? DB_STATE.userPlan : 'free';
+    const tabLimit = (plan === 'pro' || plan === 'business') ? 99999 : 10;
+    const currentTabCount = state.websites.filter(w => w.collectionId === colId).length;
+    
+    if (currentTabCount >= tabLimit) {
+        alert(`Limit Reached: Your ${plan} plan allows only ${tabLimit} tabs per workspace. Please upgrade for unlimited tabs.`);
+        return;
+    }
+
     const id   = 'site-' + Date.now();
     const site = {
       id,
       url,
       originalUrl: url,
       title:       name || titleFromUrl(url),
-      collectionId: $colSelect.val() || (state.collections[0]?.id ?? 'work')
+      collectionId: colId
     };
 
     state.websites.push(site);

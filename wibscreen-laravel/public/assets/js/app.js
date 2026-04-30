@@ -51,14 +51,39 @@ $(function () {
   let renameTargetId = null;
 
   /* ─── Boot ───────────────────────────────────────── */
-  boot();
+  $(function() {
+    boot();
+  });
 
   function boot () {
+    // CSRF Setup for AJAX
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        error: function(xhr) {
+            if (xhr.status === 419) {
+                alert('Your session has expired. Please refresh the page to continue.');
+                window.location.reload();
+            }
+        }
+    });
+
     loadState();
     applyTheme(settings.theme, false);          // silent (no save)
     setSortUI(settings.sortBy);
     bindEvents();
     render();
+
+    // Usage Tracking (150 hours limit)
+    setInterval(() => {
+        $.post('/track-usage').done(data => {
+            if (data.exceeded) {
+                alert("You have reached your 150-hour monthly limit. Please upgrade to Pro for unlimited access.");
+                window.location.href = "/pricing";
+            }
+        });
+    }, 60000); // 1 minute
   }
 
   /* ═══════════════════════════════════════════════════
@@ -412,24 +437,46 @@ $(function () {
     // Check Plan Limit
     if (!checkLimit('workspace')) return;
 
-    state.collections.push({ id: 'col-' + Date.now(), name, icon: 'fas fa-folder' });
-    modalNewFolder.hide();
-    saveState(); render();
+    $.post('/collections', { name: name, icon: 'fas fa-folder' })
+      .done(function(data) {
+        state.collections.push({ id: data.id, name: data.name, icon: data.icon });
+        modalNewFolder.hide();
+        saveState(); render();
+      })
+      .fail(function(xhr) {
+        alert(xhr.responseJSON?.error || 'Failed to create collection.');
+      });
   }
 
   function handleRenameFolder () {
     const name = $('#wb-rename-input').val().trim();
     if (!name || !renameTargetId) return;
-    const col = findCol(renameTargetId);
-    if (col) { col.name = name; saveState(); render(); }
-    modalRename.hide();
+    
+    $.post(`/collections/${renameTargetId}/rename`, { name: name })
+      .done(function(data) {
+        const col = findCol(renameTargetId);
+        if (col) { col.name = name; saveState(); render(); }
+        modalRename.hide();
+      })
+      .fail(function() {
+        alert('Failed to rename collection.');
+      });
   }
 
   function deleteCollection (id) {
-    state.collections = state.collections.filter(c => c.id !== id);
-    state.websites    = state.websites.filter(w => w.collectionId !== id);
-    if (state.currentCollection === id) state.currentCollection = 'all';
-    saveState(); render();
+    $.ajax({
+      url: `/collections/${id}`,
+      method: 'DELETE'
+    })
+    .done(function() {
+      state.collections = state.collections.filter(c => c.id != id);
+      state.websites    = state.websites.filter(w => w.collectionId != id);
+      if (state.currentCollection == id) state.currentCollection = 'all';
+      saveState(); render();
+    })
+    .fail(function() {
+      alert('Failed to delete collection.');
+    });
   }
 
   function handleAddTab () {
@@ -438,32 +485,48 @@ $(function () {
     if (!url) { $('#wb-url-input').focus(); return; }
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
-    const colId = $colSelect.val() || (state.collections[0]?.id ?? 'work');
+    let colId = $colSelect.val() || (state.collections[0]?.id ?? null);
+    if (!colId) { alert('Please create a workspace first.'); return; }
+    
+    // Clean ID if it contains 'col-' prefix from old localStorage
+    if (typeof colId === 'string' && colId.startsWith('col-')) {
+        colId = colId.replace('col-', '');
+    }
     
     // Check Tab Limit for this collection
     const plan = (typeof DB_STATE !== 'undefined') ? DB_STATE.userPlan : 'free';
     const tabLimit = (plan === 'pro' || plan === 'business') ? 99999 : 10;
-    const currentTabCount = state.websites.filter(w => w.collectionId === colId).length;
+    const currentTabCount = state.websites.filter(w => w.collectionId == colId).length;
     
     if (currentTabCount >= tabLimit) {
         alert(`Limit Reached: Your ${plan} plan allows only ${tabLimit} tabs per workspace. Please upgrade for unlimited tabs.`);
         return;
     }
 
-    const id   = 'site-' + Date.now();
-    const site = {
-      id,
-      url,
-      originalUrl: url,
-      title:       name || titleFromUrl(url),
-      collectionId: colId
-    };
+    $.post('/tabs', { 
+      collection_id: colId,
+      title: name || titleFromUrl(url),
+      url: url
+    })
+    .done(function(data) {
+      const site = {
+        id: data.id,
+        url: data.url,
+        originalUrl: data.url,
+        title: data.title,
+        collectionId: data.collection_id
+      };
 
-    state.websites.push(site);
-    mountIframe(site);
-    openInBrowser(id);
-    modalAddTab.hide();
-    saveState(); render();
+      state.websites.push(site);
+      mountIframe(site);
+      openInBrowser(site.id);
+      modalAddTab.hide();
+      saveState(); render();
+    })
+    .fail(function(xhr) {
+      const errorMsg = xhr.responseJSON?.error || (xhr.status === 404 ? 'Workspace not found. Please refresh.' : 'Failed to add tab. Server error.');
+      alert(errorMsg);
+    });
   }
 
   function openInBrowser (id) {
@@ -538,14 +601,23 @@ $(function () {
   }
 
   function deleteWebsite (id) {
-    state.websites = state.websites.filter(s => s.id !== id);
-    $(`#iframe-${id}`).remove();
-    if (state.activeTabId === id) {
-      state.activeTabId = state.websites[0]?.id || null;
-      if (!state.activeTabId) { $iframeLayer.removeClass('active'); $urlDisplay.val(''); }
-    }
-    saveState(); render();
-    if (state.activeTabId) openInBrowser(state.activeTabId);
+    $.ajax({
+      url: `/tabs/${id}`,
+      method: 'DELETE'
+    })
+    .done(function() {
+      state.websites = state.websites.filter(s => s.id != id);
+      $(`#iframe-${id}`).remove();
+      if (state.activeTabId == id) {
+        state.activeTabId = state.websites[0]?.id || null;
+        if (!state.activeTabId) { $iframeLayer.removeClass('active'); $urlDisplay.val(''); }
+      }
+      saveState(); render();
+      if (state.activeTabId) openInBrowser(state.activeTabId);
+    })
+    .fail(function() {
+      alert('Failed to delete tab.');
+    });
   }
 
   function mountIframe (site) {

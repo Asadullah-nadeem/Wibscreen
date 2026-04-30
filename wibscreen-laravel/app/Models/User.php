@@ -25,7 +25,25 @@ class User extends Authenticatable implements MustVerifyEmail
         'plan_expiry_at',
         'plan_status',
         'payment_id',
+        'monthly_usage_minutes',
+        'usage_reset_at',
+        'account_status',
     ];
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function collections()
+    {
+        return $this->hasMany(Collection::class);
+    }
+
+    public function tabs()
+    {
+        return $this->hasMany(WorkspaceTab::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -47,24 +65,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'plan_expiry_at' => 'datetime',
+            'usage_reset_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Get the collections for the user.
-     */
-    public function collections()
-    {
-        return $this->hasMany(Collection::class);
-    }
-
-    /**
-     * Get the workspace tabs for the user.
-     */
-    public function tabs()
-    {
-        return $this->hasMany(WorkspaceTab::class);
     }
 
     /**
@@ -106,6 +109,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         if ($this->hasPremium()) return 999999; // Unlimited
         return 10;
+    }
+
+    /**
+     * Return the count of all WorkspaceTab records for the user
+     */
+    public function totalTabsCount(): int
+    {
+        return $this->tabs()->count();
     }
 
     /**

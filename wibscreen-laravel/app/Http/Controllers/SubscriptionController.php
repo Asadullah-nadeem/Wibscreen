@@ -16,7 +16,6 @@ class SubscriptionController extends Controller
         $paymentId = $request->query('payment_id');
 
         if ($plan === 'pro') {
-            // Calculate Expiry
             $expiry = $duration === '1 Year' ? Carbon::now()->addYear() : Carbon::now()->addMonth();
             
             $user->update([
@@ -24,6 +23,19 @@ class SubscriptionController extends Controller
                 'plan_expiry_at' => $expiry,
                 'plan_status' => 'active',
                 'payment_id' => $paymentId
+            ]);
+
+            // Log Subscription History
+            \App\Models\Subscription::create([
+                'user_id' => $user->id,
+                'plan_name' => 'Pro Plan',
+                'plan_slug' => 'pro',
+                'amount' => ($duration === '1 Year' ? 1999 : 199),
+                'payment_id' => $paymentId,
+                'payment_status' => 'success',
+                'starts_at' => Carbon::now(),
+                'expires_at' => $expiry,
+                'metadata' => ['duration' => $duration, 'tabs_at_signup' => $user->totalTabsCount()]
             ]);
 
             $message = "Pro Plan activated successfully for {$duration}! Your Expiry Date is: {$expiry->format('d M, Y')}. Thank you for choosing Wibscreen Pro.";
@@ -34,6 +46,17 @@ class SubscriptionController extends Controller
             $user->update([
                 'plan' => 'business',
                 'plan_status' => 'pending'
+            ]);
+
+            // Log Pending Request
+            \App\Models\Subscription::create([
+                'user_id' => $user->id,
+                'plan_name' => 'Business Plan',
+                'plan_slug' => 'business',
+                'amount' => 0,
+                'payment_status' => 'pending',
+                'starts_at' => Carbon::now(),
+                'metadata' => ['tabs_at_signup' => $user->totalTabsCount()]
             ]);
 
             $message = "Thanx Over Team Cannect soon then help you. Your request for the Business Plan has been received and is pending superadmin approval.";

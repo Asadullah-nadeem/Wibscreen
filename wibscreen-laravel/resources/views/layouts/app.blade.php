@@ -8,6 +8,7 @@
   <link rel="apple-touch-icon" href="{{ asset('assets/img/favicon.png') }}">
 
   <!-- SEO -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="@yield('meta_desc', 'Wibscreen is your personal browser workspace. Organize websites into collections, open them in-app, and manage your digital life.')">
 
   <!-- Fonts -->

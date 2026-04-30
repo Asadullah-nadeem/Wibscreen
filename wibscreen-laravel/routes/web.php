@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SupportController;
+use App\Http\Controllers\WorkspaceController;
 use App\Models\Plan;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -56,6 +57,17 @@ Route::get('/pricing', function () {
 })->name('pricing');
 Route::get('/support', fn() => view('pages.support'))->name('support')->middleware(['auth', 'verified']);
 Route::post('/support', [SupportController::class, 'send'])->middleware(['auth', 'verified']);
+
+/* ── Workspace API ─────────────────────────────── */
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/collections', [WorkspaceController::class, 'createCollection'])->name('collections.create');
+    Route::post('/collections/{id}/rename', [WorkspaceController::class, 'renameCollection'])->name('collections.rename');
+    Route::delete('/collections/{id}', [WorkspaceController::class, 'deleteCollection'])->name('collections.delete');
+
+    Route::post('/tabs', [WorkspaceController::class, 'createTab'])->name('tabs.create');
+    Route::delete('/tabs/{id}', [WorkspaceController::class, 'deleteTab'])->name('tabs.delete');
+    Route::post('/track-usage', [WorkspaceController::class, 'trackUsage'])->name('usage.track');
+});
 
 /* ── Legal Pages ────────────────────────────────────── */
 Route::get('/privacy', fn() => view('pages.privacy'))->name('privacy');

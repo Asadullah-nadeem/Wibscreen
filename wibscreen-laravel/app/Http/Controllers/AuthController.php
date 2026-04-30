@@ -40,7 +40,7 @@ class AuthController extends Controller
             'plan' => $request->plan ?? 'free',
         ]);
 
-        // Create Default Collection
+        // Create Default Collection (Workspace)
         Collection::create([
             'user_id' => $user->id,
             'name' => 'Work',
@@ -53,10 +53,14 @@ class AuthController extends Controller
         Cookie::queue('wb_user_authenticated', 'true', 43200); // 30 days
 
         // Send Welcome Email
-        Mail::send('emails.welcome', ['user' => $user], function($message) use ($user) {
-            $message->to($user->email);
-            $message->subject('Welcome to Wibscreen!');
-        });
+        try {
+            Mail::send('emails.welcome', ['user' => $user], function($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Welcome to Wibscreen!');
+            });
+        } catch (\Exception $e) {
+            // Log error or ignore if mail is not configured
+        }
 
         return redirect()->route('dashboard')->with('signup_success', "Welcome! Your ".ucfirst($user->plan)." plan has been activated.");
     }
@@ -82,40 +86,6 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
-    }
-
-    public function upgrade(Request $request)
-    {
-        $plan = $request->query('plan');
-        $paymentId = $request->query('payment_id');
-
-        if (!in_array($plan, ['free', 'pro', 'business'])) {
-            return back();
-        }
-
-        $user = Auth::user();
-        $user->plan = $plan;
-        $user->save();
-
-        $duration = $request->query('duration', '1 Month');
-        $msg = "Plan upgraded to ".ucfirst($plan)." successfully for $duration!";
-        
-        if ($paymentId) {
-            $msg .= " (Payment ID: $paymentId)";
-        }
-
-        // Send Payment Success Email
-        Mail::send('emails.payment-success', [
-            'user' => $user,
-            'plan' => $plan,
-            'duration' => $duration,
-            'paymentId' => $paymentId
-        ], function($message) use ($user) {
-            $message->to($user->email);
-            $message->subject('Payment Successful — Wibscreen Pro');
-        });
-
-        return redirect()->route('dashboard')->with('signup_success', $msg);
     }
 
     public function logout(Request $request)

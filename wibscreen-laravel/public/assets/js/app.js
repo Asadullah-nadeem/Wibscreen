@@ -77,7 +77,7 @@ $(function () {
 
     // Usage Tracking (150 hours limit)
     setInterval(() => {
-        $.post('/track-usage').done(data => {
+        $.post('/track-usage', { _token: $('meta[name="csrf-token"]').attr('content') }).done(data => {
             if (data.exceeded) {
                 alert("You have reached your 150-hour monthly limit. Please upgrade to Pro for unlimited access.");
                 window.location.href = "/pricing";
@@ -407,10 +407,14 @@ $(function () {
   ═══════════════════════════════════════════════════ */
   function checkLimit (type) {
     const plan = (typeof DB_STATE !== 'undefined') ? DB_STATE.userPlan : 'free';
+    const status = (typeof DB_STATE !== 'undefined') ? DB_STATE.planStatus : 'active';
+    
+    // If business plan is pending, treat as free for limits
+    const effectivePlan = (plan === 'business' && status === 'pending') ? 'free' : plan;
     
     if (type === 'workspace') {
       const count = state.collections.length;
-      const limit = plan === 'pro' ? 10 : (plan === 'business' ? 999 : 1);
+      const limit = effectivePlan === 'pro' ? 10 : (effectivePlan === 'business' ? 999 : 1);
       if (count >= limit) {
         alert(`Limit Reached: Your ${plan} plan allows only ${limit} workspace(s). Please upgrade for more.`);
         return false;
@@ -437,7 +441,11 @@ $(function () {
     // Check Plan Limit
     if (!checkLimit('workspace')) return;
 
-    $.post('/collections', { name: name, icon: 'fas fa-folder' })
+    $.post('/collections', { 
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        name: name, 
+        icon: 'fas fa-folder' 
+    })
       .done(function(data) {
         state.collections.push({ id: data.id, name: data.name, icon: data.icon });
         modalNewFolder.hide();
@@ -452,7 +460,15 @@ $(function () {
     const name = $('#wb-rename-input').val().trim();
     if (!name || !renameTargetId) return;
     
-    $.post(`/collections/${renameTargetId}/rename`, { name: name })
+    let cleanId = renameTargetId;
+    if (typeof cleanId === 'string' && cleanId.startsWith('col-')) {
+        cleanId = cleanId.replace('col-', '');
+    }
+
+    $.post(`/collections/${cleanId}/rename`, { 
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        name: name 
+    })
       .done(function(data) {
         const col = findCol(renameTargetId);
         if (col) { col.name = name; saveState(); render(); }
@@ -464,9 +480,17 @@ $(function () {
   }
 
   function deleteCollection (id) {
+    let cleanId = id;
+    if (typeof cleanId === 'string' && cleanId.startsWith('col-')) {
+        cleanId = cleanId.replace('col-', '');
+    }
+
     $.ajax({
-      url: `/collections/${id}`,
-      method: 'DELETE'
+      url: `/collections/${cleanId}`,
+      method: 'DELETE',
+      data: {
+          _token: $('meta[name="csrf-token"]').attr('content')
+      }
     })
     .done(function() {
       state.collections = state.collections.filter(c => c.id != id);
@@ -495,15 +519,19 @@ $(function () {
     
     // Check Tab Limit for this collection
     const plan = (typeof DB_STATE !== 'undefined') ? DB_STATE.userPlan : 'free';
-    const tabLimit = (plan === 'pro' || plan === 'business') ? 99999 : 10;
+    const status = (typeof DB_STATE !== 'undefined') ? DB_STATE.planStatus : 'active';
+    const effectivePlan = (plan === 'business' && status === 'pending') ? 'free' : plan;
+
+    const tabLimit = (effectivePlan === 'pro' || effectivePlan === 'business') ? 99999 : 10;
     const currentTabCount = state.websites.filter(w => w.collectionId == colId).length;
     
     if (currentTabCount >= tabLimit) {
-        alert(`Limit Reached: Your ${plan} plan allows only ${tabLimit} tabs per workspace. Please upgrade for unlimited tabs.`);
+        alert(`Limit Reached: Your ${effectivePlan} plan allows only ${tabLimit} tabs per workspace. Please upgrade for unlimited tabs.`);
         return;
     }
 
     $.post('/tabs', { 
+      _token: $('meta[name="csrf-token"]').attr('content'),
       collection_id: colId,
       title: name || titleFromUrl(url),
       url: url
@@ -603,7 +631,10 @@ $(function () {
   function deleteWebsite (id) {
     $.ajax({
       url: `/tabs/${id}`,
-      method: 'DELETE'
+      method: 'DELETE',
+      data: {
+          _token: $('meta[name="csrf-token"]').attr('content')
+      }
     })
     .done(function() {
       state.websites = state.websites.filter(s => s.id != id);

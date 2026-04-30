@@ -446,7 +446,8 @@
   const _root = document.documentElement;
   const DB_STATE = {
       collections: @json($collections),
-      userPlan: "{{ auth()->user()->plan }}"
+      userPlan: "{{ auth()->user()->plan }}",
+      planStatus: "{{ auth()->user()->plan_status }}"
   };
 
   document.getElementById('wb-accent-color').addEventListener('input', function () {

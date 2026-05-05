@@ -1,36 +1,42 @@
 @extends('layouts.app')
-@section('title', 'Terms & Conditions — Wibscreen')
+@section('title', 'Terms of Service — Wibscreen')
+
 @section('content')
 @include('partials.navbar')
 
 <section class="wb-hero pb-4">
-  <div class="container">
+  <div class="container text-center">
     <span class="wb-section-label">Legal</span>
-    <h1 class="wb-hero-title mb-2">Terms &amp; Conditions</h1>
-    <p class="wb-hero-sub text-body-secondary">Last updated: {{ date('F Y') }}</p>
+    <h1 class="wb-hero-title">Terms of Service</h1>
+    <p class="wb-hero-sub">The rules and guidelines for using the Wibscreen platform.</p>
   </div>
 </section>
 
 <section class="py-5">
-  <div class="container" style="max-width:800px;">
-    <div class="wb-page-card shadow-sm border-0">
-      <div class="prose">
-        @php $sections=[
-          ['Acceptance of Terms','By accessing or using Wibscreen you agree to be bound by these Terms. If you disagree with any part, do not use the platform.'],
-          ['Use of the Platform','Wibscreen is provided for personal, non-commercial use unless you hold a Business plan. You agree not to misuse the service, attempt to circumvent security measures, or use it for unlawful purposes.'],
-          ['User Content','You are solely responsible for the websites you save to your workspace. Wibscreen does not review, endorse, or take responsibility for any third-party content you access through the app.'],
-          ['Intellectual Property','The Wibscreen name, logo, design, and code are the intellectual property of Wibscreen. You may not copy, modify, or redistribute them without written permission.'],
-          ['Disclaimer of Warranties','Wibscreen is provided "as is" without warranty of any kind. We do not guarantee uninterrupted access or that all third-party websites will be embeddable.'],
-          ['Limitation of Liability','To the maximum extent permitted by law, Wibscreen is not liable for any indirect, incidental, or consequential damages arising from your use of the platform.'],
-          ['Changes to Terms','We may update these terms at any time. Continued use of Wibscreen after changes constitutes acceptance of the updated terms.'],
-        ]; @endphp
-        
-        @foreach($sections as $i=>$s)
-        <div class="mb-5 {{ $loop->last ? 'mb-0' : '' }}">
-          <h2 class="h5 fw-bold mb-3 text-body-emphasis border-start border-primary border-4 ps-3" style="font-family:'Manrope',sans-serif;">{{ ($i+1) }}. {{ $s[0] }}</h2>
-          <p class="text-body-secondary lh-lg mb-0">{{ $s[1] }}</p>
-        </div>
-        @endforeach
+  <div class="container" style="max-width: 800px;">
+    <div class="wb-card p-4 p-md-5">
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">1. Acceptance of Terms</h2>
+        <p class="text-secondary">By accessing and using Wibscreen, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the service.</p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">2. Use of Service</h2>
+        <p class="text-secondary">Wibscreen provides a browser workspace tool. You are responsible for any content you access or organize through our platform. You must use the service in compliance with all applicable laws.</p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">3. Subscriptions</h2>
+        <p class="text-secondary">Some features require a paid subscription. All payments are processed securely through Razorpay. You can cancel your subscription at any time.</p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">4. Limitation of Liability</h2>
+        <p class="text-secondary">Wibscreen is provided "as is" without any warranties. We are not liable for any data loss or damages resulting from the use of our service.</p>
+      </div>
+
+      <div class="mt-5 pt-4 border-top border-emphasis-subtle text-secondary small text-center">
+        Last Updated: May 05, 2026
       </div>
     </div>
   </div>

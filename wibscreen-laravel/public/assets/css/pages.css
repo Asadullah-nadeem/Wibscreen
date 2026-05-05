@@ -6,23 +6,32 @@
 /* ── Variables ───────────────────────────────────── */
 :root {
   --wb-primary:       #6366f1;
+  --wb-primary-rgb:   99, 102, 241;
   --wb-primary-hover: #4f46e5;
-  --wb-radius:        20px;
-  --wb-speed:         0.25s;
+  --wb-radius-lg:     24px;
+  --wb-radius-md:     16px;
+  --wb-radius-sm:     12px;
+  --wb-speed:         0.3s;
 }
 
 [data-bs-theme="dark"] {
-  --wb-surface:   #1e293b;
-  --wb-surface-2: #0f172a;
-  --wb-border:    rgba(255,255,255,0.08);
-  --wb-shadow:    0 10px 30px -10px rgba(0,0,0,0.5);
+  --wb-surface:       #0f172a;
+  --wb-surface-2:     #1e293b;
+  --wb-surface-3:     #334155;
+  --wb-border:        rgba(255, 255, 255, 0.06);
+  --wb-border-strong: rgba(255, 255, 255, 0.12);
+  --wb-shadow:        0 20px 50px -12px rgba(0, 0, 0, 0.5);
+  --wb-glass-bg:      rgba(15, 23, 42, 0.8);
 }
 
 [data-bs-theme="light"] {
-  --wb-surface:   #ffffff;
-  --wb-surface-2: #f8fafc;
-  --wb-border:    rgba(0,0,0,0.06);
-  --wb-shadow:    0 10px 30px -10px rgba(0,0,0,0.08);
+  --wb-surface:       #ffffff;
+  --wb-surface-2:     #f8fafc;
+  --wb-surface-3:     #f1f5f9;
+  --wb-border:        rgba(0, 0, 0, 0.05);
+  --wb-border-strong: rgba(0, 0, 0, 0.1);
+  --wb-shadow:        0 20px 50px -12px rgba(0, 0, 0, 0.08);
+  --wb-glass-bg:      rgba(255, 255, 255, 0.8);
 }
 
 /* ── Base ────────────────────────────────────────── */
@@ -30,95 +39,176 @@ html, body {
   min-height: 100%;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .display-font {
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 /* ── Navbar ──────────────────────────────────────── */
 .wb-navbar {
-  padding: 16px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--wb-border);
-  background: var(--wb-surface);
   position: sticky;
   top: 0;
-  z-index: 1000;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  background: rgba(var(--bs-body-bg-rgb), 0.85);
+  z-index: 1050;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--wb-glass-bg);
+  transition: all var(--wb-speed) ease;
+}
+
+.wb-navbar.scrolled {
+  padding: 8px 0;
+  box-shadow: var(--wb-shadow);
+}
+
+.nav-link-custom {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+  padding: 8px 16px;
+  border-radius: var(--wb-radius-sm);
+  transition: all var(--wb-speed) ease;
+}
+
+.nav-link-custom:hover, .nav-link-custom.active {
+  color: var(--bs-emphasis-color);
+  background: var(--wb-surface-2);
 }
 
 /* ── Hero Section ────────────────────────────────── */
 .wb-hero {
-  padding: 100px 0 80px;
-  text-align: center;
+  padding: 120px 0 80px;
+  position: relative;
+  overflow: hidden;
 }
 
 .wb-hero-title {
-  font-family: 'Manrope', sans-serif;
-  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
   font-weight: 800;
-  letter-spacing: -1.2px;
-  line-height: 1.1;
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
 }
 
 .wb-hero-sub {
-  font-size: 1.15rem;
-  opacity: 0.7;
-  max-width: 620px;
-  margin: 0 auto;
+  font-size: clamp(1.1rem, 2vw, 1.25rem);
+  color: var(--bs-secondary-color);
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
 }
 
-/* ── Page Card ───────────────────────────────────── */
-.wb-page-card {
-  background: var(--wb-surface);
-  border: 1px solid var(--wb-border);
-  border-radius: var(--wb-radius);
-  padding: 40px;
-  box-shadow: var(--wb-shadow);
-  transition: transform var(--wb-speed), box-shadow var(--wb-speed);
-}
-
-@media (max-width: 575.98px) {
-  .wb-page-card { padding: 24px 20px; border-radius: 16px; }
-}
-
-/* ── Section headings ────────────────────────────── */
+/* ── Section UI ──────────────────────────────────── */
 .wb-section-label {
+  display: inline-block;
   font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 1.6px;
   text-transform: uppercase;
+  letter-spacing: 0.15em;
   color: var(--wb-primary);
-  margin-bottom: 12px;
-  display: block;
+  background: rgba(var(--wb-primary-rgb), 0.1);
+  padding: 6px 16px;
+  border-radius: 100px;
+  margin-bottom: 1.5rem;
 }
 
-/* ── Info Blocks ─────────────────────────────────── */
-.wb-info-block {
-  background: var(--wb-surface-2);
+/* ── Cards ───────────────────────────────────────── */
+.wb-card {
+  background: var(--wb-surface);
   border: 1px solid var(--wb-border);
-  border-radius: 16px;
-  padding: 24px 28px;
-  margin-bottom: 24px;
+  border-radius: var(--wb-radius-lg);
+  padding: 40px;
+  box-shadow: var(--wb-shadow);
+  transition: all var(--wb-speed) ease;
 }
 
-/* ── Feature Grid ────────────────────────────────── */
 .wb-feature-card {
   background: var(--wb-surface);
   border: 1px solid var(--wb-border);
-  border-radius: 20px;
+  border-radius: var(--wb-radius-md);
   padding: 32px;
   height: 100%;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--wb-speed) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .wb-feature-card:hover {
-  border-color: rgba(99,102,241,0.4);
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.2);
+  border-color: rgba(var(--wb-primary-rgb), 0.3);
+  transform: translateY(-8px);
+  box-shadow: var(--wb-shadow);
 }
 
-/* ── Auth Card ───────────────────────────────────── */
-.wb-auth-wrap {
-  min-height: 100dvh;
+/* ── Buttons ─────────────────────────────────────── */
+.btn-primary-wb {
+  background: var(--wb-primary);
+  border: none;
+  border-radius: var(--wb-radius-sm);
+  font-weight: 700;
+  padding: 12px 28px;
+  color: white;
+  transition: all var(--wb-speed) ease;
+  box-shadow: 0 8px 20px -6px rgba(var(--wb-primary-rgb), 0.5);
+}
+
+.btn-primary-wb:hover {
+  background: var(--wb-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -6px rgba(var(--wb-primary-rgb), 0.6);
+  color: white;
+}
+
+.btn-outline-wb {
+  background: transparent;
+  border: 1px solid var(--wb-border-strong);
+  border-radius: var(--wb-radius-sm);
+  font-weight: 600;
+  padding: 12px 28px;
+  transition: all var(--wb-speed) ease;
+}
+
+.btn-outline-wb:hover {
+  background: var(--wb-surface-2);
+  border-color: var(--bs-emphasis-color);
+  transform: translateY(-2px);
+}
+
+/* ── Footer ──────────────────────────────────────── */
+.wb-footer {
+  padding: 80px 0 40px;
+  background: var(--wb-surface);
+  border-top: 1px solid var(--wb-border);
+}
+
+.footer-link {
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color var(--wb-speed) ease;
+}
+
+.footer-link:hover {
+  color: var(--wb-primary);
+}
+
+/* ── Utilities ───────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, var(--wb-primary), #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--wb-glass-bg);
+}
+
+/* ── Auth ────────────────────────────────────────── */
+.wb-auth-container {
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,53 +218,10 @@ html, body {
 
 .wb-auth-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 450px;
   background: var(--wb-surface);
   border: 1px solid var(--wb-border);
-  border-radius: 24px;
-  padding: 48px 40px;
+  border-radius: var(--wb-radius-lg);
+  padding: 48px;
   box-shadow: var(--wb-shadow);
-}
-
-/* ── Buttons ─────────────────────────────────────── */
-.wb-btn-primary {
-  background: var(--wb-primary);
-  border: none;
-  border-radius: 14px;
-  font-weight: 700;
-  padding: 14px 24px;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  color: #fff;
-  width: 100%;
-  box-shadow: 0 4px 14px 0 rgba(99,102,241,0.39);
-}
-
-.wb-btn-primary:hover {
-  background: var(--wb-primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99,102,241,0.45);
-}
-
-.wb-btn-primary:active { transform: translateY(0); }
-
-/* ── Comparison Table ────────────────────────────── */
-.compare-table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.compare-table thead th {
-  background: var(--wb-surface-2);
-  border-bottom: 2px solid var(--wb-border);
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
-}
-
-.compare-table td {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--wb-border);
-  vertical-align: middle;
 }

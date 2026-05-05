@@ -1,35 +1,42 @@
 @extends('layouts.app')
-@section('title', 'Cookies Policy — Wibscreen')
+@section('title', 'Cookie Policy — Wibscreen')
+
 @section('content')
 @include('partials.navbar')
 
 <section class="wb-hero pb-4">
-  <div class="container">
+  <div class="container text-center">
     <span class="wb-section-label">Legal</span>
-    <h1 class="wb-hero-title mb-2">Cookies Policy</h1>
-    <p class="wb-hero-sub text-body-secondary">Last updated: {{ date('F Y') }}</p>
+    <h1 class="wb-hero-title">Cookie Policy</h1>
+    <p class="wb-hero-sub">Understanding how we use cookies to improve your experience.</p>
   </div>
 </section>
 
 <section class="py-5">
-  <div class="container" style="max-width:800px;">
-    <div class="wb-page-card shadow-sm border-0">
-      <div class="prose">
-        @php $sections=[
-          ['Do We Use Cookies?','Wibscreen does not use traditional HTTP cookies for tracking or analytics. We use browser localStorage exclusively to store your workspace data locally on your device.'],
-          ['What Is localStorage?','localStorage is a web browser feature that allows websites to store data on your device — similar to cookies, but the data never leaves your browser and is not sent to any server automatically.'],
-          ['What We Store','We store: your collections list, saved websites, UI settings (theme, accent color, layout), and secure session tokens. None of this data is transmitted to our servers.'],
-          ['Third-Party Scripts','We load Bootstrap, Font Awesome, and Google Fonts from CDNs. These CDNs may set their own cookies or log request data. Please refer to their respective privacy policies.'],
-          ['Controlling Your Data','You can clear all Wibscreen localStorage at any time via your browser\'s developer tools → Application → Local Storage. This will reset your workspace to its default state.'],
-          ['No Advertising Cookies','The Free plan shows minimal ads but we do not use advertising tracking cookies. Pro and Business plans are completely ad-free.'],
-        ]; @endphp
-        
-        @foreach($sections as $i=>$s)
-        <div class="mb-5 {{ $loop->last ? 'mb-0' : '' }}">
-          <h2 class="h5 fw-bold mb-3 text-body-emphasis border-start border-primary border-4 ps-3" style="font-family:'Manrope',sans-serif;">{{ ($i+1) }}. {{ $s[0] }}</h2>
-          <p class="text-body-secondary lh-lg mb-0">{{ $s[1] }}</p>
-        </div>
-        @endforeach
+  <div class="container" style="max-width: 800px;">
+    <div class="wb-card p-4 p-md-5">
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">1. What are Cookies?</h2>
+        <p class="text-secondary">Cookies are small text files stored on your device when you visit a website. They help us remember your preferences and keep you logged in.</p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">2. Essential Cookies</h2>
+        <p class="text-secondary">We use essential cookies for core functionality, such as user authentication and security. These cannot be disabled as the service would not function correctly without them.</p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">3. Preference Cookies</h2>
+        <p class="text-secondary">These cookies allow us to remember your settings, such as your chosen theme (Dark/Light mode) and language preferences.</p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4 fw-bold mb-3">4. Managing Cookies</h2>
+        <p class="text-secondary">You can manage or disable cookies through your browser settings. However, please note that disabling essential cookies may impact your ability to use Wibscreen.</p>
+      </div>
+
+      <div class="mt-5 pt-4 border-top border-emphasis-subtle text-secondary small text-center">
+        Last Updated: May 05, 2026
       </div>
     </div>
   </div>

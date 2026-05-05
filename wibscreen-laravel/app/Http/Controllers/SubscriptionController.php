@@ -62,9 +62,20 @@ class SubscriptionController extends Controller
                 'plan_slug' => 'business',
                 'amount' => 0,
                 'payment_status' => 'pending',
-                'starts_at' => Carbon::now(),
+                'starts_at' => \Carbon\Carbon::now(),
                 'metadata' => ['tabs_at_signup' => $user->totalTabsCount()]
             ]);
+
+            // Send Dual Notifications
+            try {
+                // 1. Notify the Team (Sales)
+                \Illuminate\Support\Facades\Mail::to('support.codeaxe@gmail.com')->send(new \App\Mail\BusinessRequestTeamEmail($user));
+                
+                // 2. Confirm to the User
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\BusinessRequestUserEmail($user));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send Business request emails: " . $e->getMessage());
+            }
 
             $message = "Thanx Over Team Cannect soon then help you. Your request for the Business Plan has been received and is pending superadmin approval.";
             return redirect()->route('dashboard')->with('info', $message);

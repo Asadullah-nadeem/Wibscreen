@@ -34,9 +34,12 @@
           <button type="button" class="wb-pass-toggle" id="toggle-pass"><i class="fas fa-eye" id="eye-icon"></i></button>
         </div>
       </div>
-      <div class="mb-3 form-check">
-        <input type="checkbox" name="remember" class="form-check-input" id="remember">
-        <label class="form-check-label small" for="remember">Remember me</label>
+      <div class="mb-3 d-flex align-items-center justify-content-between">
+        <div class="form-check">
+          <input type="checkbox" name="remember" class="form-check-input" id="remember">
+          <label class="form-check-label small" for="remember">Remember me</label>
+        </div>
+        <a href="{{ route('password.request') }}" class="small text-primary text-decoration-none fw-medium">Forgot password?</a>
       </div>
       <button type="submit" class="btn btn-primary w-100 fw-semibold py-2 mt-1">Sign In</button>
     </form>

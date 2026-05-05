@@ -51,6 +51,17 @@ services:
     networks:
       - wibscreen-network
 
+  # Mailpit Service
+  mailpit:
+    image: axllent/mailpit
+    container_name: wibscreen-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - wibscreen-network
+
 networks:
   wibscreen-network:
     driver: bridge

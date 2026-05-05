@@ -6,11 +6,12 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -28,7 +29,16 @@ class User extends Authenticatable implements MustVerifyEmail
         'monthly_usage_minutes',
         'usage_reset_at',
         'account_status',
+        'deactivated_at',
     ];
+
+    /**
+     * Check if the account is deactivated
+     */
+    public function isDeactivated(): bool
+    {
+        return $this->account_status === 'suspended' || !is_null($this->deactivated_at);
+    }
 
     public function subscriptions()
     {

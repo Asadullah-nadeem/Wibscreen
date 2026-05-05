@@ -141,6 +141,35 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Check if user exists (including soft-deleted)
+        $user = User::withTrashed()->where('email', $credentials['email'])->first();
+
+        if ($user) {
+            // Case 1: Account is soft-deleted (Scheduled for deletion)
+            if ($user->trashed()) {
+                return back()->withErrors([
+                    'email' => 'Your account is scheduled for deletion. Please contact support if this is a mistake.',
+                ])->onlyInput('email');
+            }
+
+            // Case 2: Account is deactivated (Suspended)
+            if ($user->isDeactivated()) {
+                if (Auth::attempt($credentials, $request->remember)) {
+                    // Send reactivation verification mail
+                    try {
+                        Mail::to($user->email)->send(new \App\Mail\AccountReactivatedEmail($user->name));
+                    } catch (\Exception $e) {}
+                    
+                    // Reactivate and continue
+                    $user->update(['account_status' => 'active', 'deactivated_at' => null]);
+                    
+                    $request->session()->regenerate();
+                    Cookie::queue('wb_user_authenticated', 'true', 43200);
+                    return redirect()->intended('dashboard')->with('success', 'Your account has been reactivated! Welcome back.');
+                }
+            }
+        }
+
         if (Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
             Cookie::queue('wb_user_authenticated', 'true', 43200); // 30 days
@@ -170,7 +199,10 @@ class AuthController extends Controller
         $userName = $user->name;
         $userEmail = $user->email;
 
-        $user->update(['account_status' => 'suspended']);
+        $user->update([
+            'account_status' => 'suspended',
+            'deactivated_at' => \Carbon\Carbon::now()
+        ]);
         
         // Send Deactivation Email
         try {
@@ -184,7 +216,7 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         Cookie::queue(Cookie::forget('wb_user_authenticated'));
 
-        return redirect('/')->with('info', 'Your account has been deactivated. You can contact support to reactivate it.');
+        return redirect('/')->with('info', 'Your account has been deactivated. You can sign in anytime to reactivate it.');
     }
 
     /**
@@ -203,14 +235,7 @@ class AuthController extends Controller
             \Illuminate\Support\Facades\Log::error("Failed to send deletion email to {$userEmail}: " . $e->getMessage());
         }
 
-        // Delete all related data
-        $user->collections()->each(function($col) {
-            $col->tabs()->delete();
-            $col->notes()->delete();
-            $col->delete();
-        });
-        
-        $user->subscriptions()->delete();
+        // Soft delete the user (marks as scheduled for deletion)
         $user->delete();
 
         Auth::logout();
@@ -218,6 +243,6 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         Cookie::queue(Cookie::forget('wb_user_authenticated'));
 
-        return redirect('/')->with('success', 'Your account and all associated data have been permanently deleted.');
+        return redirect('/')->with('success', 'Your account is now scheduled for deletion and all access has been revoked.');
     }
 }

@@ -67,10 +67,24 @@ $(function () {
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
-        error: function(xhr) {
+        error: function(xhr, status, error) {
             if (xhr.status === 419) {
-                alert('Your session has expired. Please refresh the page to continue.');
-                window.location.reload();
+                // CSRF Token Expired - Try to refresh silently
+                console.log('CSRF Token expired. Attempting refresh...');
+                $.get('/refresh-csrf').done(function(data) {
+                    if (data.token) {
+                        // Update meta tag and AJAX setup for future requests
+                        $('meta[name="csrf-token"]').attr('content', data.token);
+                        $.ajaxSetup({
+                            headers: { 'X-CSRF-TOKEN': data.token }
+                        });
+                        console.log('CSRF Token refreshed successfully.');
+                    } else {
+                        window.location.reload();
+                    }
+                }).fail(function() {
+                    window.location.reload();
+                });
             }
         }
     });

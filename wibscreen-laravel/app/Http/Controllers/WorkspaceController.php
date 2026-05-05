@@ -10,6 +10,24 @@ use Illuminate\Support\Facades\Auth;
 class WorkspaceController extends Controller
 {
     /**
+     * Dashboard Index
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $collections = $user->collections()->with(['tabs', 'notes'])->get();
+        
+        // Fetch latest active subscription for detailed info
+        $latestSubscription = $user->subscriptions()
+            ->where('plan_slug', $user->plan)
+            ->where('payment_status', 'success')
+            ->latest()
+            ->first();
+
+        return view('pages.dashboard', compact('collections', 'latestSubscription'));
+    }
+
+    /**
      * Create a new collection (folder)
      */
     public function createCollection(Request $request)

@@ -62,10 +62,7 @@ Route::post('/email/verification-notification', function (Request $request) {
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 /* ── Dashboard (Workspace) ──────────────────────── */
-Route::get('/dashboard', function () {
-    $collections = auth()->user()->collections()->with(['tabs', 'notes'])->get();
-    return view('pages.dashboard', compact('collections'));
-})->name('dashboard')->middleware(['auth', 'verified']);
+Route::get('/dashboard', [WorkspaceController::class, 'index'])->name('dashboard')->middleware(['auth', 'verified']);
 Route::get('/dasboard', fn() => redirect()->route('dashboard')); // Redirect typo to real route
 
 /* ── Main Pages ─────────────────────────────────────── */

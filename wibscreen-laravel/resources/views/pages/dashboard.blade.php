@@ -424,15 +424,35 @@
 
         <!-- Plan Info -->
         <div class="p-3 rounded-3 mb-4" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);">
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
-              <div class="small fw-bold" id="plan-name-text">{{ $currentPlan['label'] }}</div>
-              <div class="small text-body-secondary" id="plan-desc-text">{{ $currentPlan['desc'] }}</div>
+              <div class="small fw-bold text-uppercase" style="letter-spacing:0.5px; color:var(--wb-primary);">{{ $currentPlan['label'] }}</div>
             </div>
             @if(auth()->user()->plan !== 'business')
-              <a href="{{ route('pricing') }}" class="btn btn-primary btn-sm fw-semibold px-3">Upgrade</a>
+              <a href="{{ route('pricing') }}" class="btn btn-primary btn-sm fw-semibold px-3 py-1" style="font-size:0.75rem;">Upgrade</a>
             @endif
           </div>
+          
+          <div class="small text-body-secondary mb-1">
+            <i class="far fa-calendar-check me-1"></i> 
+            @if(auth()->user()->plan === 'free')
+              Lifetime access
+            @else
+              @if(isset($latestSubscription))
+                Duration: <strong>{{ $latestSubscription->metadata['duration'] ?? '1 Month' }}</strong>
+              @else
+                Active Subscription
+              @endif
+            @endif
+          </div>
+
+          @if(auth()->user()->plan_expiry_at)
+          <div class="small {{ auth()->user()->isPlanExpired() ? 'text-danger' : 'text-body-secondary' }}">
+            <i class="far fa-clock me-1"></i> 
+            {{ auth()->user()->isPlanExpired() ? 'Expired on:' : 'Expires on:' }} 
+            <strong>{{ auth()->user()->plan_expiry_at->format('d M, Y | h:i A') }}</strong>
+          </div>
+          @endif
         </div>
 
         <hr class="opacity-10 my-4">

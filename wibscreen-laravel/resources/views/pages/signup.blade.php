@@ -34,7 +34,7 @@
         @endforeach
       </div>
     @endif
-    <form id="signup-form" method="POST" action="{{ url('/signup') }}">
+    <form id="signup-form" method="POST" action="{{ route('signup') }}">
       @csrf
       <input type="hidden" name="plan" value="{{ $plan }}">
       <div class="mb-3"><label class="form-label small fw-semibold">Display Name</label><input type="text" name="name" id="su-name" class="form-control" placeholder="Your name" value="{{ old('name') }}" required></div>

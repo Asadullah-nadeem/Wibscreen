@@ -26,7 +26,7 @@
         @endforeach
       </div>
     @endif
-    <form id="login-form" method="POST" action="{{ url('/login') }}">
+    <form id="login-form" method="POST" action="{{ route('login') }}">
       @csrf
       <div class="mb-3"><label class="form-label small fw-semibold">Email</label><input type="email" name="email" id="login-email" class="form-control" placeholder="you@example.com" value="{{ old('email') }}" required></div>
       <div class="mb-3"><label class="form-label small fw-semibold">Password</label>

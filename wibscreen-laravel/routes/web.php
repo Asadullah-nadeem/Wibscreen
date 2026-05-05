@@ -26,6 +26,11 @@ Route::get('/sinup', [AuthController::class, 'showSignup'])->name('signup');
 Route::post('/sinup', [AuthController::class, 'signup']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Legacy Redirects to prevent 404s
+Route::get('/login', fn() => redirect()->route('login'));
+Route::get('/signup', fn() => redirect()->route('signup'));
+Route::get('/forgot-password', fn() => redirect()->route('password.request'));
+
 /* ── Password Reset ────────────────────────────────── */
 Route::get('/froget-password', [AuthController::class, 'showForgotPassword'])->middleware('guest')->name('password.request');
 Route::post('/froget-password', [AuthController::class, 'sendResetLink'])->middleware('guest')->name('password.email');

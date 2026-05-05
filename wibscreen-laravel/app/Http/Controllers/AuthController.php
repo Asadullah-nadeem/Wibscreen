@@ -54,12 +54,9 @@ class AuthController extends Controller
 
         // Send Welcome Email
         try {
-            Mail::send('emails.welcome', ['user' => $user], function($message) use ($user) {
-                $message->to($user->email);
-                $message->subject('Welcome to Wibscreen!');
-            });
+            Mail::to($user->email)->send(new \App\Mail\WelcomePlanEmail($user));
         } catch (\Exception $e) {
-            // Log error or ignore if mail is not configured
+            \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $e->getMessage());
         }
 
         return redirect()->route('dashboard')->with('signup_success', "Welcome! Your ".ucfirst($user->plan)." plan has been activated.");

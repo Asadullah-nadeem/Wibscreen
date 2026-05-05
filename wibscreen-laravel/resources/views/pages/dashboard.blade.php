@@ -423,7 +423,7 @@
         </div>
 
         <!-- Plan Info -->
-        <div class="p-3 rounded-3 mb-3" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);">
+        <div class="p-3 rounded-3 mb-4" style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <div class="small fw-bold" id="plan-name-text">{{ $currentPlan['label'] }}</div>
@@ -434,6 +434,24 @@
             @endif
           </div>
         </div>
+
+        <hr class="opacity-10 my-4">
+
+        <!-- Danger Zone -->
+        <div class="mb-2">
+          <label class="form-label small fw-bold text-danger">Danger Zone</label>
+          <div class="d-flex flex-column gap-2">
+            <button type="button" class="btn btn-sm btn-outline-warning text-start" onclick="confirmDeactivation()">
+              <i class="fas fa-pause-circle me-2"></i>Deactivate Account
+              <div class="x-small opacity-75 ms-4">Temporarily hide your profile and data.</div>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger text-start" onclick="confirmDeletion()">
+              <i class="fas fa-trash-alt me-2"></i>Delete Permanently
+              <div class="x-small opacity-75 ms-4">Delete all workspaces, tabs, and notes. Irreversible.</div>
+            </button>
+          </div>
+        </div>
+
       </div>
       <div class="modal-footer border-top-0 pt-0 justify-content-between">
         <form action="{{ route('logout') }}" method="POST" id="logout-form">
@@ -447,6 +465,10 @@
     </div>
   </div>
 </div>
+
+<!-- Hidden Forms -->
+<form id="deactivate-form" action="{{ route('account.deactivate') }}" method="POST" style="display: none;">@csrf</form>
+<form id="delete-form" action="{{ route('account.delete') }}" method="POST" style="display: none;">@csrf @method('DELETE')</form>
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -491,6 +513,23 @@
        modalProfile.hide();
     });
   });
+
+  function confirmDeactivation() {
+    if (confirm("Are you sure you want to deactivate your account? You will be logged out and your data will be hidden until you contact support to reactivate.")) {
+      document.getElementById('deactivate-form').submit();
+    }
+  }
+
+  function confirmDeletion() {
+    if (confirm("🚨 WARNING: PERMANENT DELETION\n\nThis will permanently delete your account and ALL your data (Workspaces, Tabs, and Notes). This action is IRREVERSIBLE.\n\nType 'DELETE' to confirm:")) {
+      const confirmation = prompt("Please type 'DELETE' to confirm permanent account removal:");
+      if (confirmation === 'DELETE') {
+        document.getElementById('delete-form').submit();
+      } else {
+        alert("Deletion cancelled. Text did not match.");
+      }
+    }
+  }
 </script>
 </body>
 </html>

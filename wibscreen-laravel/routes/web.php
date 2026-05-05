@@ -87,6 +87,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notes/{id}', [\App\Http\Controllers\NoteController::class, 'destroy']);
 
     Route::post('/track-usage', [WorkspaceController::class, 'trackUsage'])->name('usage.track');
+
+    // Account Management
+    Route::post('/account/deactivate', [AuthController::class, 'deactivate'])->name('account.deactivate');
+    Route::delete('/account/delete', [AuthController::class, 'deleteAccount'])->name('account.delete');
 });
 
 /* ── Legal Pages ────────────────────────────────────── */

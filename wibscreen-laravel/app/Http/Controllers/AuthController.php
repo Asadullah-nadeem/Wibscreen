@@ -160,4 +160,45 @@ class AuthController extends Controller
         Cookie::queue(Cookie::forget('wb_user_authenticated'));
         return redirect('/');
     }
+
+    /**
+     * Deactivate account (Suspend)
+     */
+    public function deactivate(Request $request)
+    {
+        $user = Auth::user();
+        $user->update(['account_status' => 'suspended']);
+        
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        Cookie::queue(Cookie::forget('wb_user_authenticated'));
+
+        return redirect('/')->with('info', 'Your account has been deactivated. You can contact support to reactivate it.');
+    }
+
+    /**
+     * Permanently delete account
+     */
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Delete all related data
+        $user->collections()->each(function($col) {
+            $col->tabs()->delete();
+            $col->notes()->delete();
+            $col->delete();
+        });
+        
+        $user->subscriptions()->delete();
+        $user->delete();
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        Cookie::queue(Cookie::forget('wb_user_authenticated'));
+
+        return redirect('/')->with('success', 'Your account and all associated data have been permanently deleted.');
+    }
 }

@@ -89,6 +89,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'plan' => $request->plan ?? 'free',
+            'plan_status' => (in_array($request->plan, ['pro', 'business']) ? 'pending' : 'active'),
         ]);
 
         // Create Default Collection (Workspace)

@@ -247,5 +247,19 @@ document.addEventListener('click', function(e) {
     handleRazorpay(plan);
   }
 });
+
+// Auto-trigger Razorpay if checkout flag is present
+window.addEventListener('load', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('checkout')) {
+    @auth
+      const userPlan = "{{ auth()->user()->plan }}";
+      if (userPlan === 'pro' || userPlan === 'business') {
+        console.log('Auto-triggering checkout for:', userPlan);
+        handleRazorpay(userPlan);
+      }
+    @endauth
+  }
+});
 </script>
 @endpush

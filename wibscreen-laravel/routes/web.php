@@ -41,6 +41,13 @@ Route::get('/email/verify', function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
+    $user = auth()->user();
+
+    // If premium plan is pending, redirect to pricing with auto-pay trigger
+    if ($user && in_array($user->plan, ['pro', 'business']) && $user->plan_status === 'pending') {
+        return redirect()->route('pricing', ['checkout' => 1]);
+    }
+
     return redirect('/dashboard');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 

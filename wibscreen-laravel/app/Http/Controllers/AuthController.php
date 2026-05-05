@@ -167,8 +167,18 @@ class AuthController extends Controller
     public function deactivate(Request $request)
     {
         $user = Auth::user();
+        $userName = $user->name;
+        $userEmail = $user->email;
+
         $user->update(['account_status' => 'suspended']);
         
+        // Send Deactivation Email
+        try {
+            Mail::to($userEmail)->send(new \App\Mail\AccountDeactivatedEmail($userName));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send deactivation email to {$userEmail}: " . $e->getMessage());
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -183,7 +193,16 @@ class AuthController extends Controller
     public function deleteAccount(Request $request)
     {
         $user = Auth::user();
+        $userName = $user->name;
+        $userEmail = $user->email;
         
+        // Send Deletion Email
+        try {
+            Mail::to($userEmail)->send(new \App\Mail\AccountDeletedEmail($userName));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send deletion email to {$userEmail}: " . $e->getMessage());
+        }
+
         // Delete all related data
         $user->collections()->each(function($col) {
             $col->tabs()->delete();

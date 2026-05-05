@@ -2,8 +2,6 @@
 @section('title', 'About Us — Wibscreen')
 
 @section('content')
-@include('partials.navbar')
-
 <!-- Hero Section -->
 <section class="wb-hero pb-5">
   <div class="container text-center">
@@ -71,6 +69,4 @@
     </div>
   </div>
 </section>
-
-@include('partials.footer')
 @endsection

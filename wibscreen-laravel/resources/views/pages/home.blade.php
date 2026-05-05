@@ -3,47 +3,9 @@
 @section('title', 'Wibscreen — Your Personal Browser Workspace')
 @section('meta_desc', 'Wibscreen lets you open, organize and manage websites inside one unified workspace. Collections, tab management, and more.')
 
-@push('styles')
-<style>
-  .hero-bg-accent {
-    position: absolute; top: -100px; right: -100px; width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(var(--wb-primary-rgb), 0.15) 0%, transparent 70%);
-    filter: blur(50px); z-index: -1;
-  }
-  .browser-mockup {
-    background: var(--wb-surface);
-    border: 1px solid var(--wb-border-strong);
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.4);
-    overflow: hidden;
-  }
-  .mockup-header {
-    height: 40px; background: var(--wb-surface-2);
-    border-bottom: 1px solid var(--wb-border);
-    display: flex; align-items: center; padding: 0 16px; gap: 8px;
-  }
-  .dot { width: 10px; height: 10px; border-radius: 50%; }
-  .feature-icon {
-    width: 56px; height: 56px; border-radius: 14px;
-    background: rgba(var(--wb-primary-rgb), 0.1);
-    color: var(--wb-primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; margin-bottom: 24px;
-    transition: all 0.3s ease;
-  }
-  .wb-feature-card:hover .feature-icon {
-    background: var(--wb-primary); color: white;
-    transform: scale(1.1);
-  }
-</style>
-@endpush
-
 @section('content')
-@include('partials.navbar')
-
 <!-- Hero Section -->
 <section class="wb-hero">
-  <div class="hero-bg-accent"></div>
   <div class="container">
     <div class="row justify-content-center text-center">
       <div class="col-lg-10 col-xl-8">
@@ -61,16 +23,14 @@
     <!-- Visual Mockup -->
     <div class="row justify-content-center mt-5">
       <div class="col-lg-11">
-        <div class="browser-mockup">
-          <div class="mockup-header">
-            <div class="dot bg-danger opacity-50"></div>
-            <div class="dot bg-warning opacity-50"></div>
-            <div class="dot bg-success opacity-50"></div>
-            <div class="ms-3 bg-emphasis-subtle rounded-pill" style="height: 20px; width: 40%; max-width: 300px;"></div>
+        <div class="wb-card p-1 overflow-hidden">
+          <div class="d-flex align-items-center px-3 py-2 border-bottom bg-body-tertiary gap-2">
+            <div class="dot bg-danger opacity-50" style="width:10px;height:10px;border-radius:50%;"></div>
+            <div class="dot bg-warning opacity-50" style="width:10px;height:10px;border-radius:50%;"></div>
+            <div class="dot bg-success opacity-50" style="width:10px;height:10px;border-radius:50%;"></div>
+            <div class="ms-3 bg-emphasis-subtle rounded-pill" style="height: 12px; width: 40%; max-width: 300px;"></div>
           </div>
-          <div class="p-1">
-             <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=90" class="img-fluid rounded-bottom" alt="Wibscreen Interface">
-          </div>
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=90" class="img-fluid rounded-bottom" alt="Wibscreen Interface">
         </div>
       </div>
     </div>
@@ -101,8 +61,8 @@
       @foreach($features as $f)
       <div class="col-md-6 col-lg-4">
         <div class="wb-feature-card">
-          <div class="feature-icon">
-            <i class="{{ $f[0] }}"></i>
+          <div class="wb-feature-icon mb-4">
+            <i class="{{ $f[0] }} fs-3"></i>
           </div>
           <h3 class="h4 fw-bold mb-3">{{ $f[1] }}</h3>
           <p class="text-secondary mb-0">{{ $f[2] }}</p>
@@ -117,7 +77,6 @@
 <section class="py-5 mb-5">
   <div class="container">
     <div class="wb-card p-5 text-center position-relative overflow-hidden">
-      <div class="hero-bg-accent" style="bottom: -50px; left: -50px; top: auto; right: auto;"></div>
       <h2 class="display-6 fw-bold mb-3">Ready to take control?</h2>
       <p class="text-secondary mb-5 mx-auto" style="max-width: 500px;">Join thousands of users who have organized their digital life with Wibscreen. Start your journey today.</p>
       <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
@@ -127,6 +86,4 @@
     </div>
   </div>
 </section>
-
-@include('partials.footer')
 @endsection

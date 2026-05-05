@@ -2,8 +2,6 @@
 @section('title', 'Support & Feedback — Wibscreen')
 
 @section('content')
-@include('partials.navbar')
-
 <!-- Hero Section -->
 <section class="wb-hero pb-4">
   <div class="container">
@@ -19,7 +17,7 @@
     <div class="row g-5">
       <!-- Contact Form -->
       <div class="col-lg-7">
-        <div class="wb-card shadow-lg border-0">
+        <div class="wb-card shadow-lg border-0 p-4">
           <h2 class="h3 fw-bold mb-4">Send a Message</h2>
           
           @if(session('success'))
@@ -111,6 +109,4 @@
     </div>
   </div>
 </section>
-
-@include('partials.footer')
 @endsection

@@ -1,0 +1,13 @@
+// ── Variables & Overrides ──────────────────────────
+$primary: #6366f1;
+$border-radius: 12px;
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, sans-serif;
+
+// ── Bootstrap ─────────────────────────────────────
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+// ── Custom Modules ────────────────────────────────
+@import "pages";
+@import "auth";
+@import "dashboard";

@@ -1,0 +1,90 @@
+/* ── Auth Split Wrapper ──────────────────────────── */
+.auth-split-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.auth-side-image {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 60px;
+}
+
+.auth-side-image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.auth-image-content {
+  position: relative;
+  z-index: 10;
+  color: #fff;
+  max-width: 500px;
+}
+
+.auth-image-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 2.5rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.auth-side-form {
+  width: 550px;
+  background: var(--wb-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  border-left: 1px solid var(--wb-border);
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (max-width: 991.98px) {
+  .auth-side-image {
+    display: none;
+  }
+  .auth-side-form {
+    width: 100%;
+    border-left: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .auth-side-form {
+    padding: 24px;
+  }
+}
+
+/* ── Form Floating Overrides ─────────────────────── */
+.form-floating > .form-control:focus ~ label, 
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  opacity: .65;
+  transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+}
+
+.strength-meter {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--wb-border);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.strength-bar {
+  height: 100%;
+  width: 0;
+  transition: all 0.3s ease;
+}

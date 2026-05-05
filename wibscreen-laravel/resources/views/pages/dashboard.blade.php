@@ -1,30 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark" class="wb-app-root">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  
+  <title>Wibscreen | Browser Workspace</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
+
+  <!-- Scripts and Styles -->
+  @vite(['resources/css/app.scss', 'resources/js/app.js', 'resources/js/dashboard.js'])
+
   <script>
     (function() {
       const savedTheme = localStorage.getItem('wb-theme') || 'dark';
       document.documentElement.setAttribute('data-bs-theme', savedTheme);
     })();
   </script>
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Wibscreen | Browser Workspace</title>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <!-- App CSS -->
-  <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
 </head>
 
 <body>
@@ -490,12 +484,7 @@
 <form id="deactivate-form" action="{{ route('account.deactivate') }}" method="POST" style="display: none;">@csrf</form>
 <form id="delete-form" action="{{ route('account.delete') }}" method="POST" style="display: none;">@csrf @method('DELETE')</form>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- Bootstrap Bundle JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- App JS -->
-<script src="{{ asset('assets/js/app.js') }}"></script>
+<!-- jQuery and Bootstrap handled by Vite -->
 
 <script>
   const _root = document.documentElement;

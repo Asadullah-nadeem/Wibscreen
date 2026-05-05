@@ -1,12 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Sign In — Wibscreen')
 
-@push('styles')
-<style>
-  .form-floating > .form-control:focus ~ label, .form-floating > .form-control:not(:placeholder-shown) ~ label { opacity: .65; transform: scale(.85) translateY(-.5rem) translateX(.15rem); }
-</style>
-@endpush
-
 @section('content')
 <div class="auth-split-wrapper">
   <!-- Left: Image Section -->

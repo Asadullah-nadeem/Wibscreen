@@ -1,14 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Sign Up — Wibscreen')
 
-@push('styles')
-<style>
-  .form-floating > .form-control:focus ~ label, .form-floating > .form-control:not(:placeholder-shown) ~ label { opacity: .65; transform: scale(.85) translateY(-.5rem) translateX(.15rem); }
-  .strength-meter { height: 6px; border-radius: 3px; background: var(--wb-border); overflow: hidden; margin-top: 8px; }
-  .strength-bar { height: 100%; width: 0; transition: all 0.3s ease; }
-</style>
-@endpush
-
 @section('content')
 <div class="auth-split-wrapper">
   <!-- Left: Form Section -->

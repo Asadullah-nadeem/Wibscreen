@@ -2,8 +2,6 @@
 @section('title', 'Cookie Policy — Wibscreen')
 
 @section('content')
-@include('partials.navbar')
-
 <section class="wb-hero pb-4">
   <div class="container text-center">
     <span class="wb-section-label">Legal</span>
@@ -41,6 +39,4 @@
     </div>
   </div>
 </section>
-
-@include('partials.footer')
 @endsection

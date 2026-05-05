@@ -2,51 +2,7 @@
 @section('title', 'Pricing — Wibscreen')
 @section('meta_desc', 'Simple transparent pricing. Free, Pro and Business plans for every need.')
 
-@push('styles')
-<style>
-  .plan-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid var(--wb-border);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  .plan-card.popular {
-    border: 2px solid var(--wb-primary);
-    box-shadow: 0 30px 60px -12px rgba(var(--wb-primary-rgb), 0.25);
-    transform: scale(1.02);
-    z-index: 10;
-  }
-  .popular-badge {
-    position: absolute; top: 12px; right: -35px;
-    background: var(--wb-primary); color: white;
-    padding: 6px 45px; font-size: 0.75rem; font-weight: 800;
-    transform: rotate(45deg); text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .plan-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem; margin-bottom: 24px;
-  }
-  .plan-price { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 3rem; letter-spacing: -2px; line-height: 1; }
-  .plan-feature { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 0.95rem; }
-  .plan-feature i { margin-top: 2px; font-size: 1.1rem; }
-  .plan-feature i.tick { color: #22c55e; }
-  .plan-feature i.cross { color: #ef4444; opacity: 0.5; }
-
-  /* Billing Toggle Customization */
-  .billing-toggle {
-    display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 60px;
-  }
-  .form-check-input:checked { background-color: var(--wb-primary); border-color: var(--wb-primary); }
-</style>
-@endpush
-
 @section('content')
-@include('partials.navbar')
-
 <!-- Hero Section -->
 <section class="wb-hero pb-5">
   <div class="container text-center">
@@ -70,7 +26,7 @@
         <div class="wb-card plan-card h-100 {{ $plan->is_popular ? 'popular' : '' }}">
           @if($plan->is_popular) <div class="popular-badge">Best Value</div> @endif
           
-          <div class="plan-icon shadow-sm" style="background: {{ $plan->slug === 'pro' ? 'rgba(var(--wb-primary-rgb), 0.1)' : ($plan->slug === 'business' ? '#fef3c7' : 'var(--wb-surface-3)') }}; color: {{ $plan->slug === 'pro' ? 'var(--wb-primary)' : ($plan->slug === 'business' ? '#d97706' : 'var(--bs-secondary-color)') }};">
+          <div class="plan-icon shadow-sm" style="background: {{ $plan->slug === 'pro' ? 'rgba(99,102,241, 0.1)' : ($plan->slug === 'business' ? '#fef3c7' : 'var(--bs-tertiary-bg)') }}; color: {{ $plan->slug === 'pro' ? 'var(--wb-primary)' : ($plan->slug === 'business' ? '#d97706' : 'var(--bs-secondary-color)') }};">
             <i class="bi {{ $plan->slug === 'pro' ? 'bi-rocket-takeoff-fill' : ($plan->slug === 'business' ? 'bi-building-fill' : 'bi-seedling-fill') }}"></i>
           </div>
           
@@ -97,9 +53,7 @@
               @endif
             @else
               @if($isPremiumActive)
-                <button class="btn btn-outline-wb w-100 py-3" onclick="alert('You already have an active {{ ucfirst($user->plan) }} subscription.');" disabled>
-                   Locked
-                </button>
+                <button class="btn btn-outline-wb w-100 py-3" onclick="alert('You already have an active {{ ucfirst($user->plan) }} subscription.');" disabled>Locked</button>
               @else
                 @if(in_array($plan->slug, ['pro', 'business']))
                   <button class="btn btn-primary-wb w-100 py-3 rzp-pay-btn" data-plan="{{ $plan->slug }}">
@@ -171,8 +125,6 @@
     </div>
   </div>
 </section>
-
-@include('partials.footer')
 @endsection
 
 @push('scripts')

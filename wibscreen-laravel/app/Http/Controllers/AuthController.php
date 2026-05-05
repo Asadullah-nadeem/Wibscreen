@@ -59,7 +59,13 @@ class AuthController extends Controller
             \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $e->getMessage());
         }
 
-        return redirect()->route('dashboard')->with('signup_success', "Welcome! Your ".ucfirst($user->plan)." plan has been activated.");
+        // --- NEW SECURITY: LOGOUT UNTIL VERIFIED ---
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        Cookie::queue(Cookie::forget('wb_user_authenticated'));
+        
+        return redirect()->route('verification.notice')->with('status', 'Please verify your email address before accessing your ' . ucfirst($user->plan) . ' workspace.');
     }
 
     public function showLogin()

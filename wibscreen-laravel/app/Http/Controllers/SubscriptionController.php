@@ -43,6 +43,12 @@ class SubscriptionController extends Controller
                 'payment_id' => $paymentId
             ]);
 
+            // Update Payment Lead Status
+            \App\Models\PaymentLead::where('user_id', $user->id)
+                ->where('plan_slug', $planSlug)
+                ->where('status', '!=', 'completed')
+                ->update(['status' => 'completed']);
+
             // Log Subscription History
             \App\Models\Subscription::create([
                 'user_id' => $user->id,

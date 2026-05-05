@@ -55,6 +55,15 @@ class AuthController extends Controller
         // Send Welcome Email
         try {
             Mail::to($user->email)->send(new \App\Mail\WelcomePlanEmail($user));
+            
+            // Log Payment Lead if plan is premium
+            if (in_array($user->plan, ['pro', 'business'])) {
+                \App\Models\PaymentLead::create([
+                    'user_id' => $user->id,
+                    'plan_slug' => $user->plan,
+                    'status' => 'pending'
+                ]);
+            }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $e->getMessage());
         }

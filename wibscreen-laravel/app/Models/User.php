@@ -131,4 +131,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->plan === 'business' && $this->plan_status === 'pending';
     }
+
+    /**
+     * Check if the current premium plan has expired
+     */
+    public function isPlanExpired(): bool
+    {
+        if ($this->plan === 'free') return false;
+        
+        return $this->plan_expiry_at && $this->plan_expiry_at->isPast();
+    }
 }

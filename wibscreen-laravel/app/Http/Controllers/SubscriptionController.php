@@ -82,6 +82,11 @@ class SubscriptionController extends Controller
         }
 
         if ($plan === 'free') {
+            // Block manual downgrade if premium plan is still active
+            if ($user->plan !== 'free' && !$user->isPlanExpired() && $user->plan_status === 'active') {
+                return redirect()->back()->with('error', 'You cannot downgrade to the Free plan while your ' . ucfirst($user->plan) . ' plan is still active.');
+            }
+
             $user->update([
                 'plan' => 'free',
                 'plan_expiry_at' => null,

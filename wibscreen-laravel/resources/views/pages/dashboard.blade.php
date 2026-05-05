@@ -140,6 +140,13 @@
           <div>
             <h1 class="wb-dashboard-title" id="wb-dash-title">Explore Workspace</h1>
             <p class="wb-dashboard-sub">Manage your collections and saved tabs</p>
+            
+            @if(auth()->user()->isPlanExpired())
+              <div class="alert alert-warning border-0 small py-2 mt-2" style="background:rgba(234,179,8,.1);color:#eab308;">
+                <i class="fas fa-triangle-exclamation me-2"></i> Your <strong>{{ ucfirst(auth()->user()->plan) }}</strong> plan has expired. Your workspace is currently frozen. <a href="{{ route('pricing') }}" class="fw-bold text-decoration-none" style="color:#eab308;text-decoration:underline!important;">Renew Now</a>
+              </div>
+            @endif
+
             @if(session('signup_success'))
               <div class="alert alert-success alert-dismissible fade show small py-2 mt-2 border-0" role="alert" style="background:rgba(34,197,94,.1);color:#22c55e;">
                 <i class="fas fa-circle-check me-2"></i> {{ session('signup_success') }}

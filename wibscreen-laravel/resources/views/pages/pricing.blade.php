@@ -73,14 +73,24 @@
 
           @auth
             @if(auth()->user()->plan === $plan->slug)
-              <button class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3" disabled>Current Plan</button>
+              @if(auth()->user()->isPlanExpired())
+                <button class="btn btn-danger w-100 fw-semibold py-2 mb-4 rounded-3" onclick="alert('Your {{ ucfirst($plan->slug) }} plan has expired. Please renew to continue enjoying premium features.');">Plan Expired</button>
+              @else
+                <button class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3" disabled>Current Plan</button>
+              @endif
             @else
+              {{-- Not the current plan --}}
               @if($plan->slug === 'pro')
                 <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
               @elseif($plan->slug === 'business')
                 <a href="{{ route('upgrade', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Sales</a>
               @else
-                <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
+                {{-- Free Plan Button --}}
+                @if(auth()->user()->plan !== 'free' && !auth()->user()->isPlanExpired())
+                  <button class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3" onclick="alert('You cannot switch to the Free plan while your {{ ucfirst(auth()->user()->plan) }} plan is still active.');" disabled>Switch to {{ $plan->name }}</button>
+                @else
+                  <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
+                @endif
               @endif
             @endif
           @else

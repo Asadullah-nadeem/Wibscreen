@@ -15,6 +15,10 @@ class WorkspaceController extends Controller
     public function createCollection(Request $request)
     {
         $user = Auth::user();
+
+        if ($user->isPlanExpired()) {
+            return response()->json(['error' => 'Your plan has expired. Please renew to continue using the workspace.'], 403);
+        }
         
         // Enforce Plan Limit
         if (!$user->canCreateWorkspace()) {
@@ -35,6 +39,10 @@ class WorkspaceController extends Controller
      */
     public function renameCollection(Request $request, $id)
     {
+        if (Auth::user()->isPlanExpired()) {
+            return response()->json(['error' => 'Your plan has expired.'], 403);
+        }
+
         $collection = Collection::where('user_id', Auth::id())->findOrFail($id);
         $collection->update(['name' => $request->name]);
         return response()->json($collection);
@@ -45,6 +53,10 @@ class WorkspaceController extends Controller
      */
     public function deleteCollection($id)
     {
+        if (Auth::user()->isPlanExpired()) {
+            return response()->json(['error' => 'Your plan has expired.'], 403);
+        }
+
         $collection = Collection::where('user_id', Auth::id())->findOrFail($id);
         $collection->tabs()->delete();
         $collection->delete();
@@ -57,6 +69,11 @@ class WorkspaceController extends Controller
     public function createTab(Request $request)
     {
         $user = Auth::user();
+
+        if ($user->isPlanExpired()) {
+            return response()->json(['error' => 'Your plan has expired.'], 403);
+        }
+
         $collectionId = $request->collection_id;
 
         // Ensure collection ID is numeric (ignore old string IDs from localStorage)

@@ -19,7 +19,7 @@
 
       @guest
         <a href="{{ route('login') }}"  class="btn btn-outline-secondary btn-sm">Sign In</a>
-        <a href="{{ route('signup') }}" class="btn btn-primary btn-sm fw-semibold">Get Started</a>
+        <a href="{{ route('signup') }}" class="btn btn-primary btn-sm fw-semibold">Sinup</a>
       @else
         <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm">Dashboard</a>
         <form action="{{ route('logout') }}" method="POST" class="d-inline">

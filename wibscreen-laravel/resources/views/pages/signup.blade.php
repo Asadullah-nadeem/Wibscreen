@@ -16,7 +16,7 @@
         <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:36px;height:36px;border-radius:10px;">
         <span class="fw-bold" style="font-family:'Manrope',sans-serif;font-size:1.1rem;color:inherit;">Wibscreen</span>
       </a>
-      <h1 class="h4 fw-bold mb-1">Create your account</h1>
+      <h1 class="h4 fw-bold mb-1">Sinup</h1>
       <p class="text-body-secondary small">
         @if($plan === 'pro')
           You've selected the <span class="badge bg-primary">Pro Plan</span>
@@ -42,7 +42,7 @@
       <div class="mb-1"><label class="form-label small fw-semibold">Password</label><input type="password" name="password" id="su-pass" class="form-control" placeholder="Min 8 characters" required></div>
       <div class="strength-bar mb-3"><div class="strength-fill" id="strength-fill"></div></div>
       <div class="mb-3 form-check"><input type="checkbox" name="terms" class="form-check-input" id="su-terms" required><label class="form-check-label small" for="su-terms">I agree to the <a href="{{ route('terms') }}" class="text-primary">Terms</a> and <a href="{{ route('privacy') }}" class="text-primary">Privacy Policy</a></label></div>
-      <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">Create Account</button>
+      <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">Sinup</button>
     </form>
     <p class="text-center small text-body-secondary mt-4 mb-0">Already have an account? <a href="{{ route('login') }}" class="text-primary fw-semibold">Sign In</a></p>
   </div>

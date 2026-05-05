@@ -14,7 +14,7 @@
         <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:36px;height:36px;border-radius:10px;">
         <span class="fw-bold" style="font-family:'Manrope',sans-serif;font-size:1.1rem;color:inherit;">Wibscreen</span>
       </a>
-      <h1 class="h4 fw-bold mb-1">Forgot password?</h1>
+      <h1 class="h4 fw-bold mb-1">froget-password</h1>
       <p class="text-body-secondary small">No worries, we'll send you reset instructions.</p>
     </div>
 

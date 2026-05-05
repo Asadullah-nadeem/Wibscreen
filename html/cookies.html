@@ -23,39 +23,39 @@
 </section>
 
 <section class="pb-5">
-  <div class="container" style="max-width:760px;">
+  <div class="container" style="max-width:800px;">
 
     <div class="wb-info-block">
-      <h5>What Are Cookies?</h5>
-      <p class="mb-0">Cookies are small text files stored on your device by a website. They help websites remember your preferences and session state. Wibscreen uses browser <strong>localStorage</strong> (not traditional cookies) to store your workspace data — this means no data is sent to servers automatically.</p>
+      <h5>What Are Cookies and Local Storage?</h5>
+      <p>Cookies are small text files stored on your device by a website. Local Storage is a modern browser technology that allows websites to store larger amounts of data locally. Wibscreen uses both to provide a high-performance, personalized workspace experience without needing to store your workspace data on our servers.</p>
     </div>
 
     <div class="wb-info-block">
-      <h5>What Wibscreen Stores</h5>
-      <p>We use browser localStorage (similar to cookies but more private) for:</p>
+      <h5>How We Use These Technologies</h5>
+      <p>We use browser storage (primarily <strong>localStorage</strong>) for the following critical functions:</p>
       <div class="row g-3">
         <div class="col-sm-6">
-          <div class="p-3 rounded-3" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
-            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-circle-check text-primary"></i><strong class="small">Session Data</strong></div>
-            <p class="small text-body-secondary mb-0">Login state flag to keep you signed in between visits.</p>
+          <div class="p-3 rounded-3 h-100" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
+            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-key text-primary"></i><strong class="small">Authentication</strong></div>
+            <p class="small text-body-secondary mb-0">Secure session tokens to keep you logged in and verify your identity.</p>
           </div>
         </div>
         <div class="col-sm-6">
-          <div class="p-3 rounded-3" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
-            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-circle-check text-primary"></i><strong class="small">Workspace Data</strong></div>
-            <p class="small text-body-secondary mb-0">Your collections and saved website URLs.</p>
+          <div class="p-3 rounded-3 h-100" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
+            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-folder-open text-primary"></i><strong class="small">Workspace Data</strong></div>
+            <p class="small text-body-secondary mb-0">Your saved collections, URLs, and tab structures are stored on your device.</p>
           </div>
         </div>
         <div class="col-sm-6">
-          <div class="p-3 rounded-3" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
-            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-circle-check text-primary"></i><strong class="small">Preferences</strong></div>
-            <p class="small text-body-secondary mb-0">Theme (Day/Night), colors, font size, layout settings.</p>
+          <div class="p-3 rounded-3 h-100" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
+            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-palette text-primary"></i><strong class="small">Preferences</strong></div>
+            <p class="small text-body-secondary mb-0">Settings like Dark Mode, font size, and custom layout arrangements.</p>
           </div>
         </div>
         <div class="col-sm-6">
-          <div class="p-3 rounded-3" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
-            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-circle-xmark text-danger"></i><strong class="small">No Analytics Cookies</strong></div>
-            <p class="small text-body-secondary mb-0">We do not use Google Analytics, tracking cookies, or advertising cookies.</p>
+          <div class="p-3 rounded-3 h-100" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);">
+            <div class="d-flex align-items-center gap-2 mb-2"><i class="fas fa-ban text-danger"></i><strong class="small">No Tracking</strong></div>
+            <p class="small text-body-secondary mb-0">We do NOT use Google Analytics, tracking pixels, or marketing cookies.</p>
           </div>
         </div>
       </div>
@@ -63,21 +63,23 @@
 
     <div class="wb-info-block">
       <h5>Third-Party Cookies</h5>
-      <p class="mb-0">Websites you load <em>inside</em> the Wibscreen workspace may set their own cookies. These are governed by those websites' own privacy and cookie policies. Wibscreen has no control over third-party cookies from websites you visit.</p>
+      <p>When you open a website <em>within</em> the Wibscreen workspace, that website may set its own cookies or use its own local storage. These are completely independent of Wibscreen and are governed by those websites' respective policies. We recommend reviewing the privacy settings of any third-party service you choose to use.</p>
     </div>
 
     <div class="wb-info-block">
-      <h5>How to Control Storage</h5>
+      <h5>Managing Your Storage</h5>
+      <p>You have full control over the data stored in your browser:</p>
       <ul>
-        <li>Open your browser settings and clear site data for Wibscreen to remove all stored data.</li>
-        <li>Use private/incognito mode to prevent any localStorage from persisting.</li>
-        <li>Most browsers also allow you to block cookies and localStorage per-site.</li>
+        <li><strong>Browser Settings:</strong> You can clear all cookies and site data for Wibscreen via your browser's settings menu at any time.</li>
+        <li><strong>Private Browsing:</strong> Using "Incognito" or "Private" mode will ensure that all storage is cleared as soon as you close your browser window.</li>
+        <li><strong>Per-Site Controls:</strong> Most modern browsers allow you to block storage for specific sites while allowing it for others.</li>
       </ul>
+      <p class="mt-2 mb-0 small text-body-secondary italic">Note: Disabling storage for Wibscreen will prevent the platform from saving your workspace and keeping you logged in.</p>
     </div>
 
     <div class="wb-info-block mb-0">
       <h5>Questions?</h5>
-      <p class="mb-0">If you have any questions about how we use storage, <a href="support.html" class="text-primary">contact us on the Support page</a>.</p>
+      <p class="mb-0">If you have questions about our use of storage technologies, please <a href="support.html" class="text-primary">visit our Support page</a> or contact us via email.</p>
     </div>
   </div>
 </section>

@@ -59,31 +59,35 @@
     <div class="row g-4">
       <div class="col-lg-8">
         <div class="wb-info-block">
-          <h5><i class="fas fa-database text-primary me-2"></i>Data Storage Security</h5>
-          <p>Wibscreen stores all collections, tabs, and settings using browser localStorage. This is a sandboxed storage mechanism private to the Wibscreen origin. Other websites cannot access it. Your data does not leave your browser.</p>
+          <h5><i class="fas fa-database text-primary me-2"></i>Data Storage and Privacy</h5>
+          <p>Wibscreen employs a "Local-First" data model. Your most sensitive information—collections, URLs, and notes—is stored using browser <code>localStorage</code>. This storage is origin-locked, meaning only Wibscreen can access its own data. This architecture ensures that your private browsing organization never resides on our servers.</p>
         </div>
         <div class="wb-info-block">
-          <h5><i class="fas fa-globe text-primary me-2"></i>Browser Sandbox Security</h5>
-          <p>Websites loaded inside Wibscreen run in sandboxed iframes. They cannot access your Wibscreen data, localStorage, or other open tabs. Standard browser security policies are fully enforced.</p>
+          <h5><i class="fas fa-shield-alt text-primary me-2"></i>Encryption and Transit</h5>
+          <p>All data exchanged between your browser and our servers is protected by industry-standard 256-bit SSL/TLS encryption. This prevents "man-in-the-middle" attacks and ensures that your account credentials and subscription data remain private while in transit.</p>
         </div>
         <div class="wb-info-block">
-          <h5><i class="fas fa-key text-primary me-2"></i>Account Security</h5>
-          <p>Currently Wibscreen operates with client-side session flags. We recommend using a strong, unique password on any shared devices. Do not share your device session with untrusted users.</p>
+          <h5><i class="fas fa-user-lock text-primary me-2"></i>Account Security</h5>
+          <p>We use secure authentication mechanisms to protect your profile. Passwords are never stored in plain text; instead, we use advanced salted hashing algorithms. We also monitor for suspicious login activity to proactively protect your account from unauthorized access.</p>
+        </div>
+        <div class="wb-info-block">
+          <h5><i class="fas fa-window-restore text-primary me-2"></i>Browser Isolation (Iframes)</h5>
+          <p>Every website you load inside Wibscreen runs within its own sandboxed iframe. This utilizes the browser's native Same-Origin Policy (SOP) to ensure that third-party sites cannot "see" each other or access your Wibscreen data. We leverage the web's most fundamental security boundary to keep your workspace safe.</p>
         </div>
         <div class="wb-info-block mb-0">
-          <h5><i class="fas fa-bug text-primary me-2"></i>Report a Security Issue</h5>
-          <p class="mb-0">Found a security vulnerability? Please disclose it responsibly via our <a href="support.html" class="text-primary">Support page</a>. We take all reports seriously and respond promptly.</p>
+          <h5><i class="fas fa-bug text-primary me-2"></i>Responsible Disclosure</h5>
+          <p class="mb-0">We value the input of the security community. If you discover a vulnerability, please report it to us through our <a href="support.html" class="text-primary">Support page</a>. We are committed to working with researchers to resolve issues quickly and responsibly.</p>
         </div>
       </div>
       <div class="col-lg-4">
         <div class="wb-page-card">
           <h5 class="fw-bold mb-3">Safe Usage Tips</h5>
           <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
-            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Keep your browser updated to the latest version.</span></li>
-            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Don't add untrusted or suspicious URLs to your workspace.</span></li>
-            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Use a strong password for your device account.</span></li>
-            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Log out when using shared or public devices.</span></li>
-            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Export / back up your workspace regularly.</span></li>
+            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Use a unique, strong password for your Wibscreen account.</span></li>
+            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Keep your web browser updated to receive the latest security patches.</span></li>
+            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Be mindful of the URLs you add; avoid untrusted or suspicious links.</span></li>
+            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Sign out completely if you are using Wibscreen on a public or shared device.</span></li>
+            <li class="d-flex gap-2"><i class="fas fa-check-circle text-success mt-1"></i><span>Regularly review your active sessions in your account settings.</span></li>
           </ul>
         </div>
       </div>

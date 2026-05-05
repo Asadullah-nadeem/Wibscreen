@@ -57,8 +57,6 @@
 @endpush
 
 @section('content')
-@include('partials.navbar')
-
 <div class="verify-wrap">
   <div class="verify-card">
     @if (session('verified_pop'))
@@ -112,6 +110,4 @@
     </p>
   </div>
 </div>
-
-@include('partials.footer')
 @endsection

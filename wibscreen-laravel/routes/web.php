@@ -20,10 +20,10 @@ Route::get('/pricing', function () {
 })->name('pricing');
 
 /* ── Auth ───────────────────────────────────────────── */
-Route::get('/sign-in', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/sign-in', [AuthController::class, 'login']);
-Route::get('/sinup', [AuthController::class, 'showSignup'])->name('signup');
-Route::post('/sinup', [AuthController::class, 'signup']);
+Route::get('/sign-in', [AuthController::class, 'showLogin'])->middleware('guest')->name('login');
+Route::post('/sign-in', [AuthController::class, 'login'])->middleware('guest');
+Route::get('/sinup', [AuthController::class, 'showSignup'])->middleware('guest')->name('signup');
+Route::post('/sinup', [AuthController::class, 'signup'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Legacy Redirects to prevent 404s

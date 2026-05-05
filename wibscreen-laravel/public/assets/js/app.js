@@ -19,6 +19,11 @@ $(function () {
 
   /* ─── State ──────────────────────────────────────── */
   let settings = loadJSON(STORAGE_SETTINGS, DEFAULT_SETTINGS);
+  
+  // Sync with global theme if exists
+  const globalTheme = localStorage.getItem('wb-theme');
+  if (globalTheme) settings.theme = globalTheme;
+
   const state = {
     collections: [],
     websites:    [],
@@ -111,7 +116,10 @@ $(function () {
     const isDay = theme === 'light';
     $('#wb-theme-icon').attr('class', `fas fa-${isDay ? 'sun' : 'moon'} me-2`);
     $('#wb-theme-label').text(isDay ? 'Day Mode' : 'Night Mode');
-    if (save) saveSettings();
+    if (save) {
+      saveSettings();
+      localStorage.setItem('wb-theme', theme);
+    }
   }
 
   /* ═══════════════════════════════════════════════════

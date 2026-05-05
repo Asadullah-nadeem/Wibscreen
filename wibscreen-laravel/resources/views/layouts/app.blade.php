@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('wb-theme') || 'dark';
+      document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    })();
+  </script>
   <title>@yield('title', 'Wibscreen — Your Personal Browser Workspace')</title>
   <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
   <link rel="apple-touch-icon" href="{{ asset('assets/img/favicon.png') }}">

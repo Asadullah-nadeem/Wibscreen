@@ -12,7 +12,11 @@
       <a href="{{ route('support') }}" class="text-body-secondary text-decoration-none small fw-medium {{ request()->routeIs('support') ? 'text-white' : '' }}">Support</a>
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 align-items-center">
+      <button id="theme-toggle" class="btn btn-link text-body-secondary p-1 border-0" title="Toggle Dark/Light Mode" style="font-size: 1.1rem;">
+        <i class="fas fa-moon" id="theme-toggle-icon"></i>
+      </button>
+
       @guest
         <a href="{{ route('login') }}"  class="btn btn-outline-secondary btn-sm">Sign In</a>
         <a href="{{ route('signup') }}" class="btn btn-primary btn-sm fw-semibold">Get Started</a>
@@ -26,3 +30,32 @@
     </div>
   </div>
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-toggle-icon');
+  
+  function updateIcon(theme) {
+    if (theme === 'dark') {
+      themeIcon.classList.remove('fa-sun');
+      themeIcon.classList.add('fa-moon');
+    } else {
+      themeIcon.classList.remove('fa-moon');
+      themeIcon.classList.add('fa-sun');
+    }
+  }
+
+  // Set initial icon
+  updateIcon(document.documentElement.getAttribute('data-bs-theme'));
+
+  themeToggle.addEventListener('click', function() {
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('wb-theme', newTheme);
+    updateIcon(newTheme);
+  });
+});
+</script>

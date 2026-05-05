@@ -21,6 +21,13 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', 'Invalid plan selected.');
         }
 
+        // --- NEW RESTRICTION LOGIC ---
+        // Prevent active premium users from buying any plan (even a different one)
+        if ($user->plan !== 'free' && !$user->isPlanExpired()) {
+            return redirect()->back()->with('error', 'You already have an active ' . ucfirst($user->plan) . ' subscription. You can purchase a new plan once your current one expires.');
+        }
+        // -----------------------------
+
         // Handle Paid Plans (Pro & Business)
         if (in_array($planSlug, ['pro', 'business'])) {
             if (!$paymentId) {

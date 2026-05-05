@@ -68,22 +68,36 @@
           <p class="small text-body-secondary mb-4">{{ $plan->description }}</p>
 
           @auth
-            @if(auth()->user()->plan === $plan->slug)
-              @if(auth()->user()->isPlanExpired())
-                <button class="btn btn-danger w-100 fw-semibold py-2 mb-4 rounded-3" onclick="alert('Your {{ ucfirst($plan->slug) }} plan has expired. Please renew to continue enjoying premium features.');">Plan Expired</button>
+            @php
+              $user = auth()->user();
+              $isPremiumActive = ($user->plan !== 'free' && !$user->isPlanExpired());
+            @endphp
+
+            @if($user->plan === $plan->slug)
+              @if($user->isPlanExpired())
+                {{-- Current plan but expired: Allow Buy --}}
+                @if($plan->slug === 'pro')
+                  <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Renew Pro</button>
+                @elseif($plan->slug === 'business')
+                  <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Renew Business</button>
+                @endif
               @else
+                {{-- Current plan and active: Disabled --}}
                 <button class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3" disabled>Current Plan</button>
               @endif
             @else
-              {{-- Not the current plan --}}
-              @if($plan->slug === 'pro')
-                <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
-              @elseif($plan->slug === 'business')
-                <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Upgrade to Business</button>
+              {{-- Different plan --}}
+              @if($isPremiumActive)
+                {{-- Premium active: Disable all other purchase buttons --}}
+                <button class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3" onclick="alert('You already have an active {{ ucfirst($user->plan) }} subscription. You can purchase a new plan once your current one expires.');" disabled>
+                  @if($plan->slug === 'pro') Upgrade to Pro @elseif($plan->slug === 'business') Upgrade to Business @else Switch to Free @endif
+                </button>
               @else
-                {{-- Free Plan Button --}}
-                @if(auth()->user()->plan !== 'free' && !auth()->user()->isPlanExpired())
-                  <button class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3" onclick="alert('You cannot switch to the Free plan while your {{ ucfirst(auth()->user()->plan) }} plan is still active.');" disabled>Switch to {{ $plan->name }}</button>
+                {{-- No active premium: Allow Purchase --}}
+                @if($plan->slug === 'pro')
+                  <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
+                @elseif($plan->slug === 'business')
+                  <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Upgrade to Business</button>
                 @else
                   <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
                 @endif

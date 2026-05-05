@@ -120,13 +120,7 @@ class AuthController extends Controller
             \Illuminate\Support\Facades\Log::error("Failed to send welcome email to {$user->email}: " . $e->getMessage());
         }
 
-        // --- NEW SECURITY: LOGOUT UNTIL VERIFIED ---
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        Cookie::queue(Cookie::forget('wb_user_authenticated'));
-        
-        return redirect()->route('verification.notice')->with('status', 'Please verify your email address before accessing your ' . ucfirst($user->plan) . ' workspace.');
+        return redirect()->route('verification.notice')->with('verified_pop', true);
     }
 
     public function showLogin()

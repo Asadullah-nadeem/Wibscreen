@@ -77,6 +77,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'plan' => 'required|string|in:free,pro,business',
+            'terms' => 'required|accepted',
         ]);
 
         if ($validator->fails()) {

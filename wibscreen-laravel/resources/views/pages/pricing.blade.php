@@ -179,13 +179,15 @@ if(toggle) {
       const priceEl = document.getElementById(plan.slug + '-price');
       const periodEl = document.getElementById(plan.slug + '-period');
       
-      if (priceEl && periodEl && plan.slug !== 'business') {
+      if (priceEl && periodEl) {
         const price = isAnnual ? plan.price_yearly : plan.price_monthly;
         const period = isAnnual ? '/year' : '/month';
         
-        // Format with comma
-        priceEl.textContent = '₹' + price.toLocaleString('en-IN');
-        periodEl.textContent = period;
+        if (price !== null && price !== undefined) {
+          // Format with comma
+          priceEl.textContent = '₹' + price.toLocaleString('en-IN');
+          periodEl.textContent = period;
+        }
       }
     });
   });

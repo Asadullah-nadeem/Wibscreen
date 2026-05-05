@@ -49,8 +49,8 @@ class PlanSeeder extends Seeder
 
         Plan::updateOrCreate(['slug' => 'business'], [
             'name' => 'Business',
-            'price_monthly' => 0, // Contact Sales
-            'price_yearly' => 0,
+            'price_monthly' => 899,
+            'price_yearly' => 8999,
             'description' => 'Custom solutions for teams, agencies, and enterprises.',
             'features' => [
                 ['text' => 'Unlimited Workspaces', 'bold' => true],

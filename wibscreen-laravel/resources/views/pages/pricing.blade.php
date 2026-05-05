@@ -61,12 +61,8 @@
           <div class="small fw-bold text-uppercase mb-1" style="letter-spacing:.8px;color:{{ $style['color'] }};">{{ $plan->name }}</div>
           
           <div class="d-flex align-items-end gap-1 mb-1">
-            @if($plan->slug === 'business')
-              <span class="plan-price" style="font-size:2rem;">Contact Sales</span>
-            @else
-              <span class="plan-price" id="{{ $plan->slug }}-price">₹{{ $plan->price_monthly }}</span>
-              <span class="text-body-secondary mb-2" id="{{ $plan->slug }}-period">/month</span>
-            @endif
+            <span class="plan-price" id="{{ $plan->slug }}-price">₹{{ $plan->price_monthly }}</span>
+            <span class="text-body-secondary mb-2" id="{{ $plan->slug }}-period">/month</span>
           </div>
           
           <p class="small text-body-secondary mb-4">{{ $plan->description }}</p>
@@ -83,7 +79,7 @@
               @if($plan->slug === 'pro')
                 <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
               @elseif($plan->slug === 'business')
-                <a href="{{ route('upgrade', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Sales</a>
+                <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Upgrade to Business</button>
               @else
                 {{-- Free Plan Button --}}
                 @if(auth()->user()->plan !== 'free' && !auth()->user()->isPlanExpired())
@@ -195,23 +191,21 @@ if(toggle) {
   });
 }
 
-const rzpProBtn = document.getElementById('rzp-button-pro');
-if(rzpProBtn) {
-  rzpProBtn.onclick = function(e) {
+function handleRazorpay(planSlug) {
     const isAnnual = toggle ? toggle.checked : false;
-    const proPlan = plans.find(p => p.slug === 'pro');
-    const amount = isAnnual ? (proPlan ? proPlan.price_yearly : 1999) : (proPlan ? proPlan.price_monthly : 199);
+    const plan = plans.find(p => p.slug === planSlug);
+    const amount = isAnnual ? (plan ? plan.price_yearly : 1999) : (plan ? plan.price_monthly : 199);
     
     const options = {
       "key": "{{ env('RAZORPAY_KEY') }}",
       "amount": amount * 100, // in paise
       "currency": "INR",
       "name": "Wibscreen",
-      "description": "Pro Plan Subscription",
+      "description": plan.name + " Plan Subscription",
       "image": "{{ asset('assets/img/logo.png') }}",
       "handler": function (response){
           const duration = isAnnual ? '1 Year' : '1 Month';
-          window.location.href = "{{ route('upgrade') }}?plan=pro&payment_id=" + response.razorpay_payment_id + "&duration=" + duration;
+          window.location.href = "{{ route('upgrade') }}?plan=" + planSlug + "&payment_id=" + response.razorpay_payment_id + "&duration=" + duration;
       },
       "prefill": {
           "name": "{{ auth()->user()->name ?? '' }}",
@@ -223,7 +217,21 @@ if(rzpProBtn) {
     };
     const rzp = new Razorpay(options);
     rzp.open();
+}
+
+const rzpProBtn = document.getElementById('rzp-button-pro');
+if(rzpProBtn) {
+  rzpProBtn.onclick = function(e) {
     e.preventDefault();
+    handleRazorpay('pro');
+  }
+}
+
+const rzpBizBtn = document.getElementById('rzp-button-business');
+if(rzpBizBtn) {
+  rzpBizBtn.onclick = function(e) {
+    e.preventDefault();
+    handleRazorpay('business');
   }
 }
 </script>

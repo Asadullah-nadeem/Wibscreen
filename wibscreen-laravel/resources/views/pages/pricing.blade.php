@@ -76,11 +76,7 @@
             @if($user->plan === $plan->slug)
               @if($user->isPlanExpired())
                 {{-- Current plan but expired: Allow Buy --}}
-                @if($plan->slug === 'pro')
-                  <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Renew Pro</button>
-                @elseif($plan->slug === 'business')
-                  <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Renew Business</button>
-                @endif
+                <button class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm rzp-pay-btn" data-plan="{{ $plan->slug }}">Renew {{ $plan->name }}</button>
               @else
                 {{-- Current plan and active: Disabled --}}
                 <button class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3" disabled>Current Plan</button>
@@ -94,10 +90,10 @@
                 </button>
               @else
                 {{-- No active premium: Allow Purchase --}}
-                @if($plan->slug === 'pro')
-                  <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
-                @elseif($plan->slug === 'business')
-                  <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Start Business</button>
+                @if(in_array($plan->slug, ['pro', 'business']))
+                  <button class="btn btn-{{ $plan->slug === 'pro' ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3 rzp-pay-btn" data-plan="{{ $plan->slug }}">
+                    {{ $plan->slug === 'pro' ? 'Upgrade to Pro' : 'Start Business' }}
+                  </button>
                 @else
                   <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
                 @endif
@@ -210,7 +206,13 @@ if(toggle) {
 function handleRazorpay(planSlug) {
     const isAnnual = toggle ? toggle.checked : false;
     const plan = plans.find(p => p.slug === planSlug);
-    const amount = isAnnual ? (plan ? plan.price_yearly : 1999) : (plan ? plan.price_monthly : 199);
+    
+    if (!plan) {
+        alert('Error: Plan not found.');
+        return;
+    }
+
+    const amount = isAnnual ? plan.price_yearly : plan.price_monthly;
     
     const options = {
       "key": "{{ env('RAZORPAY_KEY') }}",
@@ -235,20 +237,13 @@ function handleRazorpay(planSlug) {
     rzp.open();
 }
 
-const rzpProBtn = document.getElementById('rzp-button-pro');
-if(rzpProBtn) {
-  rzpProBtn.onclick = function(e) {
+// Attach listeners to all Razorpay buttons
+document.querySelectorAll('.rzp-pay-btn').forEach(btn => {
+  btn.onclick = function(e) {
     e.preventDefault();
-    handleRazorpay('pro');
+    const plan = this.getAttribute('data-plan');
+    handleRazorpay(plan);
   }
-}
-
-const rzpBizBtn = document.getElementById('rzp-button-business');
-if(rzpBizBtn) {
-  rzpBizBtn.onclick = function(e) {
-    e.preventDefault();
-    handleRazorpay('business');
-  }
-}
+});
 </script>
 @endpush

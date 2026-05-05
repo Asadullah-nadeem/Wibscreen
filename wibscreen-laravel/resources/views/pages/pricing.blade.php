@@ -237,11 +237,13 @@ function handleRazorpay(planSlug) {
     rzp.open();
 }
 
-// Attach listeners to all Razorpay buttons
-document.querySelectorAll('.rzp-pay-btn').forEach(btn => {
-  btn.onclick = function(e) {
+// Attach listeners using event delegation for better reliability
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.rzp-pay-btn');
+  if (btn) {
     e.preventDefault();
-    const plan = this.getAttribute('data-plan');
+    const plan = btn.getAttribute('data-plan');
+    console.log('Razorpay trigger for plan:', plan);
     handleRazorpay(plan);
   }
 });

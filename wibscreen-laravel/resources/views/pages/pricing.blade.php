@@ -90,14 +90,14 @@
               @if($isPremiumActive)
                 {{-- Premium active: Disable all other purchase buttons --}}
                 <button class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3" onclick="alert('You already have an active {{ ucfirst($user->plan) }} subscription. You can purchase a new plan once your current one expires.');" disabled>
-                  @if($plan->slug === 'pro') Upgrade to Pro @elseif($plan->slug === 'business') Upgrade to Business @else Switch to Free @endif
+                  @if($plan->slug === 'pro') Upgrade to Pro @elseif($plan->slug === 'business') Start Business @else Switch to Free @endif
                 </button>
               @else
                 {{-- No active premium: Allow Purchase --}}
                 @if($plan->slug === 'pro')
                   <button id="rzp-button-pro" class="btn btn-primary w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">Upgrade to Pro</button>
                 @elseif($plan->slug === 'business')
-                  <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Upgrade to Business</button>
+                  <button id="rzp-button-business" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Start Business</button>
                 @else
                   <a href="{{ route('upgrade', ['plan' => $plan->slug]) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Switch to {{ $plan->name }}</a>
                 @endif
@@ -105,7 +105,7 @@
             @endif
           @else
             @if($plan->slug === 'business')
-              <a href="{{ route('upgrade', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Contact Sales</a>
+              <a href="{{ route('signup', ['plan' => 'business']) }}" class="btn btn-outline-secondary w-100 fw-semibold py-2 mb-4 rounded-3">Start Business</a>
             @else
               <a href="{{ route('signup', ['plan' => $plan->slug]) }}" class="btn btn-{{ $plan->is_popular ? 'primary' : 'outline-secondary' }} w-100 fw-semibold py-2 mb-4 rounded-3 shadow-sm">{{ $plan->slug === 'pro' ? 'Start Pro Trial' : 'Get Started Free' }}</a>
             @endif

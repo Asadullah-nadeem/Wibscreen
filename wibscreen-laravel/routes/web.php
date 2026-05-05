@@ -20,15 +20,15 @@ Route::get('/pricing', function () {
 })->name('pricing');
 
 /* ── Auth ───────────────────────────────────────────── */
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
-Route::post('/signup', [AuthController::class, 'signup']);
+Route::get('/sign-in', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/sign-in', [AuthController::class, 'login']);
+Route::get('/sinup', [AuthController::class, 'showSignup'])->name('signup');
+Route::post('/sinup', [AuthController::class, 'signup']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /* ── Password Reset ────────────────────────────────── */
-Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->middleware('guest')->name('password.request');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('guest')->name('password.email');
+Route::get('/froget-password', [AuthController::class, 'showForgotPassword'])->middleware('guest')->name('password.request');
+Route::post('/froget-password', [AuthController::class, 'sendResetLink'])->middleware('guest')->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('guest')->name('password.update');
 

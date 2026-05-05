@@ -1,50 +1,51 @@
 @extends('layouts.app')
-@section('title', 'Forgot Password — Wibscreen')
+@section('title', 'froget-password — Wibscreen')
+
 @push('styles')
 <style>
-  .wb-auth-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 16px; background:var(--wb-surface-2); }
-  .wb-auth-card { background:var(--wb-surface); border:1px solid var(--wb-border); border-radius:24px; padding:40px 36px; width:100%; max-width:420px; }
+  .auth-logo { width: 42px; height: 42px; border-radius: 12px; margin-bottom: 20px; }
+  .form-floating > .form-control:focus ~ label, .form-floating > .form-control:not(:placeholder-shown) ~ label { opacity: .65; transform: scale(.85) translateY(-.5rem) translateX(.15rem); }
 </style>
 @endpush
+
 @section('content')
 <div class="wb-auth-wrap">
   <div class="wb-auth-card">
-    <div class="text-center mb-4">
-      <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-3">
-        <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen Logo" style="width:36px;height:36px;border-radius:10px;">
-        <span class="fw-bold" style="font-family:'Manrope',sans-serif;font-size:1.1rem;color:inherit;">Wibscreen</span>
+    <div class="text-center">
+      <a href="{{ route('home') }}" class="d-inline-block text-decoration-none">
+        <img src="{{ asset('assets/img/logo.png') }}" alt="Wibscreen" class="auth-logo shadow-sm">
       </a>
-      <h1 class="h4 fw-bold mb-1">froget-password</h1>
-      <p class="text-body-secondary small">No worries, we'll send you reset instructions.</p>
+      <h1 class="wb-auth-title">froget-password</h1>
+      <p class="wb-auth-sub">Enter your email and we'll send you a secure link to reset your password.</p>
     </div>
 
     @if (session('status'))
-      <div class="alert alert-success small py-2 mb-4">
-        {{ session('status') }}
+      <div class="alert alert-success border-0 small py-3 mb-4" style="background:rgba(34,197,94,0.1); color:#22c55e;">
+        <i class="fas fa-paper-plane me-2"></i> {{ session('status') }}
       </div>
     @endif
 
     @if ($errors->any())
-      <div class="alert alert-danger small py-2 mb-4">
+      <div class="alert alert-danger border-0 small py-2 mb-4" style="background:rgba(239,68,68,0.1); color:#ef4444;">
         @foreach ($errors->all() as $error)
-          <div>{{ $error }}</div>
+          <div><i class="fas fa-circle-exclamation me-1"></i> {{ $error }}</div>
         @endforeach
       </div>
     @endif
 
     <form method="POST" action="{{ route('password.email') }}">
       @csrf
-      <div class="mb-4">
-        <label class="form-label small fw-semibold">Email Address</label>
-        <input type="email" name="email" class="form-control" placeholder="you@example.com" value="{{ old('email') }}" required autofocus>
+      <div class="form-floating mb-4">
+        <input type="email" name="email" id="reset-email" class="form-control bg-transparent border-secondary-subtle rounded-3" placeholder="name@example.com" value="{{ old('email') }}" required autofocus>
+        <label for="reset-email" class="small">Email Address</label>
       </div>
-      <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">Send Reset Link</button>
+
+      <button type="submit" class="wb-btn-primary mb-4">Send Reset Link</button>
     </form>
 
-    <p class="text-center small text-body-secondary mt-4 mb-0">
-      Wait, I remember! <a href="{{ route('login') }}" class="text-primary fw-semibold">Sign In</a>
-    </p>
-    <p class="text-center small mt-2 mb-0"><a href="{{ route('home') }}" class="text-body-secondary text-decoration-none">← Back to Home</a></p>
+    <div class="text-center border-top pt-4" style="border-color: var(--wb-border) !important;">
+      <p class="small text-body-secondary mb-0">Wait, I remember! <a href="{{ route('login') }}" class="text-primary fw-bold text-decoration-none">Sign In</a></p>
+    </div>
   </div>
 </div>
 @endsection

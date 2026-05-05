@@ -38,6 +38,13 @@ class SubscriptionController extends Controller
                 'metadata' => ['duration' => $duration, 'tabs_at_signup' => $user->totalTabsCount()]
             ]);
 
+            // Send Upgrade Confirmation Email
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PlanUpgradedEmail($user, 'pro', $expiry));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send upgrade email to {$user->email}: " . $e->getMessage());
+            }
+
             $message = "Pro Plan activated successfully for {$duration}! Your Expiry Date is: {$expiry->format('d M, Y')}. Thank you for choosing Wibscreen Pro.";
             return redirect()->route('dashboard')->with('success', $message);
         }

@@ -41,8 +41,8 @@
                     </form>
                 @else
                     <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm px-3">Sign In</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm px-3 fw-semibold">Get Started</a>
+                    @if (Route::has('signup'))
+                        <a href="{{ route('signup') }}" class="btn btn-primary btn-sm px-3 fw-semibold">Get Started</a>
                     @endif
                 @endauth
             </div>

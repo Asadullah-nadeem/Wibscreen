@@ -110,7 +110,7 @@
   <div class="container py-5 text-center">
     <h2 class="display-6 fw-bold mb-4">Ready to reclaim your focus?</h2>
     <p class="text-secondary lead mb-5">Join thousands of users who have traded tab-chaos for Wibscreen-clarity.</p>
-    <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-5 py-3 fw-bold rounded-pill shadow">Get Started for Free</a>
+    <a href="{{ route('signup') }}" class="btn btn-primary btn-lg px-5 py-3 fw-bold rounded-pill shadow">Get Started for Free</a>
   </div>
 </section>
 @endsection

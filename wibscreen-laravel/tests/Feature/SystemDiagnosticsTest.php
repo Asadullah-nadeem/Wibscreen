@@ -142,7 +142,7 @@ class SystemDiagnosticsTest extends TestCase
         
         // Make 10 requests to the load balancer (web service container)
         for ($i = 0; $i < 10; $i++) {
-            $response = Http::get("http://{$this->webHost}/load-balancer-test");
+            $response = Http::withHeaders(['Connection' => 'close'])->get("http://{$this->webHost}/load-balancer-test");
             if ($response->successful()) {
                 $responses[] = $response->json('handled_by');
             }
@@ -153,6 +153,7 @@ class SystemDiagnosticsTest extends TestCase
         $uniqueBackends = array_unique(array_filter($responses));
 
         $this->assertNotEmpty($uniqueBackends, 'Load balancer did not return any backend responses');
+        $this->assertGreaterThan(1, count($uniqueBackends), 'Load balancer is not distributing traffic across multiple instances');
         
         // Assert that the returned backends are valid app containers (app1-app5)
         foreach ($uniqueBackends as $backend) {

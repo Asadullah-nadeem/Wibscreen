@@ -283,7 +283,7 @@ services:
       - ./:/var/www
     environment:
       NODE_ENV: development
-    command: sh -c "if [ ! -d node_modules ]; then npm install; fi && npm run dev"
+    command: sh -c "if [ ! -d node_modules ]; then npm install; fi && npm run build && tail -f /dev/null"
     depends_on:
       - app1
     networks:
@@ -351,6 +351,92 @@ services:
       - "1025:1025"
     networks:
       - wibscreen-network
+
+  # Fluentd Log Collector Service
+  fluentd:
+    image: fluent/fluentd:edge
+    container_name: wibscreen-fluentd
+    restart: unless-stopped
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    volumes:
+      - ./docker/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+    networks:
+      - wibscreen-network
+
+  # RabbitMQ Message Broker & Queue Service
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: wibscreen-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - wibscreen-network
+
+  # Memcached Caching Service
+  memcached:
+    image: memcached:alpine
+    container_name: wibscreen-memcached
+    restart: unless-stopped
+    ports:
+      - "11211:11211"
+    networks:
+      - wibscreen-network
+
+  # Varnish Cache Caching Accelerator Service
+  varnish:
+    image: varnish:alpine
+    container_name: wibscreen-varnish
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    volumes:
+      - ./docker/varnish/default.vcl:/etc/varnish/default.vcl:ro
+    depends_on:
+      - web
+    networks:
+      - wibscreen-network
+
+  # HAProxy Web Load Balancer Service
+  haproxy-web:
+    image: haproxy:alpine
+    container_name: wibscreen-haproxy-web
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    volumes:
+      - ./docker/haproxy-web.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - web
+    networks:
+      - wibscreen-network
+
+  # Traefik auto reverse proxy Service
+  traefik:
+    image: traefik:v3.0
+    container_name: wibscreen-traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "8084:80"
+      - "8085:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+    networks:
+      - wibscreen-network
+
 
 networks:
   wibscreen-network:

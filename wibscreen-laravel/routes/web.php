@@ -38,6 +38,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Legacy Redirects to prevent 404s
 Route::get('/login', fn() => redirect()->route('login'));
 Route::get('/signup', fn() => redirect()->route('signup'));
+Route::get('/register', fn() => redirect()->route('signup'))->name('register');
 Route::get('/forgot-password', fn() => redirect()->route('password.request'));
 
 /* ── Password Reset ────────────────────────────────── */

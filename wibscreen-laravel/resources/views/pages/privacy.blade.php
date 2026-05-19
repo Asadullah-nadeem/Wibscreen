@@ -52,7 +52,7 @@
           <li><strong>Essential Cookies:</strong> Necessary for authentication and session management.</li>
           <li><strong>Local Storage:</strong> Used to save your workspace data on your own device. This ensures your data remains private and fast.</li>
         </ul>
-        <p class="text-secondary mt-3">For more details, please see our <a href="{{ route('pages.cookies') }}" class="text-primary">Cookie Policy</a>.</p>
+        <p class="text-secondary mt-3">For more details, please see our <a href="{{ route('cookies') }}" class="text-primary">Cookie Policy</a>.</p>
       </div>
 
       <div class="mb-5">
@@ -77,7 +77,7 @@
 
       <div class="mb-5">
         <h2 class="h4 fw-bold mb-3">7. Contact Us</h2>
-        <p class="text-secondary">If you have any questions about this Privacy Policy or how we handle your data, please reach out to us through our <a href="{{ route('pages.support') }}" class="text-primary">Support Page</a> or email us at privacy@wibscreen.com.</p>
+        <p class="text-secondary">If you have any questions about this Privacy Policy or how we handle your data, please reach out to us through our <a href="{{ route('support') }}" class="text-primary">Support Page</a> or email us at privacy@wibscreen.com.</p>
       </div>
 
       <div class="mt-5 pt-4 border-top border-emphasis-subtle text-secondary small text-center">

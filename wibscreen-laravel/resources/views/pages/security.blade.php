@@ -61,7 +61,7 @@
       <div class="mb-5">
         <h2 class="h4 fw-bold mb-3"><i class="bi bi-bug-fill text-primary me-2"></i>5. Responsible Disclosure</h2>
         <p class="text-secondary">If you are a security researcher and have found a vulnerability in Wibscreen, we encourage you to disclose it to us responsibly. We will work with you to understand and resolve the issue as quickly as possible.</p>
-        <p class="text-secondary mt-2">Please report security issues through our <a href="{{ route('pages.support') }}" class="text-primary">Support Page</a> or email us at security@wibscreen.com.</p>
+        <p class="text-secondary mt-2">Please report security issues through our <a href="{{ route('support') }}" class="text-primary">Support Page</a> or email us at security@wibscreen.com.</p>
       </div>
 
       <div class="mt-5 pt-4 border-top border-emphasis-subtle text-secondary small text-center">

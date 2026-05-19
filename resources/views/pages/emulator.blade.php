@@ -51,6 +51,9 @@
             line-height: 16px;
             cursor: text;
         }
+        #screen_container:focus {
+            outline: none;
+        }
         #status {
             padding: 8px 20px;
             background-color: #111827;
@@ -92,7 +95,7 @@
     </div>
     
     <div id="container">
-        <div id="screen_container"></div>
+        <div id="screen_container" tabindex="0"></div>
     </div>
 
     <div id="status">
@@ -168,28 +171,55 @@
             '\n': 0x1C
         };
 
+        const CACHE_NAME = 'wibscreen-v86-cache';
+
+        // Cache Storage Helper to load assets from cache or download and cache them
+        async function getCacheStorageAssetUrl(key, url, statusText) {
+            try {
+                const cache = await caches.open(CACHE_NAME);
+                let response = await cache.match(url);
+                if (!response) {
+                    statusText.innerText = "Downloading " + key + " (first-time cache)...";
+                    response = await fetch(url);
+                    if (!response.ok) throw new Error("Fetch failed");
+                    await cache.put(url, response.clone());
+                }
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+            } catch (e) {
+                console.error("Cache Storage Error for " + key + ":", e);
+                return url; // fallback to raw path
+            }
+        }
+
         window.onload = async function() {
             const statusText = document.getElementById("status-text");
             const rawUsername = "{{ auth()->user()->name }}";
             const username = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '') || 'wibuser';
+
+            statusText.innerText = "Locating VM engine in Cache Storage...";
+            const wasmUrl = await getCacheStorageAssetUrl("WebAssembly Engine", "/linux/v86.wasm", statusText);
+            const biosUrl = await getCacheStorageAssetUrl("System BIOS", "/linux/seabios.bin", statusText);
+            const vgaBiosUrl = await getCacheStorageAssetUrl("VGA BIOS", "/linux/vgabios.bin", statusText);
+            const isoUrl = await getCacheStorageAssetUrl("Tiny Core Linux ISO", "/linux/tinycore.iso", statusText);
 
             statusText.innerText = "Checking cache for boot state...";
             const savedState = await getSavedState();
             const isRestored = !!savedState;
 
             const config = {
-                wasm_path: "/linux/v86.wasm",
+                wasm_path: wasmUrl,
                 memory_size: 64 * 1024 * 1024, // 64MB (compact & fast memory state)
                 vga_memory_size: 2 * 1024 * 1024,
                 screen_container: document.getElementById("screen_container"),
                 bios: {
-                    url: "/linux/seabios.bin",
+                    url: biosUrl,
                 },
                 vga_bios: {
-                    url: "/linux/vgabios.bin",
+                    url: vgaBiosUrl,
                 },
                 cdrom: {
-                    url: "/linux/tinycore.iso",
+                    url: isoUrl,
                 },
                 autostart: true,
             };
@@ -239,38 +269,64 @@
 
             emulator.add_listener("emulator-ready", async function() {
                 if (isRestored) {
+                    statusText.innerText = "Restoring session for " + username + "...";
+                    
+                    // We are at the clean root/tc prompt. Log in as the user.
+                    const loginCommands = [
+                        `stty erase ^?\n`,
+                        `sudo adduser -D -s /bin/sh ${username}\n`,
+                        `su - ${username}\n`,
+                        `stty erase ^?\n`,
+                        `echo "stty erase ^?" >> ~/.profile\n`,
+                        `export PS1="${username}@wibscreen:\\$ "\n`,
+                        `clear\n`,
+                        `echo "========================================="\n`,
+                        `echo "   Welcome to Wibscreen x86 Console!"\n`,
+                        `echo "   Logged in as: ${username}"\n`,
+                        `echo "========================================="\n`
+                    ];
+
+                    for (const cmd of loginCommands) {
+                        await sendString(cmd);
+                        await new Promise(r => setTimeout(r, 300));
+                    }
+                    
                     statusText.innerText = "VM restored. Active user: " + username;
                 } else {
-                    statusText.innerText = "Booting OS kernel...";
+                    statusText.innerText = "Booting OS kernel (first time)...";
                     // Wait for Linux boot to finish (~12 seconds)
                     setTimeout(async function() {
-                        statusText.innerText = "Registering user and logging in...";
+                        statusText.innerText = "Caching pristine booted VM state...";
                         
-                        // Commands to register user, set prompt, and clear terminal
-                        const setupCommands = [
-                            `sudo adduser -D -s /bin/sh ${username}\n`,
-                            `su - ${username}\n`,
-                            `export PS1="${username}@wibscreen:\\$ "\n`,
-                            `clear\n`,
-                            `echo "========================================="\n`,
-                            `echo "   Welcome to Wibscreen x86 Console!"\n`,
-                            `echo "   Logged in as: ${username}"\n`,
-                            `echo "========================================="\n`
-                        ];
-
-                        for (const cmd of setupCommands) {
-                            await sendString(cmd);
-                            await new Promise(r => setTimeout(r, 400));
-                        }
-
-                        statusText.innerText = "Caching booted VM state to local storage...";
                         emulator.save_state(async function(err, stateBuffer) {
                             if (!err && stateBuffer) {
                                 await saveStateToDB(stateBuffer);
-                                statusText.innerText = "VM Booted. Cached state created successfully!";
+                                statusText.innerText = "State cached. Configuring user...";
                             } else {
-                                statusText.innerText = "VM Booted (failed to cache state).";
+                                statusText.innerText = "Failed to cache state. Configuring user...";
                             }
+                            
+                            // Now configure user login
+                            const setupCommands = [
+                                `stty erase ^?\n`,
+                                `sudo adduser -D -s /bin/sh ${username}\n`,
+                                `su - ${username}\n`,
+                                `stty erase ^?\n`,
+                                `echo "stty erase ^?" >> ~/.profile\n`,
+                                `export PS1="${username}@wibscreen:\\$ "\n`,
+                                `clear\n`,
+                                `echo "========================================="\n`,
+                                `echo "   Welcome to Wibscreen x86 Console!"\n`,
+                                `echo "   Logged in as: ${username}"\n`,
+                                `echo "========================================="\n`
+                            ];
+
+                            for (const cmd of setupCommands) {
+                                await sendString(cmd);
+                                await new Promise(r => setTimeout(r, 400));
+                            }
+                            
+                            statusText.innerText = "VM Booted & configured for: " + username;
                         });
                     }, 12500);
                 }

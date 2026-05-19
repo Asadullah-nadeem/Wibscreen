@@ -13,7 +13,7 @@ class TerminalSecurityTest extends TestCase
 
     public function test_guest_cannot_generate_terminal_token(): void
     {
-        $response = $this->getJson('/terminal/token');
+        $response = $this->getJson('/terminal-token');
         $response->assertStatus(401);
     }
 
@@ -21,7 +21,7 @@ class TerminalSecurityTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->getJson('/terminal/token');
+        $response = $this->actingAs($user)->getJson('/terminal-token');
         $response->assertStatus(200);
         $response->assertJsonStructure(['token']);
 

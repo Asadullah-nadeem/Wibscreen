@@ -110,12 +110,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/account/delete', [AuthController::class, 'deleteAccount'])->name('account.delete');
 
     // Terminal Security Tokens
-    Route::get('/terminal/token', function () {
+    Route::get('/terminal-token', function () {
         $tokenStr = \Illuminate\Support\Str::random(16);
         \App\Models\TerminalToken::create([
             'user_id' => auth()->id(),
             'token' => $tokenStr,
-            'expires_at' => now()->addMinutes(2)
+            'expires_at' => now()->addHours(24)
         ]);
         return response()->json(['token' => $tokenStr]);
     });
@@ -124,23 +124,54 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/linux-vm', function () {
         return view('pages.emulator');
     })->name('emulator');
+
+    // Route to serve WebAssembly VM files directly from the secure Linux folder
+    Route::get('/linux/{filename}', function ($filename) {
+        $path = base_path('Linux/' . $filename);
+        if (!file_exists($path)) {
+            abort(404);
+        }
+        
+        $contentType = 'application/octet-stream';
+        if (str_ends_with($filename, '.wasm')) {
+            $contentType = 'application/wasm';
+        } elseif (str_ends_with($filename, '.js')) {
+            $contentType = 'application/javascript';
+        } elseif (str_ends_with($filename, '.bin')) {
+            $contentType = 'application/octet-stream';
+        } elseif (str_ends_with($filename, '.iso')) {
+            $contentType = 'application/octet-stream';
+        }
+        
+        return response()->file($path, [
+            'Content-Type' => $contentType,
+            'Cache-Control' => 'public, max-age=604800, no-transform'
+        ]);
+    })->where('filename', '.*');
 });
 
 Route::get('/terminal/auth', function (Illuminate\Http\Request $request) {
     $tokenVal = $request->query('token');
+
     if (!$tokenVal) {
         return response('Unauthorized: Missing Token', 401);
     }
 
-    $token = \App\Models\TerminalToken::where('token', $tokenVal)
+    $token = \App\Models\TerminalToken::with('user')->where('token', $tokenVal)
         ->where('expires_at', '>', now())
         ->first();
 
-    if (!$token) {
+    if (!$token || !$token->user) {
         return response('Unauthorized: Invalid or Expired Token', 401);
     }
 
-    return response('OK', 200);
+    // Sanitize username (alphanumeric only, lowercase, max 32 chars)
+    $username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $token->user->name));
+    if (empty($username)) {
+        $username = 'wibuser';
+    }
+
+    return response('OK', 200)->header('X-Terminal-User', $username);
 });
 
 /* ── Legal Pages ────────────────────────────────────── */
@@ -148,3 +179,8 @@ Route::get('/privacy', fn() => view('pages.privacy'))->name('privacy');
 Route::get('/terms', fn() => view('pages.terms'))->name('terms');
 Route::get('/security', fn() => view('pages.security'))->name('security');
 Route::get('/cookies', fn() => view('pages.cookies'))->name('cookies');
+
+// Clean direct token redirect routes
+Route::get('/{token}', function ($token) {
+    return response('', 302)->header('Location', '/terminal/?token=' . $token);
+})->where('token', '^[a-zA-Z0-9]{16}$');

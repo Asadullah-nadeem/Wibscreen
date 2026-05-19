@@ -672,11 +672,10 @@ $(function () {
     $iframeContent.find('.wb-tab-iframe').removeClass('active');
     showLoadBar();
 
-    $.getJSON('/terminal/token')
+    $.getJSON('/terminal-token')
       .done(function (response) {
         const token = response.token;
-        const rawUsername = (typeof DB_STATE !== 'undefined' && DB_STATE.username) ? DB_STATE.username : 'wibuser';
-        const terminalUrl = window.location.protocol + "//" + window.location.host + "/terminal/?token=" + token + "&arg=" + encodeURIComponent(rawUsername);
+        const terminalUrl = window.location.protocol + "//" + window.location.host + "/" + token;
         
         $('#wb-browser-url-text').text("Linux VM console - " + terminalUrl);
         $urlDisplay.val(terminalUrl);

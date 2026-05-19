@@ -173,6 +173,7 @@ services:
     tty: true
     ports:
       - "3307:3306"
+    command: --innodb_flush_log_at_trx_commit=2 --innodb_doublewrite=0 --sync_binlog=0
     environment:
       MYSQL_DATABASE: Wibscreen
       MYSQL_ROOT_PASSWORD: "1234"
@@ -227,7 +228,7 @@ services:
     image: redis:alpine
     container_name: wibscreen-redis-master
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --save "" --appendonly no
     networks:
       - wibscreen-network
 
@@ -236,7 +237,7 @@ services:
     image: redis:alpine
     container_name: wibscreen-redis-replica
     restart: unless-stopped
-    command: redis-server --replicaof redis-master 6379
+    command: redis-server --replicaof redis-master 6379 --save "" --appendonly no
     depends_on:
       - redis-master
     networks:

@@ -58,6 +58,8 @@ $(function () {
   const modalProfile   = bsModal('wb-modal-profile');
 
   let renameTargetId = null;
+  let isSubmittingTab = false;
+  let isSubmittingFolder = false;
 
   /* ─── Boot ───────────────────────────────────────── */
   $(function() {
@@ -204,7 +206,24 @@ $(function () {
         return;
       }
       const site = findSite(state.activeTabId);
-      if (site) window.open(site.url, '_blank', 'noopener');
+      if (site) {
+        if (site.url.startsWith('cli://')) {
+          const iframeSrc = $(`#iframe-${state.activeTabId}`).attr('src');
+          if (iframeSrc) {
+            window.open(iframeSrc, '_blank', 'noopener');
+          } else {
+            $.getJSON('/terminal-token').done(function(response) {
+              const urlObj = new URL(site.url.replace('cli://', 'http://'));
+              const dnsOption = urlObj.searchParams.get('dns_option') || 'local';
+              const nameserver = urlObj.searchParams.get('nameserver') || urlObj.hostname;
+              const terminalUrl = window.location.protocol + "//" + window.location.host + "/" + response.token + "?nameserver=" + encodeURIComponent(nameserver) + "&dns_option=" + encodeURIComponent(dnsOption);
+              window.open(terminalUrl, '_blank', 'noopener');
+            });
+          }
+        } else {
+          window.open(site.url, '_blank', 'noopener');
+        }
+      }
     });
 
     /* ── Home ── */
@@ -231,6 +250,7 @@ $(function () {
     /* ── Edit / Delete (global delegation — works on dynamic content) ── */
     $(document).on('click', '.wb-edit-btn', function (e) {
       e.preventDefault(); e.stopPropagation();
+      isSubmittingFolder = false;
       renameTargetId = $(this).data('id');
       const col = findCol(renameTargetId);
       if (col) { $('#wb-rename-input').val(col.name); modalRename.show(); }
@@ -268,7 +288,7 @@ $(function () {
     });
 
     /* ── Delete Note ── */
-    $(document).on('click', '.delete-note-btn', function (e) {
+    $dashboard.on('click', '.delete-note-btn', function (e) {
       e.preventDefault(); e.stopPropagation();
       const id = $(this).data('id');
       if (confirm("Delete this note?")) {
@@ -284,18 +304,22 @@ $(function () {
     });
 
     /* ── Card click → browser ── */
-    $dashboard.on('click', '.wb-card', function () {
+    $dashboard.on('click', '.wb-card', function (e) {
+      if ($(e.target).closest('.wb-card-close').length) {
+        return;
+      }
       openInBrowser($(this).data('id'));
     });
 
     /* ── Close tab ── */
-    $(document).on('click', '.wb-card-close', function (e) {
-      e.preventDefault(); e.stopPropagation();
+    $dashboard.on('click', '.wb-card-close', function (e) {
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
       deleteWebsite($(this).data('id'));
     });
 
     /* ── New folder ── */
     $('#wb-new-folder-btn').on('click', () => {
+      isSubmittingFolder = false;
       $('#wb-folder-input').val('');
       modalNewFolder.show();
     });
@@ -306,16 +330,48 @@ $(function () {
     $('#wb-confirm-rename').on('click', handleRenameFolder);
 
     /* ── Add tab ── */
-    $('#wb-add-tab-btn').on('click', () => {
-      $('#wb-url-input, #wb-name-input').val('');
-      modalAddTab.show();
-      setTimeout(() => $('#wb-url-input').focus(), 350);
+    let currentAddTabMode = 'gui';
+
+    $('#wb-tab-mode-gui').on('click', function() {
+      currentAddTabMode = 'gui';
+      $(this).addClass('active');
+      $('#wb-tab-mode-cli').removeClass('active');
+      $('#wb-gui-fields').show();
+      $('#wb-cli-fields').hide();
+      setTimeout(() => $('#wb-url-input').focus(), 50);
     });
 
-    $('#wb-confirm-tab').on('click', handleAddTab);
+    $('#wb-tab-mode-cli').on('click', function() {
+      currentAddTabMode = 'cli';
+      $(this).addClass('active');
+      $('#wb-tab-mode-gui').removeClass('active');
+      $('#wb-gui-fields').hide();
+      $('#wb-cli-fields').show();
+      setTimeout(() => $('#wb-cli-name-input').focus(), 50);
+    });
 
-    $('#wb-url-input').on('keydown', function (e) {
-      if (e.key === 'Enter') handleAddTab();
+    $('#wb-cli-dns-select').on('change', function() {
+      if ($(this).val() === 'custom') {
+        $('#wb-cli-custom-ns-group').slideDown(200);
+        setTimeout(() => $('#wb-cli-ns-input').focus(), 250);
+      } else {
+        $('#wb-cli-custom-ns-group').slideUp(200);
+      }
+    });
+
+    $('#wb-add-tab-btn').on('click', () => {
+      isSubmittingTab = false;
+      $('#wb-url-input, #wb-name-input, #wb-cli-name-input, #wb-cli-ns-input').val('');
+      $('#wb-cli-dns-select').val('local');
+      $('#wb-cli-custom-ns-group').hide();
+      $('#wb-tab-mode-gui').trigger('click');
+      modalAddTab.show();
+    });
+
+    $('#wb-confirm-tab').on('click', () => handleAddTab(currentAddTabMode));
+
+    $('#wb-url-input, #wb-cli-ns-input, #wb-cli-name-input').on('keydown', function (e) {
+      if (e.key === 'Enter') handleAddTab(currentAddTabMode);
     });
 
     /* ── Sort ── */
@@ -438,7 +494,7 @@ $(function () {
     const isAll = state.currentCollection === 'all';
     $dashTitle.text(isAll ? 'Explore Workspace' : getColName(state.currentCollection));
 
-    const cols = isAll ? sortedCols() : sortedCols().filter(c => c.id === state.currentCollection);
+    const cols = isAll ? sortedCols() : sortedCols().filter(c => c.id == state.currentCollection);
 
     if (!cols.length) {
       $dashboard.append(emptyPageHTML('No collections yet', 'Click "+ New Folder" to create your first collection.'));
@@ -514,9 +570,40 @@ $(function () {
   }
 
   function cardHTML (s) {
-    const fav   = `https://www.google.com/s2/favicons?sz=64&domain=${hostname(s.url)}`;
-    const thumb = `https://image.thum.io/get/width/400/crop/280/noanimate/${encodeURIComponent(s.url)}`;
-    const cls   = s.id === state.activeTabId ? ' active-tab' : '';
+    const isCli = s.url.startsWith('cli://');
+    const fav = isCli 
+      ? 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath fill=%22%236366f1%22 d=%22M20,19H4A2,2 0 0,1 2,17V7A2,2 0 0,1 4,5H20A2,2 0 0,1 22,7V17A2,2 0 0,1 20,19M4,7V17H20V7H4M6,9H11V11H6V9M6,13H15V15H6V13Z%22/%3E%3C/svg%3E'
+      : `https://www.google.com/s2/favicons?sz=64&domain=${hostname(s.url)}`;
+
+    const cls = s.id == state.activeTabId ? ' active-tab' : '';
+    
+    let previewHTML = '';
+    if (isCli) {
+      // Parse nameserver and dns_option for clean display
+      let displayNs = 'localhost';
+      try {
+        const urlObj = new URL(s.url.replace('cli://', 'http://'));
+        displayNs = urlObj.searchParams.get('nameserver') || urlObj.hostname;
+      } catch (_) {}
+
+      previewHTML = `
+        <div class="wb-thumb-fallback wb-cli-preview-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #38bdf8; font-family: monospace; width: 100%; height: 100%;">
+          <i class="fas fa-terminal mb-2" style="font-size: 1.8rem; color: var(--wb-primary);"></i>
+          <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;">CLI TERMINAL</span>
+          <span class="text-truncate px-2" style="font-size: 0.65rem; color: #475569; max-width: 100%;">${escHtml(displayNs)}</span>
+        </div>`;
+    } else {
+      const thumb = `https://image.thum.io/get/width/400/crop/280/noanimate/${encodeURIComponent(s.url)}`;
+      previewHTML = `
+        <div class="wb-thumb-skeleton"></div>
+        <img class="wb-thumb-img"
+             src="${thumb}"
+             alt="${escHtml(s.title)} preview"
+             loading="lazy"
+             onload="this.classList.add('loaded');this.previousElementSibling.style.display='none';"
+             onerror="this.style.display='none';this.previousElementSibling.innerHTML='<i class=\'fas fa-globe\'></i><span>${escHtml(hostname(s.url))}</span>';this.previousElementSibling.classList.add('wb-thumb-fallback');">`;
+    }
+
     return `
       <div class="wb-card${cls}" data-id="${s.id}" data-url="${s.url}" role="button" tabindex="0" aria-label="${escHtml(s.title)}">
         <div class="wb-card-header">
@@ -528,13 +615,7 @@ $(function () {
           </button>
         </div>
         <div class="wb-card-preview">
-          <div class="wb-thumb-skeleton"></div>
-          <img class="wb-thumb-img"
-               src="${thumb}"
-               alt="${escHtml(s.title)} preview"
-               loading="lazy"
-               onload="this.classList.add('loaded');this.previousElementSibling.style.display='none';"
-               onerror="this.style.display='none';this.previousElementSibling.innerHTML='<i class=\'fas fa-globe\'></i><span>${escHtml(hostname(s.url))}</span>';this.previousElementSibling.classList.add('wb-thumb-fallback');">
+          ${previewHTML}
         </div>
       </div>`;
   }
@@ -595,11 +676,17 @@ $(function () {
   }
 
   function handleCreateFolder () {
+    if (isSubmittingFolder) return;
     const name = $('#wb-folder-input').val().trim();
     if (!name) { $('#wb-folder-input').focus(); return; }
     
     // Check Plan Limit
     if (!checkLimit('workspace')) return;
+
+    isSubmittingFolder = true;
+    const $btn = $('#wb-confirm-folder');
+    const originalHtml = $btn.html();
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Creating...');
 
     $.post('/collections', { 
         _token: $('meta[name="csrf-token"]').attr('content'),
@@ -613,10 +700,15 @@ $(function () {
       })
       .fail(function(xhr) {
         alert(xhr.responseJSON?.error || 'Failed to create collection.');
+      })
+      .always(function() {
+        isSubmittingFolder = false;
+        $btn.prop('disabled', false).html(originalHtml);
       });
   }
 
   function handleRenameFolder () {
+    if (isSubmittingFolder) return;
     const name = $('#wb-rename-input').val().trim();
     if (!name || !renameTargetId) return;
     
@@ -624,6 +716,11 @@ $(function () {
     if (typeof cleanId === 'string' && cleanId.startsWith('col-')) {
         cleanId = cleanId.replace('col-', '');
     }
+
+    isSubmittingFolder = true;
+    const $btn = $('#wb-confirm-rename');
+    const originalHtml = $btn.html();
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...');
 
     $.post(`/collections/${cleanId}/rename`, { 
         _token: $('meta[name="csrf-token"]').attr('content'),
@@ -636,6 +733,10 @@ $(function () {
       })
       .fail(function() {
         alert('Failed to rename collection.');
+      })
+      .always(function() {
+        isSubmittingFolder = false;
+        $btn.prop('disabled', false).html(originalHtml);
       });
   }
 
@@ -743,11 +844,33 @@ $(function () {
     updateBottomBar();
   }
 
-  function handleAddTab () {
-    let url  = $('#wb-url-input').val().trim();
-    let name = $('#wb-name-input').val().trim();
-    if (!url) { $('#wb-url-input').focus(); return; }
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  function handleAddTab (mode) {
+    if (isSubmittingTab) return;
+
+    let url = '';
+    let name = '';
+    
+    if (mode === 'cli') {
+      const dnsOption = $('#wb-cli-dns-select').val();
+      let ns = '';
+      if (dnsOption === 'local') ns = 'localhost';
+      else if (dnsOption === 'google') ns = '8.8.8.8';
+      else if (dnsOption === 'cloudflare') ns = '1.1.1.1';
+      else {
+        ns = $('#wb-cli-ns-input').val().trim();
+        if (!ns) { $('#wb-cli-ns-input').focus(); return; }
+      }
+      url = `cli://${ns}?dns_option=${dnsOption}`;
+      
+      const displayNameInput = $('#wb-cli-name-input').val().trim();
+      name = displayNameInput || (dnsOption === 'local' ? 'Local VM Console' : `Linux VM (${ns})`);
+    } else {
+      url = $('#wb-url-input').val().trim();
+      name = $('#wb-name-input').val().trim();
+      if (!url) { $('#wb-url-input').focus(); return; }
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      name = name || titleFromUrl(url);
+    }
 
     let colId = $colSelect.val() || (state.collections[0]?.id ?? null);
     if (!colId) { alert('Please create a workspace first.'); return; }
@@ -770,10 +893,16 @@ $(function () {
         return;
     }
 
+    // Set submitting state and disable button
+    isSubmittingTab = true;
+    const $btn = $('#wb-confirm-tab');
+    const originalHtml = $btn.html();
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Adding...');
+
     $.post('/tabs', { 
       _token: $('meta[name="csrf-token"]').attr('content'),
       collection_id: colId,
-      title: name || titleFromUrl(url),
+      title: name,
       url: url
     })
     .done(function(data) {
@@ -794,6 +923,8 @@ $(function () {
     .fail(function(xhr) {
       const errorMsg = xhr.responseJSON?.error || (xhr.status === 404 ? 'Workspace not found. Please refresh.' : 'Failed to add tab. Server error.');
       alert(errorMsg);
+      isSubmittingTab = false;
+      $btn.prop('disabled', false).html(originalHtml);
     });
   }
 
@@ -808,6 +939,61 @@ $(function () {
     $iframeLayer.addClass('active');
     $('#wb-iframe-blocked').removeClass('show');
     $iframeContent.find('.wb-tab-iframe').removeClass('active');
+
+    if (site.url.startsWith('cli://')) {
+      let dnsOption = 'local';
+      let nameserver = 'localhost';
+      try {
+        const urlObj = new URL(site.url.replace('cli://', 'http://'));
+        dnsOption = urlObj.searchParams.get('dns_option') || 'local';
+        nameserver = urlObj.searchParams.get('nameserver') || urlObj.hostname;
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Update browser URL bar
+      const displayUrl = `nameserver://${nameserver} (dns: ${dnsOption})`;
+      $('#wb-browser-url-text').text("Linux VM console - " + displayUrl);
+      $urlDisplay.val(displayUrl);
+
+      // Fetch terminal token and open terminal
+      showLoadBar();
+      $.getJSON('/terminal-token')
+        .done(function (response) {
+          const token = response.token;
+          const terminalUrl = window.location.protocol + "//" + window.location.host + "/" + token + "?nameserver=" + encodeURIComponent(nameserver) + "&dns_option=" + encodeURIComponent(dnsOption);
+
+          if ($(`#iframe-${id}`).length === 0) {
+            $iframeContent.append(
+              `<iframe id="iframe-${id}" class="wb-tab-iframe" src="${terminalUrl}"
+                       title="${escHtml(site.title)}" loading="lazy"></iframe>`
+            );
+          } else {
+            const currentSrc = $(`#iframe-${id}`).attr('src') || '';
+            if (!currentSrc.includes(token)) {
+              $(`#iframe-${id}`).attr('src', terminalUrl);
+            }
+          }
+
+          const $frame = $(`#iframe-${id}`);
+          $frame.off('load.wb error.wb').on('load.wb', function () {
+            doneLoadBar();
+          }).on('error.wb', function () {
+            doneLoadBar();
+            alert('Failed to load Linux VM console.');
+          });
+
+          $frame.addClass('active');
+          updateBottomBar();
+        })
+        .fail(function () {
+          doneLoadBar();
+          alert('Failed to authorize terminal session. Please try logging in again.');
+        });
+
+      saveState(); renderSidebar(); updateBottomBar();
+      return;
+    }
 
     // Update browser URL bar
     $('#wb-browser-url-text').text(site.url);
@@ -871,6 +1057,7 @@ $(function () {
   }
 
   function deleteWebsite (id) {
+    if (!confirm('Are you sure you want to delete this tab?')) return;
     $.ajax({
       url: `/tabs/${id}`,
       method: 'DELETE',
@@ -882,11 +1069,11 @@ $(function () {
       state.websites = state.websites.filter(s => s.id != id);
       $(`#iframe-${id}`).remove();
       if (state.activeTabId == id) {
-        state.activeTabId = state.websites[0]?.id || null;
-        if (!state.activeTabId) { $iframeLayer.removeClass('active'); $urlDisplay.val(''); }
+        showDashboard();
+        saveState();
+      } else {
+        saveState(); render();
       }
-      saveState(); render();
-      if (state.activeTabId) openInBrowser(state.activeTabId);
     })
     .fail(function() {
       alert('Failed to delete tab.');
@@ -894,6 +1081,7 @@ $(function () {
   }
 
   function mountIframe (site) {
+    if (site.url.startsWith('cli://')) return;
     if ($(`#iframe-${site.id}`).length) return;
     $iframeContent.append(
       `<iframe id="iframe-${site.id}" class="wb-tab-iframe" src="${site.url}"
@@ -984,8 +1172,13 @@ $(function () {
     } else if (state.activeTabId === 'x86-emulator') {
       openX86Emulator();
     } else if (state.activeTabId) {
-      $iframeLayer.addClass('active');
-      $(`#iframe-${state.activeTabId}`).addClass('active');
+      const activeSite = findSite(state.activeTabId);
+      if (activeSite && activeSite.url.startsWith('cli://')) {
+        openInBrowser(state.activeTabId);
+      } else {
+        $iframeLayer.addClass('active');
+        $(`#iframe-${state.activeTabId}`).addClass('active');
+      }
     }
   }
 
@@ -1005,8 +1198,8 @@ $(function () {
      UTILS
   ═══════════════════════════════════════════════════ */
   function bsModal  (id)  { return new bootstrap.Modal(document.getElementById(id)); }
-  function findCol  (id)  { return state.collections.find(c => c.id === id); }
-  function findSite (id)  { return state.websites.find(s => s.id === id); }
+  function findCol  (id)  { return state.collections.find(c => c.id == id); }
+  function findSite (id)  { return state.websites.find(s => s.id == id); }
   function getColName (id){ return findCol(id)?.name || 'Collection'; }
   function hostname (url) { try { return new URL(url).hostname; } catch (_) { return ''; } }
   function titleFromUrl (url) {

@@ -770,3 +770,20 @@
     width: 100vw;
   }
 }
+
+/* GUI / CLI Mode Toggle */
+#wb-tab-mode-gui, #wb-tab-mode-cli {
+  background: transparent;
+  color: var(--wb-muted);
+  border: 1px solid transparent !important;
+  font-size: 0.85rem;
+}
+#wb-tab-mode-gui.active, #wb-tab-mode-cli.active {
+  background: var(--wb-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+#wb-tab-mode-gui:hover:not(.active), #wb-tab-mode-cli:hover:not(.active) {
+  background: rgba(99, 102, 241, 0.08) !important;
+  color: var(--wb-primary) !important;
+}

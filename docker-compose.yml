@@ -445,6 +445,8 @@ services:
       dockerfile: docker/Dockerfile.terminal
     container_name: wibscreen-terminal
     restart: unless-stopped
+    volumes:
+      - ./storage/terminal:/home
     networks:
       - wibscreen-network
 

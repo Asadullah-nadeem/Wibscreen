@@ -111,13 +111,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Terminal Security Tokens
     Route::get('/terminal-token', function () {
-        $tokenStr = \Illuminate\Support\Str::random(16);
-        \App\Models\TerminalToken::create([
-            'user_id' => auth()->id(),
-            'token' => $tokenStr,
-            'expires_at' => now()->addHours(24)
-        ]);
-        return response()->json(['token' => $tokenStr]);
+        $token = \App\Models\TerminalToken::where('user_id', auth()->id())->first();
+        if (!$token) {
+            $tokenStr = \Illuminate\Support\Str::random(16);
+            $token = \App\Models\TerminalToken::create([
+                'user_id' => auth()->id(),
+                'token' => $tokenStr,
+                'expires_at' => now()->addYears(10)
+            ]);
+        }
+        return response()->json(['token' => $token->token]);
     });
 
     // Web-Based x86 Emulator booting tinycore.iso
@@ -150,11 +153,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->where('filename', '.*');
 });
 
-Route::get('/terminal/auth', function (Illuminate\Http\Request $request) {
+Route::get('/terminal-auth-backend', function (Illuminate\Http\Request $request) {
     $tokenVal = $request->query('token');
 
     if (!$tokenVal) {
-        return response('Unauthorized: Missing Token', 401);
+        // Fallback: Check if the user is authenticated via Laravel session
+        if (auth()->check()) {
+            $user = auth()->user();
+            if (empty($user->terminal_username) || empty($user->terminal_password)) {
+                $baseUsername = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $user->name));
+                if (empty($baseUsername)) {
+                    $baseUsername = 'wibuser';
+                }
+                $terminalUsername = $baseUsername;
+                $counter = 1;
+                while (\App\Models\User::where('terminal_username', $terminalUsername)->where('id', '!=', $user->id)->exists()) {
+                    $terminalUsername = $baseUsername . $counter;
+                    $counter++;
+                }
+                $user->terminal_username = $terminalUsername;
+                if (empty($user->terminal_password)) {
+                    $user->terminal_password = strtolower(\Illuminate\Support\Str::random(10));
+                }
+                $user->save();
+            }
+            $user->createDatabaseAndUser();
+            return response('OK', 200)
+                ->header('X-Terminal-User', $user->terminal_username)
+                ->header('X-Terminal-Password', $user->terminal_password);
+        }
+        return response('Unauthorized: Missing Token & Session', 401);
     }
 
     $token = \App\Models\TerminalToken::with('user')->where('token', $tokenVal)
@@ -165,13 +193,29 @@ Route::get('/terminal/auth', function (Illuminate\Http\Request $request) {
         return response('Unauthorized: Invalid or Expired Token', 401);
     }
 
-    // Sanitize username (alphanumeric only, lowercase, max 32 chars)
-    $username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $token->user->name));
-    if (empty($username)) {
-        $username = 'wibuser';
+    $user = $token->user;
+    if (empty($user->terminal_username) || empty($user->terminal_password)) {
+        $baseUsername = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $user->name));
+        if (empty($baseUsername)) {
+            $baseUsername = 'wibuser';
+        }
+        $terminalUsername = $baseUsername;
+        $counter = 1;
+        while (\App\Models\User::where('terminal_username', $terminalUsername)->where('id', '!=', $user->id)->exists()) {
+            $terminalUsername = $baseUsername . $counter;
+            $counter++;
+        }
+        $user->terminal_username = $terminalUsername;
+        if (empty($user->terminal_password)) {
+            $user->terminal_password = strtolower(\Illuminate\Support\Str::random(10));
+        }
+        $user->save();
     }
+    $user->createDatabaseAndUser();
 
-    return response('OK', 200)->header('X-Terminal-User', $username);
+    return response('OK', 200)
+        ->header('X-Terminal-User', $user->terminal_username)
+        ->header('X-Terminal-Password', $user->terminal_password);
 });
 
 /* ── Legal Pages ────────────────────────────────────── */
@@ -181,6 +225,11 @@ Route::get('/security', fn() => view('pages.security'))->name('security');
 Route::get('/cookies', fn() => view('pages.cookies'))->name('cookies');
 
 // Clean direct token redirect routes
-Route::get('/{token}', function ($token) {
-    return response('', 302)->header('Location', '/terminal/?token=' . $token);
+Route::get('/{token}', function (\Illuminate\Http\Request $request, $token) {
+    $queryString = $request->getQueryString();
+    $targetUrl = '/terminal/?token=' . $token;
+    if ($queryString) {
+        $targetUrl .= '&' . $queryString;
+    }
+    return response('', 302)->header('Location', $targetUrl);
 })->where('token', '^[a-zA-Z0-9]{16}$');

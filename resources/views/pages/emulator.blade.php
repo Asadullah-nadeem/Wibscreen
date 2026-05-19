@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Wibscreen x86 Emulator (Tiny Core Linux)</title>
+    <title>Wibscreen x86 Emulator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
@@ -87,8 +87,13 @@
 </head>
 <body>
     <div id="header">
-        <h1><i class="fas fa-microchip text-success"></i> Tiny Core Linux x86 VM</h1>
-        <div style="display: flex; gap: 10px;">
+        <h1><i class="fas fa-microchip text-success"></i> x86 WebAssembly VM</h1>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <label for="os-select" style="font-size: 0.8rem; font-family: system-ui, -apple-system, sans-serif; color: #9ca3af;">Select OS:</label>
+            <select id="os-select" style="background-color: #1f2937; color: white; border: 1px solid #374151; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; outline: none; cursor: pointer; font-family: system-ui, -apple-system, sans-serif;">
+                <option value="tinycore">Tiny Core Linux (17MB)</option>
+                <option value="alpine">Alpine Linux Virt (44MB)</option>
+            </select>
             <button class="btn" id="btn-restart"><i class="fas fa-redo"></i> Restart VM</button>
             <button class="btn" id="btn-fullscreen"><i class="fas fa-expand"></i> Fullscreen</button>
         </div>
@@ -106,7 +111,12 @@
     <script>
         const DB_NAME = 'WibscreenVM';
         const STORE_NAME = 'States';
-        const STATE_KEY = 'tinycore_state';
+        
+        // Use a unique state key per operating system
+        const selectedOS = localStorage.getItem('wibscreen_selected_os') || 'tinycore';
+        const STATE_KEY = 'v86_state_' + selectedOS;
+
+        document.getElementById('os-select').value = selectedOS;
 
         // IndexedDB Helpers
         function getSavedState() {
@@ -197,11 +207,18 @@
             const rawUsername = "{{ auth()->user()->name }}";
             const username = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '') || 'wibuser';
 
+            let isoFilename = "tinycore.iso";
+            let isoLabel = "Tiny Core Linux ISO";
+            if (selectedOS === 'alpine') {
+                isoFilename = "alpine.iso";
+                isoLabel = "Alpine Linux ISO";
+            }
+
             statusText.innerText = "Locating VM engine in Cache Storage...";
             const wasmUrl = await getCacheStorageAssetUrl("WebAssembly Engine", "/linux/v86.wasm", statusText);
             const biosUrl = await getCacheStorageAssetUrl("System BIOS", "/linux/seabios.bin", statusText);
             const vgaBiosUrl = await getCacheStorageAssetUrl("VGA BIOS", "/linux/vgabios.bin", statusText);
-            const isoUrl = await getCacheStorageAssetUrl("Tiny Core Linux ISO", "/linux/tinycore.iso", statusText);
+            const isoUrl = await getCacheStorageAssetUrl(isoLabel, "/linux/" + isoFilename, statusText);
 
             statusText.innerText = "Checking cache for boot state...";
             const savedState = await getSavedState();
@@ -271,20 +288,28 @@
                 if (isRestored) {
                     statusText.innerText = "Restoring session for " + username + "...";
                     
-                    // We are at the clean root/tc prompt. Log in as the user.
-                    const loginCommands = [
-                        `stty erase ^?\n`,
-                        `sudo adduser -D -s /bin/sh ${username}\n`,
-                        `su - ${username}\n`,
-                        `stty erase ^?\n`,
-                        `echo "stty erase ^?" >> ~/.profile\n`,
-                        `export PS1="${username}@wibscreen:\\$ "\n`,
-                        `clear\n`,
-                        `echo "========================================="\n`,
-                        `echo "   Welcome to Wibscreen x86 Console!"\n`,
-                        `echo "   Logged in as: ${username}"\n`,
-                        `echo "========================================="\n`
-                    ];
+                    // Root/tc prompt setup
+                    let loginCommands = [];
+                    if (selectedOS === 'alpine') {
+                        loginCommands = [
+                            `stty erase ^?\n`,
+                            `clear\n`
+                        ];
+                    } else {
+                        loginCommands = [
+                            `stty erase ^?\n`,
+                            `sudo adduser -D -s /bin/sh ${username}\n`,
+                            `su - ${username}\n`,
+                            `stty erase ^?\n`,
+                            `echo "stty erase ^?" >> ~/.profile\n`,
+                            `export PS1="${username}@wibscreen:\\$ "\n`,
+                            `clear\n`,
+                            `echo "========================================="\n`,
+                            `echo "   Welcome to Wibscreen x86 Console!"\n`,
+                            `echo "   Logged in as: ${username}"\n`,
+                            `echo "========================================="\n`
+                        ];
+                    }
 
                     for (const cmd of loginCommands) {
                         await sendString(cmd);
@@ -294,7 +319,9 @@
                     statusText.innerText = "VM restored. Active user: " + username;
                 } else {
                     statusText.innerText = "Booting OS kernel (first time)...";
-                    // Wait for Linux boot to finish (~12 seconds)
+                    
+                    const bootTimeout = (selectedOS === 'alpine') ? 22000 : 12500;
+                    
                     setTimeout(async function() {
                         statusText.innerText = "Caching pristine booted VM state...";
                         
@@ -307,28 +334,45 @@
                             }
                             
                             // Now configure user login
-                            const setupCommands = [
-                                `stty erase ^?\n`,
-                                `sudo adduser -D -s /bin/sh ${username}\n`,
-                                `su - ${username}\n`,
-                                `stty erase ^?\n`,
-                                `echo "stty erase ^?" >> ~/.profile\n`,
-                                `export PS1="${username}@wibscreen:\\$ "\n`,
-                                `clear\n`,
-                                `echo "========================================="\n`,
-                                `echo "   Welcome to Wibscreen x86 Console!"\n`,
-                                `echo "   Logged in as: ${username}"\n`,
-                                `echo "========================================="\n`
-                            ];
+                            let setupCommands = [];
+                            if (selectedOS === 'alpine') {
+                                setupCommands = [
+                                    `root\n`, // Log in as default root user
+                                    `stty erase ^?\n`,
+                                    `adduser -D -s /bin/sh ${username}\n`,
+                                    `su - ${username}\n`,
+                                    `stty erase ^?\n`,
+                                    `export PS1="${username}@wibscreen:\\$ "\n`,
+                                    `clear\n`,
+                                    `echo "========================================="\n`,
+                                    `echo "   Welcome to Wibscreen Alpine Console!"\n`,
+                                    `echo "   Logged in as: ${username}"\n`,
+                                    `echo "========================================="\n`
+                                ];
+                            } else {
+                                setupCommands = [
+                                    `stty erase ^?\n`,
+                                    `sudo adduser -D -s /bin/sh ${username}\n`,
+                                    `su - ${username}\n`,
+                                    `stty erase ^?\n`,
+                                    `echo "stty erase ^?" >> ~/.profile\n`,
+                                    `export PS1="${username}@wibscreen:\\$ "\n`,
+                                    `clear\n`,
+                                    `echo "========================================="\n`,
+                                    `echo "   Welcome to Wibscreen x86 Console!"\n`,
+                                    `echo "   Logged in as: ${username}"\n`,
+                                    `echo "========================================="\n`
+                                ];
+                            }
 
                             for (const cmd of setupCommands) {
                                 await sendString(cmd);
-                                await new Promise(r => setTimeout(r, 400));
+                                await new Promise(r => setTimeout(r, 450));
                             }
                             
                             statusText.innerText = "VM Booted & configured for: " + username;
                         });
-                    }, 12500);
+                    }, bootTimeout);
                 }
             });
 
@@ -345,6 +389,23 @@
                 } else if (elem.webkitRequestFullscreen) {
                     elem.webkitRequestFullscreen();
                 }
+            };
+
+            document.getElementById('os-select').onchange = async function() {
+                localStorage.setItem('wibscreen_selected_os', this.value);
+                statusText.innerText = "Switching Operating System...";
+                // Clear state so it boots fresh on first run of the other OS
+                const oldStateKey = 'v86_state_' + this.value;
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onsuccess = function(e) {
+                    const db = e.target.result;
+                    const transaction = db.transaction(STORE_NAME, 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    store.delete(oldStateKey);
+                    transaction.oncomplete = function() {
+                        window.location.reload();
+                    };
+                };
             };
         };
     </script>

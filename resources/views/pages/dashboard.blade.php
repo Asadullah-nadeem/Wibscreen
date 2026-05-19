@@ -79,10 +79,6 @@
         <i class="fas fa-chevron-right ms-auto opacity-40 small"></i>
       </button>
 
-      <button id="wb-linux-btn" class="wb-footer-btn">
-        <i class="fas fa-terminal text-primary"></i>
-        <span>Linux VM</span>
-      </button>
 
       <button id="wb-emulator-btn" class="wb-footer-btn">
         <i class="fas fa-microchip text-success"></i>
@@ -279,15 +275,50 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body pt-3 pb-2">
-        <div class="mb-3">
-          <label class="form-label small fw-semibold text-body-secondary" for="wb-url-input">Website URL</label>
-          <input id="wb-url-input" type="url" class="form-control" placeholder="https://example.com" autocomplete="off">
+        <!-- GUI / CLI Selector Buttons -->
+        <div class="d-flex gap-2 mb-4 p-1 rounded-3" style="background:var(--wb-surface-2);border:1px solid var(--wb-border);">
+          <button type="button" id="wb-tab-mode-gui" class="btn btn-sm flex-fill fw-bold rounded-2 active" style="transition:all 0.2s; border: none;">
+            <i class="fas fa-globe me-2"></i>GUI (Website)
+          </button>
+          <button type="button" id="wb-tab-mode-cli" class="btn btn-sm flex-fill fw-bold rounded-2" style="transition:all 0.2s; border: none;">
+            <i class="fas fa-terminal me-2"></i>CLI (Terminal)
+          </button>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-semibold text-body-secondary" for="wb-name-input">Display Name <span class="opacity-50">(optional)</span></label>
-          <input id="wb-name-input" type="text" class="form-control" placeholder="My Site">
+
+        <!-- GUI Form Fields -->
+        <div id="wb-gui-fields">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-body-secondary" for="wb-url-input">Website URL</label>
+            <input id="wb-url-input" type="url" class="form-control" placeholder="https://example.com" autocomplete="off">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-body-secondary" for="wb-name-input">Display Name <span class="opacity-50">(optional)</span></label>
+            <input id="wb-name-input" type="text" class="form-control" placeholder="My Site">
+          </div>
         </div>
-        <div>
+
+        <!-- CLI Form Fields -->
+        <div id="wb-cli-fields" style="display:none;">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-body-secondary" for="wb-cli-name-input">Display Name <span class="opacity-50">(optional)</span></label>
+            <input id="wb-cli-name-input" type="text" class="form-control" placeholder="Local VM Console">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-body-secondary" for="wb-cli-dns-select">DNS Connection Option</label>
+            <select id="wb-cli-dns-select" class="form-select">
+              <option value="local">Local VM Resolver (Default)</option>
+              <option value="google">Google Public DNS (8.8.8.8)</option>
+              <option value="cloudflare">Cloudflare DNS (1.1.1.1)</option>
+              <option value="custom">Custom Nameserver</option>
+            </select>
+          </div>
+          <div class="mb-3" id="wb-cli-custom-ns-group" style="display:none;">
+            <label class="form-label small fw-semibold text-body-secondary" for="wb-cli-ns-input">Nameserver Hostname / IP</label>
+            <input id="wb-cli-ns-input" type="text" class="form-control" placeholder="nameserver.wibscreen.vm" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="mb-2">
           <label class="form-label small fw-semibold text-body-secondary" for="wb-col-select">Collection</label>
           <select id="wb-col-select" class="form-select"></select>
         </div>

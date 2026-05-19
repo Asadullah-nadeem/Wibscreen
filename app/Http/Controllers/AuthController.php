@@ -84,13 +84,30 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        $baseUsername = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $request->name));
+        if (empty($baseUsername)) {
+            $baseUsername = 'wibuser';
+        }
+        $terminalUsername = $baseUsername;
+        $counter = 1;
+        while (User::where('terminal_username', $terminalUsername)->exists()) {
+            $terminalUsername = $baseUsername . $counter;
+            $counter++;
+        }
+        $terminalPassword = strtolower(\Illuminate\Support\Str::random(10));
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'plan' => $request->plan ?? 'free',
             'plan_status' => (in_array($request->plan, ['pro', 'business']) ? 'pending' : 'active'),
+            'terminal_username' => $terminalUsername,
+            'terminal_password' => $terminalPassword,
         ]);
+
+        // Create isolated database and user in MySQL
+        $user->createDatabaseAndUser();
 
         // Create Default Collection (Workspace)
         Collection::create([

@@ -35,11 +35,11 @@ class TerminalSecurityTest extends TestCase
     public function test_terminal_auth_endpoint_requires_valid_token(): void
     {
         // 1. Missing token
-        $response = $this->get('/terminal/auth');
+        $response = $this->get('/terminal-auth-backend');
         $response->assertStatus(401);
 
         // 2. Invalid token
-        $response = $this->get('/terminal/auth?token=invalidtoken1234');
+        $response = $this->get('/terminal-auth-backend?token=invalidtoken1234');
         $response->assertStatus(401);
 
         // 3. Valid token
@@ -51,7 +51,7 @@ class TerminalSecurityTest extends TestCase
             'expires_at' => now()->addMinutes(5),
         ]);
 
-        $response = $this->get("/terminal/auth?token={$tokenStr}");
+        $response = $this->get("/terminal-auth-backend?token={$tokenStr}");
         $response->assertStatus(200);
         $response->assertSee('OK');
     }
@@ -66,7 +66,16 @@ class TerminalSecurityTest extends TestCase
             'expires_at' => now()->subMinutes(1), // Already expired
         ]);
 
-        $response = $this->get("/terminal/auth?token={$tokenStr}");
+        $response = $this->get("/terminal-auth-backend?token={$tokenStr}");
         $response->assertStatus(401);
+    }
+
+    public function test_terminal_auth_endpoint_allows_active_session_without_token(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get('/terminal-auth-backend');
+        $response->assertStatus(200);
+        $response->assertSee('OK');
     }
 }

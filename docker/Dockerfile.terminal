@@ -9,7 +9,9 @@ RUN apk update && apk add --no-cache \
     procps \
     curl \
     git \
-    openssl
+    openssl \
+    mariadb-client \
+    redis
 
 # Copy the initialization script
 COPY docker/terminal-init.sh /usr/local/bin/terminal-init.sh
@@ -18,5 +20,5 @@ RUN chmod +x /usr/local/bin/terminal-init.sh
 # Expose the ttyd port
 EXPOSE 7681
 
-# Start ttyd with base path (/terminal) and url arguments enabled (-a) running our initialization script
-ENTRYPOINT ["ttyd", "-b", "/terminal", "-a", "sh", "/usr/local/bin/terminal-init.sh"]
+# Start ttyd with write permissions enabled (-W), base path (/terminal), and url arguments enabled (-a) running our initialization script
+ENTRYPOINT ["ttyd", "-W", "-b", "/terminal", "-a", "sh", "/usr/local/bin/terminal-init.sh"]

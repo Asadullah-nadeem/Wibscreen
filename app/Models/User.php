@@ -30,6 +30,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'usage_reset_at',
         'account_status',
         'deactivated_at',
+        'terminal_username',
+        'terminal_password',
     ];
 
     /**
@@ -150,5 +152,34 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->plan === 'free') return false;
         
         return $this->plan_expiry_at && $this->plan_expiry_at->isPast();
+    }
+
+    /**
+     * Create isolated database and user in MySQL for this user
+     */
+    public function createDatabaseAndUser(): void
+    {
+        if (empty($this->terminal_username) || empty($this->terminal_password)) {
+            return;
+        }
+
+        $dbName = 'wibscreen_' . $this->terminal_username;
+        $dbUser = $this->terminal_username;
+        $dbPass = $this->terminal_password;
+
+        try {
+            // 1. Create database
+            \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("CREATE DATABASE IF NOT EXISTS `{$dbName}`;");
+
+            // 2. Create user if not exists and grant privileges
+            \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("CREATE USER IF NOT EXISTS '{$dbUser}'@'%' IDENTIFIED BY '{$dbPass}';");
+            \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("ALTER USER '{$dbUser}'@'%' IDENTIFIED BY '{$dbPass}';");
+            
+            // 3. Grant privileges
+            \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$dbUser}'@'%';");
+            \Illuminate\Support\Facades\DB::connection('mysql_root')->statement("FLUSH PRIVILEGES;");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to create database/user for {$this->terminal_username}: " . $e->getMessage());
+        }
     }
 }

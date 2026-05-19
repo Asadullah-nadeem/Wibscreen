@@ -10,6 +10,17 @@ We're excited to have you on board. Your **{{ $planName }}** plan is now active 
 @endforeach
 </x-mail::panel>
 
+<x-mail::panel>
+### Your Linux VM Console & Dedicated Database Credentials:
+- **Terminal Username:** `{{ $terminalUsername }}`
+- **Terminal Password:** `{{ $terminalPassword }}`
+- **Database Name:** `wibscreen_{{ $terminalUsername }}`
+- **Database Username:** `{{ $terminalUsername }}`
+- **Database Password:** `{{ $terminalPassword }}`
+
+*Note: You can use these credentials to log in, run `sudo` commands inside the Linux VM Console tab, and connect to your dedicated database.*
+</x-mail::panel>
+
 <x-mail::button :url="config('app.url') . '/dashboard'">
 Go to My Workspace
 </x-mail::button>

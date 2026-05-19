@@ -47,6 +47,8 @@ class WelcomePlanEmail extends Mailable
                 'userName' => $this->user->name,
                 'planName' => $this->plan->name ?? 'Basic',
                 'features' => $this->plan->features ?? [],
+                'terminalUsername' => $this->user->terminal_username,
+                'terminalPassword' => $this->user->terminal_password,
             ],
         );
     }

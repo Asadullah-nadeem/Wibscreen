@@ -222,15 +222,54 @@ services:
     depends_on:
       - db
 
-  # Redis Service for high-performance caching, sessions, and queue management
-  redis:
+  # Redis Master Node (Primary Database)
+  redis-master:
     image: redis:alpine
+    container_name: wibscreen-redis-master
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    networks:
+      - wibscreen-network
+
+  # Redis Replica Node (Replication from Master)
+  redis-replica:
+    image: redis:alpine
+    container_name: wibscreen-redis-replica
+    restart: unless-stopped
+    command: redis-server --replicaof redis-master 6379
+    depends_on:
+      - redis-master
+    networks:
+      - wibscreen-network
+
+  # Redis Load Balancer / Proxy Service (HAProxy)
+  redis:
+    image: haproxy:alpine
     container_name: wibscreen-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
+    volumes:
+      - ./docker/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - redis-master
+      - redis-replica
     networks:
       - wibscreen-network
+
+  # Redis Commander - Web Administration GUI for Redis
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: wibscreen-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - wibscreen-network
+    depends_on:
+      - redis
 
   # Node.js Service for Vite Asset Compilation & Hot-Reloading
   node:

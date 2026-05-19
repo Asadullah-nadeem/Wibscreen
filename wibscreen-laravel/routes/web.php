@@ -10,6 +10,15 @@ use Illuminate\Http\Request;
 /* ── Home ───────────────────────────────────────────── */
 Route::get('/', fn() => view('pages.home'))->name('home');
 
+Route::get('/load-balancer-test', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Request successfully load balanced!',
+        'handled_by' => env('SERVICE_NAME', 'unknown'),
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
 use App\Http\Controllers\SubscriptionController;
 // use App\Models\Plan;
 
@@ -89,11 +98,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notes/{id}', [\App\Http\Controllers\NoteController::class, 'destroy']);
 
     Route::post('/track-usage', [WorkspaceController::class, 'trackUsage'])->name('usage.track');
-    
+
     // CSRF Refresh
-    Route::get('/refresh-csrf', function() {
-        return response()->json(['token' => csrf_token()]);
-    });
+    // Route::get('/refresh-csrf', function () {
+    //     return response()->json(['token' => csrf_token()]);
+    // });
 
     // Account Management
     Route::post('/account/deactivate', [AuthController::class, 'deactivate'])->name('account.deactivate');

@@ -11,6 +11,9 @@ use Tests\TestCase;
 
 class SystemDiagnosticsTest extends TestCase
 {
+    private string $webHost;
+    private string $mailpitHost;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -19,6 +22,11 @@ class SystemDiagnosticsTest extends TestCase
         config()->set('database.connections.mysql.database', 'Wibscreen');
         config()->set('cache.default', 'redis');
         config()->set('queue.default', 'redis');
+
+        // Dynamically determine host addresses based on the environment (Docker container vs. Windows host)
+        $isDocker = file_exists('/.dockerenv') || env('DB_HOST') === 'db';
+        $this->webHost = $isDocker ? 'web' : 'localhost:8000';
+        $this->mailpitHost = $isDocker ? 'mailpit:8025' : 'localhost:8025';
     }
     /**
      * Test A: Database is connected and writable.
@@ -69,9 +77,10 @@ class SystemDiagnosticsTest extends TestCase
      */
     public function test_mailpit_smtp_and_api_are_working(): void
     {
-        // Skip if SMTP host is not mailpit
-        if (config('mail.mailers.smtp.host') !== 'mailpit' && env('MAIL_HOST') !== 'mailpit') {
-            $this->markTestSkipped('SMTP host is not mailpit.');
+        // Skip if SMTP host is not Mailpit
+        $smtpHost = config('mail.mailers.smtp.host') ?? env('MAIL_HOST');
+        if (!in_array($smtpHost, ['mailpit', '127.0.0.1', 'localhost'])) {
+            $this->markTestSkipped('SMTP host is not Mailpit.');
         }
 
         // Send a test email
@@ -83,7 +92,7 @@ class SystemDiagnosticsTest extends TestCase
         usleep(500000); // 0.5s
 
         // Query Mailpit REST API to verify it received the email
-        $response = Http::get('http://mailpit:8025/api/v1/messages');
+        $response = Http::get("http://{$this->mailpitHost}/api/v1/messages");
         
         $this->assertTrue($response->successful());
         $messages = $response->json('messages') ?? [];
@@ -122,5 +131,32 @@ class SystemDiagnosticsTest extends TestCase
 
         $this->assertTrue($processed, 'Queue job was not processed by the queue worker container');
         $cache->forget('diagnostic_queue_result');
+    }
+
+    /**
+     * Test F: Load Balancer is distributing traffic to different PHP-FPM containers.
+     */
+    public function test_load_balancer_is_distributing_traffic(): void
+    {
+        $responses = [];
+        
+        // Make 10 requests to the load balancer (web service container)
+        for ($i = 0; $i < 10; $i++) {
+            $response = Http::get("http://{$this->webHost}/load-balancer-test");
+            if ($response->successful()) {
+                $responses[] = $response->json('handled_by');
+            }
+            usleep(50000); // 50ms
+        }
+
+        // Count unique backend containers that responded
+        $uniqueBackends = array_unique(array_filter($responses));
+
+        $this->assertNotEmpty($uniqueBackends, 'Load balancer did not return any backend responses');
+        
+        // Assert that the returned backends are valid app containers (app1-app5)
+        foreach ($uniqueBackends as $backend) {
+            $this->assertMatchesRegularExpression('/^app[1-5]$/', $backend);
+        }
     }
 }

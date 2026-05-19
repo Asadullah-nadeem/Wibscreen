@@ -455,16 +455,16 @@
             // Set the Select dropdown value safely inside onload
             document.getElementById('os-select').value = selectedOS;
 
-            let isoFilename = "wibos.img";
+            let isoFilename = "wibos/wibos.img";
             let isoLabel = "WibOS Bootable Image";
             if (selectedOS === 'tinycore') {
-                isoFilename = "tinycore.iso";
+                isoFilename = "tinycore/tinycore.iso";
                 isoLabel = "Tiny Core Linux ISO";
             } else if (selectedOS === 'tinycore-gui') {
-                isoFilename = "tinycore-gui.iso";
+                isoFilename = "tinycore-gui/tinycore-gui.iso";
                 isoLabel = "Tiny Core GUI Desktop ISO";
             } else if (selectedOS === 'alpine') {
-                isoFilename = "alpine.iso";
+                isoFilename = "alpine/alpine.iso";
                 isoLabel = "Alpine Linux ISO";
             }
 

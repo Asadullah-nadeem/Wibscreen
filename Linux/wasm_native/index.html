@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +17,7 @@
             height: 100vh;
             margin: 0;
         }
+
         .container {
             background-color: #111827;
             padding: 40px;
@@ -25,7 +27,12 @@
             max-width: 600px;
             border: 1px solid #1f2937;
         }
-        h2 { color: #34d399; margin-top: 0; }
+
+        h2 {
+            color: #34d399;
+            margin-top: 0;
+        }
+
         button {
             background-color: #2563eb;
             color: white;
@@ -38,7 +45,11 @@
             font-weight: 600;
             transition: 0.2s all;
         }
-        button:hover { background-color: #1d4ed8; }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
         .result {
             margin-top: 30px;
             padding: 20px;
@@ -50,24 +61,34 @@
             line-height: 1.6;
             text-align: left;
         }
-        .time { color: #f59e0b; }
-        .success { color: #10b981; font-weight: bold; }
+
+        .time {
+            color: #f59e0b;
+        }
+
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2><i class="fas fa-bolt text-warning"></i> Native WebAssembly</h2>
-        <p style="color: #9ca3af; font-size: 0.9rem;">This executes compiled C code directly in your browser's Javascript V8 engine without loading a virtual PC operating system. This results in incredibly fast 10x+ native performance.</p>
-        
+        <p style="color: #9ca3af; font-size: 0.9rem;">This executes compiled C code directly in your browser's
+            Javascript V8 engine without loading a virtual PC operating system. This results in incredibly fast 10x+
+            native performance.</p>
+
         <button id="runBtn"><i class="fas fa-play"></i> Run C Code Natively in WASM</button>
-        
+
         <div class="result" id="output">Waiting for execution command...</div>
     </div>
 
     <script>
         // Instead of forcing you to install Clang/Emscripten to compile add.c to math.wasm,
         // we have embedded the raw compiled WebAssembly bytecode for the C `add` function directly here!
-        
+
         // This bytecode is exactly what `add.c` looks like after being compiled to WebAssembly.
         const wasmCode = new Uint8Array([
             0x00, 0x61, 0x73, 0x6d, // Magic header (\0asm)
@@ -81,24 +102,24 @@
         document.getElementById("runBtn").addEventListener("click", async () => {
             const output = document.getElementById("output");
             output.innerText = "Instantiating C Code via WebAssembly...";
-            
+
             try {
                 // Instantiating the raw C compiled bytecode directly in the JS Engine
                 const wasmModule = await WebAssembly.instantiate(wasmCode);
-                
+
                 // Extracting our exported 'add' function originating from C!
                 const c_add = wasmModule.instance.exports.add;
-                
+
                 const startTime = performance.now();
-                
+
                 // Running the compiled C function natively!
                 const num1 = 50000;
                 const num2 = 90000;
                 const result = c_add(num1, num2);
-                
+
                 const endTime = performance.now();
                 const timeMs = (endTime - startTime).toFixed(4);
-                
+
                 output.innerHTML = `
                     Executing <strong>add.c</strong> directly inside browser:<br><br>
                     C Function Called: <span style="color:#fff">add(${num1}, ${num2})</span><br>
@@ -112,4 +133,5 @@
         });
     </script>
 </body>
+
 </html>

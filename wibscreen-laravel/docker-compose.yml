@@ -1,25 +1,151 @@
-version: '3.8'
 services:
 
-  # PHP Service
-  app:
+  # PHP Application Service 1
+  app1:
     build:
       context: .
       dockerfile: docker/Dockerfile
     image: wibscreen-laravel-app
-    container_name: wibscreen-app
+    container_name: wibscreen-app1
     restart: unless-stopped
     tty: true
+    ports:
+      - "8001:9000"
     environment:
-      SERVICE_NAME: app
+      SERVICE_NAME: app1
       SERVICE_TAGS: dev
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
     networks:
       - wibscreen-network
 
-  # Nginx Service
+  # PHP Application Service 2
+  app2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wibscreen-laravel-app
+    container_name: wibscreen-app2
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8002:9000"
+    environment:
+      SERVICE_NAME: app2
+      SERVICE_TAGS: dev
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
+    networks:
+      - wibscreen-network
+
+  # PHP Application Service 3
+  app3:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wibscreen-laravel-app
+    container_name: wibscreen-app3
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8003:9000"
+    environment:
+      SERVICE_NAME: app3
+      SERVICE_TAGS: dev
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
+    networks:
+      - wibscreen-network
+
+  # PHP Application Service 4
+  app4:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wibscreen-laravel-app
+    container_name: wibscreen-app4
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8004:9000"
+    environment:
+      SERVICE_NAME: app4
+      SERVICE_TAGS: dev
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
+    networks:
+      - wibscreen-network
+
+  # PHP Application Service 5
+  app5:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wibscreen-laravel-app
+    container_name: wibscreen-app5
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8005:9000"
+    environment:
+      SERVICE_NAME: app5
+      SERVICE_TAGS: dev
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
+    networks:
+      - wibscreen-network
+
+  # Nginx Web Server / Load Balancer Service
   web:
     image: nginx:alpine
     container_name: wibscreen-web
@@ -32,8 +158,14 @@ services:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - wibscreen-network
+    depends_on:
+      - app1
+      - app2
+      - app3
+      - app4
+      - app5
 
-  # MySQL Service
+  # MySQL Database Service
   db:
     image: mysql:8.0
     container_name: wibscreen-db
@@ -43,15 +175,134 @@ services:
       - "3307:3306"
     environment:
       MYSQL_DATABASE: Wibscreen
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_PASSWORD: "1234"
       MYSQL_USER: laravel_user
     volumes:
       - wibscreen-dbdata:/var/lib/mysql
     networks:
       - wibscreen-network
 
-  # Mailpit Service
+  # MySQL Auto-Backup Service (Daily and on Startup)
+  db-backup:
+    image: fradelg/mysql-cron-backup:latest
+    container_name: wibscreen-db-backup
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - ./backups:/backup
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: laravel_user
+      MYSQL_PASS: "1234"
+      MYSQL_DATABASE: Wibscreen
+      CRON_TIME: "0 0 * * *"   # Run daily at midnight
+      MAX_BACKUPS: 15          # Retain last 15 backups
+      INIT_BACKUP: 1           # Perform initial backup on startup
+      MYSQLDUMP_OPTS: "--no-tablespaces --column-statistics=0"
+    networks:
+      - wibscreen-network
+
+  # phpMyAdmin Database Management Service
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: wibscreen-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: "1234"
+      UPLOAD_LIMIT: 300M
+    networks:
+      - wibscreen-network
+    depends_on:
+      - db
+
+  # Redis Service for high-performance caching, sessions, and queue management
+  redis:
+    image: redis:alpine
+    container_name: wibscreen-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - wibscreen-network
+
+  # Node.js Service for Vite Asset Compilation & Hot-Reloading
+  node:
+    image: node:20-alpine
+    container_name: wibscreen-node
+    restart: unless-stopped
+    working_dir: /var/www
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/var/www
+    environment:
+      NODE_ENV: development
+    command: sh -c "if [ ! -d node_modules ]; then npm install; fi && npm run dev"
+    depends_on:
+      - app1
+    networks:
+      - wibscreen-network
+
+  # Laravel Queue Worker Service
+  queue:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wibscreen-laravel-app
+    container_name: wibscreen-queue
+    restart: unless-stopped
+    command: php artisan queue:listen
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
+      - app1
+    networks:
+      - wibscreen-network
+
+  # Laravel Scheduler Service
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wibscreen-laravel-app
+    container_name: wibscreen-scheduler
+    restart: unless-stopped
+    command: php artisan schedule:work
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    depends_on:
+      - db
+      - redis
+      - app1
+    networks:
+      - wibscreen-network
+
+  # Mailpit Service for local email testing
   mailpit:
     image: axllent/mailpit
     container_name: wibscreen-mailpit

@@ -10,6 +10,9 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
 
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <!-- Scripts and Styles -->
   @vite(['resources/css/app.scss', 'resources/js/app.js', 'resources/js/dashboard.js'])
 
@@ -76,15 +79,24 @@
         <i class="fas fa-chevron-right ms-auto opacity-40 small"></i>
       </button>
 
-      <button id="wb-theme-btn" class="btn btn-outline-secondary btn-sm text-start">
-        <i id="wb-theme-icon" class="fas fa-moon me-2"></i>
+      <button id="wb-linux-btn" class="wb-footer-btn">
+        <i class="fas fa-terminal text-primary"></i>
+        <span>Linux VM</span>
+      </button>
+
+      <button id="wb-theme-btn" class="wb-footer-btn">
+        <i id="wb-theme-icon" class="fas fa-moon"></i>
         <span id="wb-theme-label">Night Mode</span>
       </button>
-      <button id="wb-settings-btn" class="btn btn-outline-secondary btn-sm text-start">
-        <i class="fas fa-cog me-2"></i>Settings
+
+      <button id="wb-settings-btn" class="wb-footer-btn">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
       </button>
-      <a href="{{ route('pricing') }}" class="btn btn-outline-secondary btn-sm text-start text-decoration-none">
-        <i class="fas fa-crown me-2" style="color:#eab308;"></i>Upgrade Plan
+
+      <a href="{{ route('pricing') }}" class="wb-footer-btn">
+        <i class="fas fa-crown" style="color:#eab308;"></i>
+        <span>Upgrade Plan</span>
       </a>
 
       <div class="d-flex align-items-center gap-2 mt-1 ps-1">
@@ -455,11 +467,11 @@
         <div class="mb-2">
           <label class="form-label small fw-bold text-danger">Danger Zone</label>
           <div class="d-flex flex-column gap-2">
-            <button type="button" class="btn btn-sm btn-outline-warning text-start" onclick="confirmDeactivation()">
+            <button type="button" id="wb-deactivate-btn" class="btn btn-sm btn-outline-warning text-start">
               <i class="fas fa-pause-circle me-2"></i>Deactivate Account
               <div class="x-small opacity-75 ms-4">Temporarily hide your profile and data.</div>
             </button>
-            <button type="button" class="btn btn-sm btn-outline-danger text-start" onclick="confirmDeletion()">
+            <button type="button" id="wb-delete-btn" class="btn btn-sm btn-outline-danger text-start">
               <i class="fas fa-trash-alt me-2"></i>Delete Permanently
               <div class="x-small opacity-75 ms-4">Delete all workspaces, tabs, and notes. Irreversible.</div>
             </button>
@@ -484,61 +496,13 @@
 <form id="deactivate-form" action="{{ route('account.deactivate') }}" method="POST" style="display: none;">@csrf</form>
 <form id="delete-form" action="{{ route('account.delete') }}" method="POST" style="display: none;">@csrf @method('DELETE')</form>
 
-<!-- jQuery and Bootstrap handled by Vite -->
-
 <script>
-  const _root = document.documentElement;
-  const DB_STATE = {
+  window.DB_STATE = {
       collections: @json($collections),
       userPlan: "{{ auth()->user()->plan }}",
-      planStatus: "{{ auth()->user()->plan_status }}"
+      planStatus: "{{ auth()->user()->plan_status }}",
+      username: "{{ auth()->user()->name }}"
   };
-
-  document.getElementById('wb-accent-color').addEventListener('input', function () {
-    _root.style.setProperty('--wb-primary', this.value);
-  });
-  document.getElementById('wb-card-radius').addEventListener('input', function () {
-    _root.style.setProperty('--wb-card-radius', this.value + 'px');
-    document.getElementById('wb-radius-val').textContent = this.value + 'px';
-  });
-  document.getElementById('wb-sidebar-w').addEventListener('input', function () {
-    _root.style.setProperty('--wb-sidebar-w', this.value + 'px');
-    document.getElementById('wb-sw-val').textContent = this.value + 'px';
-  });
-  document.getElementById('wb-settings-theme-btn').addEventListener('click', function () {
-    document.getElementById('wb-theme-btn').click();
-  });
-
-  // ── Profile Logic ────────────────────────────
-  $(function () {
-    const modalProfile = new bootstrap.Modal(document.getElementById('wb-modal-profile'));
-
-    $('#wb-profile-btn').on('click', function () { 
-      modalProfile.show(); 
-    });
-
-    $('#wb-save-profile').on('click', function () {
-       // Logic to save profile via AJAX could go here
-       modalProfile.hide();
-    });
-  });
-
-  function confirmDeactivation() {
-    if (confirm("Are you sure you want to deactivate your account? You will be logged out and your data will be hidden until you contact support to reactivate.")) {
-      document.getElementById('deactivate-form').submit();
-    }
-  }
-
-  function confirmDeletion() {
-    if (confirm("🚨 WARNING: PERMANENT DELETION\n\nThis will permanently delete your account and ALL your data (Workspaces, Tabs, and Notes). This action is IRREVERSIBLE.\n\nType 'DELETE' to confirm:")) {
-      const confirmation = prompt("Please type 'DELETE' to confirm permanent account removal:");
-      if (confirmation === 'DELETE') {
-        document.getElementById('delete-form').submit();
-      } else {
-        alert("Deletion cancelled. Text did not match.");
-      }
-    }
-  }
 </script>
 </body>
 </html>

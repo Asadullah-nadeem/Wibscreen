@@ -1,0 +1,22 @@
+FROM tsl0922/ttyd:alpine
+
+# Install bash, sudo, coreutils, shadow, procps, curl, git
+RUN apk update && apk add --no-cache \
+    bash \
+    sudo \
+    shadow \
+    coreutils \
+    procps \
+    curl \
+    git \
+    openssl
+
+# Copy the initialization script
+COPY docker/terminal-init.sh /usr/local/bin/terminal-init.sh
+RUN chmod +x /usr/local/bin/terminal-init.sh
+
+# Expose the ttyd port
+EXPOSE 7681
+
+# Start ttyd with base path (/terminal) and url arguments enabled (-a) running our initialization script
+ENTRYPOINT ["ttyd", "-b", "/terminal", "-a", "sh", "/usr/local/bin/terminal-init.sh"]

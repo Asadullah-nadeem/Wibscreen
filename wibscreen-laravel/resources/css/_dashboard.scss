@@ -90,6 +90,40 @@
   flex-shrink: 0;
 }
 
+.wb-footer-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--bs-secondary-color) !important;
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all var(--wb-speed) var(--wb-ease) !important;
+  width: 100% !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+}
+
+.wb-footer-btn:hover {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+  color: var(--wb-primary) !important;
+  border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+.wb-footer-btn i {
+  font-size: 0.9rem !important;
+  width: 18px !important;
+  text-align: center !important;
+}
+
+
 /* ── 4. Sidebar Overlay (mobile) ────────────────── */
 .wb-overlay {
   display: none;

@@ -1,59 +1,112 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Wibscreen Browser-Based Linux & Docker Integration Architecture
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Wibscreen aims to provide a unified digital workspace. Integrating a lightweight Linux VM and terminal directly in the web browser allows users to run commands, run scripts, and manage environments without leaving the application.
 
-## About Laravel
+This document describes the architecture, technology stack, and implementation options for running a Linux VM (< 50MB) and Docker Compose management tools directly inside the browser.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ── Architecture Overview ──
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+We propose two primary methods to enable browser-based Linux environments within Wibscreen:
 
-## Learning Laravel
+```mermaid
+graph TD
+    subgraph Client [User's Browser]
+        UI[Wibscreen Dashboard] -->|Iframe / xterm.js| Term[Web Terminal UI]
+        UI -->|WASM x86 Emulator| WASM_VM[v86 Virtual Machine]
+    end
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+    subgraph Backend [Docker Compose Environment]
+        Proxy[Nginx / HAProxy] -->|WebSockets| TTYD[ttyd / Wetty Service]
+        TTYD -->|Shell Session| Alpine[Lightweight Alpine Container]
+        DockerAPI[Docker Engine Socket] -.->|Control| UI
+    end
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    WASM_VM -->|Client-Side Only| LocalStorage[(Browser Local Storage)]
+    Term -->|Remote Access| TTYD
+```
 
-## Laravel Sponsors
+### 1. Client-Side WASM VM (Option A)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+* **Technology:** [v86](https://github.com/copy/v86) (a 32-bit x86 emulator written in Rust/WebAssembly).
+* **OS Image:** Alpine Linux 3.20 x86 Minimal (approx. 25MB - 35MB).
+* **How it works:** The virtual machine runs entirely in the browser thread using WebAssembly. The Linux filesystem is loaded as a disk image from the server and cached in browser storage (IndexedDB).
+*
+* **Technology:** [ttyd](https://github.com/tsl0922/ttyd) (Share terminal over web using WebSockets and xterm.js) or WebSSH.
+* **OS Image:** Ultra-lightweight `alpine:latest` (~5MB) running inside Docker Compose.
+* **How it works:** A lightweight Alpine container is launched on the backend server. The `ttyd` process exposes the shell via WebSockets. The Wibscreen UI embeds `xterm.js` to render the terminal.
+* **Pros:** Real Linux environment, full access to backend databases, Redis, and network services; extremely fast and reliable.
+* **Cons:** Consumes server memory/CPU.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## ── Detailed Implementation Roadmap ──
 
-## Contributing
+### Phase 1: Browser-to-Docker Terminal Integration (Option B)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+We will add a new lightweight terminal service to our existing `docker-compose.yml` that connects a terminal shell directly to your browser page.
 
-## Code of Conduct
+1. **Add `terminal` service to `docker-compose.yml`:**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   ```yaml
+     # Web-based Terminal Console for User Linux Shell
+     terminal:
+       image: tsl0922/ttyd:alpine
+       container_name: wibscreen-terminal
+       restart: unless-stopped
+       expose:
+         - "7681"
+       volumes:
+         - /var/run/docker.sock:/var/run/docker.sock # Optional: allows managing Docker from browser
+       command: ttyd -p 7681 sh
+       networks:
+         - wibscreen-network
+   ```
 
-## Security Vulnerabilities
+2. **Expose Terminal via Nginx/HAProxy Proxy:**
+   We will update `nginx.conf` to proxy `/terminal` WebSocket requests to the `terminal` service:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   ```nginx
+   location /terminal/ {
+       proxy_pass http://terminal:7681/;
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "Upgrade";
+       proxy_set_header Host $host;
+   }
+   ```
 
-## License
+3. **Embed in Wibscreen Dashboard:**
+   We will create a new terminal tab in the dashboard that displays the shell inside an iframe or uses `xterm.js` to render it in a clean card.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+### Phase 2: Client-Side WebAssembly VM (Option A)
+
+To run a completely self-contained Linux virtual machine (< 50MB) entirely client-side:
+
+1. **Host v86 Assets:**
+   We will download `v86.js` and `v86.wasm` to `public/assets/vendor/v86/`.
+2. **Alpine Disk Image:**
+   We will provide a custom, optimized Alpine Linux disk image (`alpine-v86.img` ~30MB) containing basic shell tools, and place it in the `Linux/` folder.
+3. **HTML5 Terminal Interface:**
+   We will write a Blade view `resources/views/pages/linux.blade.php` that initializes `v86` with the disk image and binds it to a terminal emulator interface in the browser.
+
+---
+
+## ── Current Workspace Diagnostics ──
+
+* **Web Server URL:** `http://localhost:8000/`
+* **Varnish Cache:** `http://localhost:8082/`
+* **HAProxy Load Balancer:** `http://localhost:8083/`
+* **Redis Instance:** `wibscreen-redis` (port 6379)
+* **Mailpit:** `http://localhost:8025/`
+
+---
+
+## ── Next Steps ──
+
+1. **Review this Plan:** Please read this design document.
+2. **Confirm Preference:** Let us know if you want to start with **Option A (WASM VM running in browser)**, **Option B (Docker Terminal exposed via ttyd)**, or **both**.
+3. **Download Linux Image:** Once confirmed, we will set up the files inside this `Linux/` folder and proceed with the integration.

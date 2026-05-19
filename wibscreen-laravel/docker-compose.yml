@@ -437,6 +437,17 @@ services:
     networks:
       - wibscreen-network
 
+  # Web-Based Linux VM Terminal Console (Low Latency Shell)
+  terminal:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.terminal
+    container_name: wibscreen-terminal
+    restart: unless-stopped
+    networks:
+      - wibscreen-network
+
+
 
 networks:
   wibscreen-network:

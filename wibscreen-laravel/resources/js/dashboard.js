@@ -55,6 +55,7 @@ $(function () {
   const modalNewFolder = bsModal('wb-modal-folder');
   const modalRename    = bsModal('wb-modal-rename');
   const modalSettings  = bsModal('wb-modal-settings');
+  const modalProfile   = bsModal('wb-modal-profile');
 
   let renameTargetId = null;
 
@@ -130,7 +131,7 @@ $(function () {
     settings.theme = theme;
     $html.attr('data-bs-theme', theme);
     const isDay = theme === 'light';
-    $('#wb-theme-icon').attr('class', `fas fa-${isDay ? 'sun' : 'moon'} me-2`);
+    $('#wb-theme-icon').attr('class', `fas fa-${isDay ? 'sun' : 'moon'}`);
     $('#wb-theme-label').text(isDay ? 'Day Mode' : 'Night Mode');
     if (save) {
       saveSettings();
@@ -171,6 +172,12 @@ $(function () {
     /* ── Settings ── */
     $('#wb-settings-btn').on('click', () => modalSettings.show());
 
+    /* ── Linux VM click ── */
+    $('#wb-linux-btn').on('click', function(e) {
+      e.preventDefault();
+      openLinuxTerminal();
+    });
+
     /* ── Browser toolbar ── */
     $('#wb-browser-back, #wb-browser-close').on('click', showDashboard);
 
@@ -185,6 +192,11 @@ $(function () {
     });
 
     $('#wb-browser-newtab, #wb-open-newtab-btn').on('click', () => {
+      if (state.activeTabId === 'linux-vm') {
+        const terminalUrl = window.location.protocol + "//" + window.location.hostname + ":7681/";
+        window.open(terminalUrl, '_blank', 'noopener');
+        return;
+      }
       const site = findSite(state.activeTabId);
       if (site) window.open(site.url, '_blank', 'noopener');
     });
@@ -319,6 +331,54 @@ $(function () {
       const dx = e.changedTouches[0].screenX - touchStartX;
       if (dx < -60 && $sidebar.hasClass('open')) closeSidebar();
     }, { passive: true });
+
+    /* ── Settings customizer sliders ── */
+    const _root = document.documentElement;
+    
+    $('#wb-accent-color').on('input', function () {
+      _root.style.setProperty('--wb-primary', this.value);
+    });
+    
+    $('#wb-card-radius').on('input', function () {
+      _root.style.setProperty('--wb-card-radius', this.value + 'px');
+      $('#wb-radius-val').text(this.value + 'px');
+    });
+    
+    $('#wb-sidebar-w').on('input', function () {
+      _root.style.setProperty('--wb-sidebar-w', this.value + 'px');
+      $('#wb-sw-val').text(this.value + 'px');
+    });
+    
+    $('#wb-settings-theme-btn').on('click', function () {
+      $('#wb-theme-btn').trigger('click');
+    });
+
+    /* ── Profile Logic ── */
+    $('#wb-profile-btn').on('click', function (e) {
+      e.preventDefault();
+      modalProfile.show();
+    });
+
+    $('#wb-save-profile').on('click', function () {
+      modalProfile.hide();
+    });
+
+    $('#wb-deactivate-btn').on('click', function () {
+      if (confirm("Are you sure you want to deactivate your account? You will be logged out and your data will be hidden until you contact support to reactivate.")) {
+        document.getElementById('deactivate-form').submit();
+      }
+    });
+
+    $('#wb-delete-btn').on('click', function () {
+      if (confirm("🚨 WARNING: PERMANENT DELETION\n\nThis will permanently delete your account and ALL your data (Workspaces, Tabs, and Notes). This action is IRREVERSIBLE.\n\nType 'DELETE' to confirm:")) {
+        const confirmation = prompt("Please type 'DELETE' to confirm permanent account removal:");
+        if (confirmation === 'DELETE') {
+          document.getElementById('delete-form').submit();
+        } else {
+          alert("Deletion cancelled. Text did not match.");
+        }
+      }
+    });
   }
 
   /* ═══════════════════════════════════════════════════
@@ -597,6 +657,50 @@ $(function () {
     });
   }
 
+  function openLinuxTerminal() {
+    state.activeTabId = 'linux-vm';
+    
+    // Show browser panel
+    $iframeLayer.addClass('active');
+    $('#wb-iframe-blocked').removeClass('show');
+    $iframeContent.find('.wb-tab-iframe').removeClass('active');
+    showLoadBar();
+
+    $.getJSON('/terminal/token')
+      .done(function (response) {
+        const token = response.token;
+        const rawUsername = (typeof DB_STATE !== 'undefined' && DB_STATE.username) ? DB_STATE.username : 'wibuser';
+        const terminalUrl = window.location.protocol + "//" + window.location.host + "/terminal/?token=" + token + "&arg=" + encodeURIComponent(rawUsername);
+        
+        $('#wb-browser-url-text').text("Linux VM console - " + terminalUrl);
+        $urlDisplay.val(terminalUrl);
+
+        if ($('#iframe-linux-vm').length === 0) {
+          $iframeContent.append(
+            `<iframe id="iframe-linux-vm" class="wb-tab-iframe" src="${terminalUrl}"
+                     title="Linux VM Console" loading="lazy"></iframe>`
+          );
+        } else {
+          $('#iframe-linux-vm').attr('src', terminalUrl);
+        }
+
+        const $frame = $('#iframe-linux-vm');
+        $frame.off('load.wb error.wb').on('load.wb', function () {
+          doneLoadBar();
+        }).on('error.wb', function () {
+          doneLoadBar();
+          alert('Failed to load Linux VM console.');
+        });
+
+        $frame.addClass('active');
+        updateBottomBar();
+      })
+      .fail(function () {
+        doneLoadBar();
+        alert('Failed to authorize terminal session. Please try logging in again.');
+      });
+  }
+
   function handleAddTab () {
     let url  = $('#wb-url-input').val().trim();
     let name = $('#wb-name-input').val().trim();
@@ -650,6 +754,8 @@ $(function () {
       alert(errorMsg);
     });
   }
+
+
 
   function openInBrowser (id) {
     state.activeTabId = id;

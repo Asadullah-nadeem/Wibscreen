@@ -108,6 +108,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Account Management
     Route::post('/account/deactivate', [AuthController::class, 'deactivate'])->name('account.deactivate');
     Route::delete('/account/delete', [AuthController::class, 'deleteAccount'])->name('account.delete');
+
+    // Terminal Security Tokens
+    Route::get('/terminal/token', function () {
+        $tokenStr = \Illuminate\Support\Str::random(16);
+        \App\Models\TerminalToken::create([
+            'user_id' => auth()->id(),
+            'token' => $tokenStr,
+            'expires_at' => now()->addMinutes(2)
+        ]);
+        return response()->json(['token' => $tokenStr]);
+    });
+});
+
+Route::get('/terminal/auth', function (Illuminate\Http\Request $request) {
+    $tokenVal = $request->query('token');
+    if (!$tokenVal) {
+        return response('Unauthorized: Missing Token', 401);
+    }
+
+    $token = \App\Models\TerminalToken::where('token', $tokenVal)
+        ->where('expires_at', '>', now())
+        ->first();
+
+    if (!$token) {
+        return response('Unauthorized: Invalid or Expired Token', 401);
+    }
+
+    return response('OK', 200);
 });
 
 /* ── Legal Pages ────────────────────────────────────── */

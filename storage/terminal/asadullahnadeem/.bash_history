@@ -8,3 +8,12 @@ ls
 su
 so
 sudo root
+sudo apt update
+apt update
+update
+cls
+clear
+ls
+apt update 
+ls
+ls ..

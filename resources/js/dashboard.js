@@ -817,7 +817,7 @@ $(function () {
     showLoadBar();
 
     const emulatorUrl = window.location.protocol + "//" + window.location.host + "/linux-vm";
-    $('#wb-browser-url-text').text("x86 Emulator (Tiny Core Linux) - " + emulatorUrl);
+    $('#wb-browser-url-text').text("x86 Emulator (WibOS Custom C/C++ VM) - " + emulatorUrl);
     $urlDisplay.val(emulatorUrl);
 
     if ($('#iframe-x86-emulator').length === 0) {

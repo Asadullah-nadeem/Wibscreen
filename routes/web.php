@@ -123,10 +123,53 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return response()->json(['token' => $token->token]);
     });
 
-    // Web-Based x86 Emulator booting tinycore.iso
+    // Web-Based x86 Emulator booting tinycore.iso / wibos.img
     Route::get('/linux-vm', function () {
-        return view('pages.emulator');
+        $kernelCode = file_exists(base_path('Linux/src/kernel.c')) ? file_get_contents(base_path('Linux/src/kernel.c')) : '';
+        $bootCode = file_exists(base_path('Linux/src/boot.asm')) ? file_get_contents(base_path('Linux/src/boot.asm')) : '';
+        return view('pages.emulator', compact('kernelCode', 'bootCode'));
     })->name('emulator');
+
+    // Route to compile WibOS custom C/Assembly kernel via Docker and Makefile
+    Route::post('/linux-vm/compile', function (\Illuminate\Http\Request $request) {
+        $kernelCode = $request->input('kernel_code');
+        $bootCode = $request->input('boot_code');
+
+        if ($kernelCode) {
+            file_put_contents(base_path('Linux/src/kernel.c'), $kernelCode);
+        }
+        if ($bootCode) {
+            file_put_contents(base_path('Linux/src/boot.asm'), $bootCode);
+        }
+
+        // Run compilation locally inside the Linux directory (in-container or on-host)
+        $linuxPath = base_path('Linux');
+        $commandClean = 'cd ' . escapeshellarg($linuxPath) . ' && make clean 2>&1';
+        $commandBuild = 'cd ' . escapeshellarg($linuxPath) . ' && make 2>&1';
+
+        $outputClean = [];
+        $returnClean = 0;
+        exec($commandClean, $outputClean, $returnClean);
+
+        $outputBuild = [];
+        $returnBuild = 0;
+        exec($commandBuild, $outputBuild, $returnBuild);
+
+        $outputStr = implode("\n", $outputBuild);
+
+        if ($returnBuild !== 0) {
+            return response()->json([
+                'success' => false,
+                'error' => "Compilation failed:\n" . $outputStr
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kernel compiled successfully!',
+            'output' => $outputStr
+        ]);
+    });
 
     // Route to serve WebAssembly VM files directly from the secure Linux folder
     Route::get('/linux/{filename}', function ($filename) {
@@ -143,6 +186,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         } elseif (str_ends_with($filename, '.bin')) {
             $contentType = 'application/octet-stream';
         } elseif (str_ends_with($filename, '.iso')) {
+            $contentType = 'application/octet-stream';
+        } elseif (str_ends_with($filename, '.img')) {
             $contentType = 'application/octet-stream';
         }
         

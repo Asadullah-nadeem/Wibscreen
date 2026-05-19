@@ -450,6 +450,15 @@ services:
     networks:
       - wibscreen-network
 
+  # WibOS Compilation Service (Compiles C/Assembly kernel via Docker & Makefile)
+  wibos-builder:
+    build:
+      context: ./Linux
+      dockerfile: Dockerfile
+    container_name: wibscreen-wibos-builder
+    volumes:
+      - ./Linux:/build
+
 
 
 networks:

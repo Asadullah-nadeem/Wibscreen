@@ -119,6 +119,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
         return response()->json(['token' => $tokenStr]);
     });
+
+    // Web-Based x86 Emulator booting tinycore.iso
+    Route::get('/linux-vm', function () {
+        return view('pages.emulator');
+    })->name('emulator');
 });
 
 Route::get('/terminal/auth', function (Illuminate\Http\Request $request) {

@@ -84,6 +84,11 @@
         <span>Linux VM</span>
       </button>
 
+      <button id="wb-emulator-btn" class="wb-footer-btn">
+        <i class="fas fa-microchip text-success"></i>
+        <span>x86 Emulator</span>
+      </button>
+
       <button id="wb-theme-btn" class="wb-footer-btn">
         <i id="wb-theme-icon" class="fas fa-moon"></i>
         <span id="wb-theme-label">Night Mode</span>

@@ -178,6 +178,12 @@ $(function () {
       openLinuxTerminal();
     });
 
+    /* ── x86 Emulator click ── */
+    $('#wb-emulator-btn').on('click', function(e) {
+      e.preventDefault();
+      openX86Emulator();
+    });
+
     /* ── Browser toolbar ── */
     $('#wb-browser-back, #wb-browser-close').on('click', showDashboard);
 
@@ -701,6 +707,43 @@ $(function () {
       });
   }
 
+  function openX86Emulator() {
+    state.activeTabId = 'x86-emulator';
+    
+    // Show browser panel
+    $iframeLayer.addClass('active');
+    $('#wb-iframe-blocked').removeClass('show');
+    $iframeContent.find('.wb-tab-iframe').removeClass('active');
+    showLoadBar();
+
+    const emulatorUrl = window.location.protocol + "//" + window.location.host + "/linux-vm";
+    $('#wb-browser-url-text').text("x86 Emulator (Tiny Core Linux) - " + emulatorUrl);
+    $urlDisplay.val(emulatorUrl);
+
+    if ($('#iframe-x86-emulator').length === 0) {
+      $iframeContent.append(
+        `<iframe id="iframe-x86-emulator" class="wb-tab-iframe" src="${emulatorUrl}"
+                 title="x86 Emulator" loading="lazy"></iframe>`
+      );
+    } else {
+      const currentSrc = $('#iframe-x86-emulator').attr('src');
+      if (currentSrc !== emulatorUrl) {
+        $('#iframe-x86-emulator').attr('src', emulatorUrl);
+      }
+    }
+
+    const $frame = $('#iframe-x86-emulator');
+    $frame.off('load.wb error.wb').on('load.wb', function () {
+      doneLoadBar();
+    }).on('error.wb', function () {
+      doneLoadBar();
+      alert('Failed to load x86 emulator.');
+    });
+
+    $frame.addClass('active');
+    updateBottomBar();
+  }
+
   function handleAddTab () {
     let url  = $('#wb-url-input').val().trim();
     let name = $('#wb-name-input').val().trim();
@@ -937,7 +980,11 @@ $(function () {
 
     state.websites.forEach(mountIframe);
 
-    if (state.activeTabId) {
+    if (state.activeTabId === 'linux-vm') {
+      openLinuxTerminal();
+    } else if (state.activeTabId === 'x86-emulator') {
+      openX86Emulator();
+    } else if (state.activeTabId) {
       $iframeLayer.addClass('active');
       $(`#iframe-${state.activeTabId}`).addClass('active');
     }

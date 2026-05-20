@@ -1,0 +1,48 @@
+README for slitaz-configs
+===============================================================================
+
+
+English
+=======
+SliTaz configs provide the files and images used by default on the core 
+LiveCD. A SliTaz package is generated from the wok and Cookutils. It contains 
+Openbox themes, an autostart script, a menu and RC file. /usr/share contains 
+the Slim Login Manager theme and the desktop background of the moment. All 
+artwork is done on SliTaz with mtPaint, The Gimp or Inkscape.
+
+
+Files: ~/.xinitrc ~/.xsession
+----------------------------
+These 2 files are used for a X session login and startup. In live mode: root
+and the default user (id 1000) need them. For a new user, when SliTaz is 
+installed the files are copied from /etc/skel. Historically, these files
+were created by tazx at boot time because we were using a tiny Xvesa server
+which couldn't autoconfigure screen resolution and we needed to generate a
+.xsession with something like: Xvesa -screen 1024x768x24 &
+
+
+Syslinux/isolinux splash image
+------------------------------
+The image size must be: 640 x 480 pixels
+The image must be: 16-bit
+Don't ask why, the image must be a png with a jpg extension
+
+Use Gimp to create/modify an image then use 'convert' from the Imagemagick
+package to correct colors and color depth:
+
+$ convert -depth 16 -colors 65536 slitaz.jpg splash.jpg
+
+
+Français
+========
+Ce paquet fournit les fichiers, images et sons utilisés par défaut sur le coeur
+du LiveCD. Le paquets SliTaz est généré depuis le wok avec Cook. Il contient
+les thèmes, le menu, script de démarrage (autostart.sh) et le fichier RC utilisé
+par le gestionnaire de fenêtres Openbox. /usr/share contient aussi le thème pour
+le gestionnaire de connexion Slim et les fond d'écran du moment.
+
+L'artwork est entièrement réalisé depuis SliTaz avec mtPaint, Gimp ou Inkscape.
+
+
+===============================================================================
+                                                         http://www.slitaz.org/

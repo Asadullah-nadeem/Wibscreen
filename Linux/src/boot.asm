@@ -94,8 +94,8 @@ disk_error:
 
 ; Data variables
 boot_drive db 0
-msg_booting db "Booting WibOS x86 VM (from 512-byte boot sector)...", 13, 10, 0
-msg_error db "Error loading kernel from disk!", 13, 10, 0
+msg_booting db "Loading MBR Boot Sector (16-bit Real Mode)... [OK]", 13, 10, "Entering 32-bit Protected Mode... [OK]", 13, 10, 0
+msg_error db "Boot Error: Failed to read sectors from floppy!", 13, 10, 0
 
 ; Global Descriptor Table (GDT) setup
 gdt_start:

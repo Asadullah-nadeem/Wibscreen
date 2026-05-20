@@ -1,3 +1,0 @@
-Wibscreen Linux Command Folder
-===============================
-This folder can be used to store helper shell scripts, config files, or mounting resources for the client-side x86 WebAssembly emulator.

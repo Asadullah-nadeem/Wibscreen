@@ -17,6 +17,8 @@ wibos.img: boot.bin kernel.bin
 	dd if=/dev/zero of=wibos.img bs=1024 count=1440
 	# Write the compiled bootloader + kernel onto the floppy image without truncating
 	dd if=temp_wibos.img of=wibos.img conv=notrunc
+	# Copy to the wibos/ subdirectory if it exists
+	mkdir -p wibos && cp wibos.img wibos/wibos.img
 	rm -f temp_wibos.img boot.bin kernel.bin kernel_entry.o kernel.o
 	@echo "WibOS floppy image wibos.img compiled and generated successfully!"
 

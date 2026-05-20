@@ -142,18 +142,52 @@ Route::middleware(['auth', 'verified'])->group(function () {
             file_put_contents(base_path('Linux/src/boot.asm'), $bootCode);
         }
 
-        // Run compilation locally inside the Linux directory (in-container or on-host)
+        // Run compilation inside the Linux directory using Docker if available, otherwise host make
         $linuxPath = base_path('Linux');
-        $commandClean = 'cd ' . escapeshellarg($linuxPath) . ' && make clean 2>&1';
-        $commandBuild = 'cd ' . escapeshellarg($linuxPath) . ' && make 2>&1';
-
-        $outputClean = [];
-        $returnClean = 0;
-        exec($commandClean, $outputClean, $returnClean);
+        $hasDocker = false;
+        $dockerVersion = [];
+        $dockerRet = -1;
+        exec('docker --version 2>&1', $dockerVersion, $dockerRet);
+        if ($dockerRet === 0) {
+            $hasDocker = true;
+        }
 
         $outputBuild = [];
         $returnBuild = 0;
-        exec($commandBuild, $outputBuild, $returnBuild);
+
+        if ($hasDocker) {
+            // Build compilation container (cached automatically after first run)
+            $commandBuildImage = 'docker build -t wibos-compiler ' . escapeshellarg($linuxPath) . ' 2>&1';
+            $outputImage = [];
+            $returnImage = 0;
+            exec($commandBuildImage, $outputImage, $returnImage);
+
+            if ($returnImage !== 0) {
+                $outputBuild = array_merge(["Docker build container creation failed:"], $outputImage);
+                $returnBuild = $returnImage;
+            } else {
+                // Run the compiler using a volume mount
+                $volumePath = str_replace('\\', '/', $linuxPath);
+                // First run make clean
+                $commandClean = 'docker run --rm -v ' . escapeshellarg($volumePath . ':/build') . ' wibos-compiler make clean 2>&1';
+                exec($commandClean);
+
+                // Then run make to compile
+                $commandBuild = 'docker run --rm -v ' . escapeshellarg($volumePath . ':/build') . ' wibos-compiler 2>&1';
+                exec($commandBuild, $outputBuild, $returnBuild);
+            }
+        } else {
+            // Fallback to host make
+            $commandClean = 'cd ' . escapeshellarg($linuxPath) . ' && make clean 2>&1';
+            exec($commandClean);
+            $commandBuild = 'cd ' . escapeshellarg($linuxPath) . ' && make 2>&1';
+            exec($commandBuild, $outputBuild, $returnBuild);
+        }
+
+        // Copy the newly compiled wibos.img to the wibos subdirectory for emulator access
+        if ($returnBuild === 0 && file_exists(base_path('Linux/wibos.img'))) {
+            copy(base_path('Linux/wibos.img'), base_path('Linux/wibos/wibos.img'));
+        }
 
         $outputStr = implode("\n", $outputBuild);
 

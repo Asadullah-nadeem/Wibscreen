@@ -35,22 +35,23 @@
         #container {
             flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
             background-color: #000;
             width: 100%;
             height: 100%;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
         }
         #emulator-screen {
+            flex: 1;
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background-color: #000;
             position: relative;
-            width: 100%;
-            height: 100%;
         }
         /* Style for the terminal screen */
         #screen_container {
@@ -65,6 +66,7 @@
             outline: none;
         }
         #status {
+            width: 100%;
             padding: 8px 20px;
             background-color: #111827;
             border-top: 1px solid #1f2937;
@@ -72,6 +74,7 @@
             color: #9ca3af;
             display: flex;
             justify-content: space-between;
+            box-sizing: border-box;
         }
         .btn {
             background-color: #2563eb;
@@ -92,7 +95,7 @@
         }
         .scaled-screen {
             width: 100% !important;
-            height: calc(100vh - 140px) !important;
+            height: calc(100vh - 100px) !important;
             max-height: none !important;
             min-height: none !important;
             display: flex !important;
@@ -121,6 +124,8 @@
                 <option value="wibos">WibOS (Custom C/Assembly OS)</option>
                 <option value="slitaz">Tiny Core Linux (GUI Desktop - 19MB)</option>
             </select>
+            <button class="btn" id="btn-load-local" style="background-color: #4b5563;"><i class="fas fa-file-upload"></i> Load Local ISO/Image</button>
+            <input type="file" id="local-file-input" style="display: none;" accept=".iso,.img,.bin">
             <button class="btn" id="btn-restart"><i class="fas fa-redo"></i> Restart VM</button>
             <button class="btn" id="btn-toggle-scale" style="background-color: #374151;"><i class="fas fa-expand-arrows-alt"></i> Scale to Fit</button>
             <button class="btn" id="btn-toggle-status" style="background-color: #374151;"><i class="fas fa-eye-slash"></i> Hide Status</button>
@@ -131,7 +136,6 @@
     <div id="container">
         <!-- Emulator Container -->
         <div id="emulator-screen">
-
             <div id="screen_container" tabindex="0"></div>
             <div id="status">
                 <span id="status-text">Initializing emulator...</span>
@@ -154,62 +158,6 @@
         }
         const STATE_KEY = 'v86_state_' + selectedOS;
 
-        // IndexedDB Helpers to Cache Boot State
-        function getSavedState() {
-            return new Promise((resolve) => {
-                try {
-                    const request = indexedDB.open(DB_NAME, 1);
-                    request.onupgradeneeded = function(e) {
-                        e.target.result.createObjectStore(STORE_NAME);
-                    };
-                    request.onsuccess = function(e) {
-                        const db = e.target.result;
-                        const transaction = db.transaction(STORE_NAME, 'readonly');
-                        const store = transaction.objectStore(STORE_NAME);
-                        const getReq = store.get(STATE_KEY);
-                        getReq.onsuccess = function() {
-                            resolve(getReq.result || null);
-                        };
-                        getReq.onerror = function() { resolve(null); };
-                    };
-                    request.onerror = function() { resolve(null); };
-                } catch (err) {
-                    resolve(null);
-                }
-            });
-        }
-
-        function saveState(state) {
-            return new Promise((resolve) => {
-                try {
-                    const request = indexedDB.open(DB_NAME, 1);
-                    request.onsuccess = function(e) {
-                        const db = e.target.result;
-                        const transaction = db.transaction(STORE_NAME, 'readwrite');
-                        const store = transaction.objectStore(STORE_NAME);
-                        store.put(state, STATE_KEY);
-                        transaction.oncomplete = function() { resolve(true); };
-                    };
-                } catch (err) {
-                    resolve(false);
-                }
-            });
-        }
-
-        // US Keyboard layout scan codes mapping
-        const scanCodes = {
-            'a': 0x1E, 'b': 0x30, 'c': 0x2E, 'd': 0x20, 'e': 0x12, 'f': 0x21,
-            'g': 0x22, 'h': 0x23, 'i': 0x17, 'j': 0x24, 'k': 0x25, 'l': 0x26,
-            'm': 0x32, 'n': 0x31, 'o': 0x18, 'p': 0x19, 'q': 0x10, 'r': 0x13,
-            's': 0x1F, 't': 0x14, 'u': 0x16, 'v': 0x2F, 'w': 0x11, 'x': 0x2D,
-            'y': 0x15, 'z': 0x2C, '1': 0x02, '2': 0x03, '3': 0x04, '4': 0x05,
-            '5': 0x06, '6': 0x07, '7': 0x08, '8': 0x09, '9': 0x0A, '0': 0x0B,
-            '\n': 0x1C, ' ': 0x39, '-': 0x0C, '=': 0x0D, '[': 0x1A, ']': 0x1B,
-            ';': 0x27, '\'': 0x28, '`': 0x29, '\\': 0x2B, ',': 0x33, '.': 0x34,
-            '/': 0x35, '\t': 0x0F, '_': 0x0C, '+': 0x0D, '@': 0x03, ':': 0x27,
-            '~': 0x29, '$': 0x06
-        };
-
         // Cache Storage Helpers to avoid double loading
         async function getCacheStorageAssetUrl(key, url, statusText) {
             try {
@@ -228,8 +176,6 @@
                 return url; // fallback to raw path
             }
         }
-
-
 
         function attachEmulatorListeners(emulator, statusText, isWibOS) {
             emulator.add_listener("emulator-ready", function() {
@@ -296,15 +242,72 @@
                 config.cdrom = { url: isoUrl };
             }
 
-            // Initialize and boot V86 emulator directly, bypassing simulated BIOS POST
-            statusText.innerText = "Booting OS kernel...";
-            try {
-                const emulator = new V86Starter(config);
-                attachEmulatorListeners(emulator, statusText, isWibOS);
-            } catch (e) {
-                console.error("V86 Initialization failed:", e);
-                statusText.innerText = "Error: " + e.message;
+            let currentEmulator = null;
+
+            function startEmulator(customConfig = null) {
+                if (currentEmulator) {
+                    try {
+                        currentEmulator.destroy();
+                    } catch (e) {
+                        console.error("Error destroying old emulator:", e);
+                    }
+                    currentEmulator = null;
+                }
+
+                // Clear screen container
+                const containerEl = document.getElementById("screen_container");
+                containerEl.innerHTML = "";
+
+                statusText.innerText = "Booting OS kernel...";
+                try {
+                    const finalConfig = customConfig || config;
+                    currentEmulator = new V86Starter(finalConfig);
+                    const isCustomWibOS = finalConfig.fda && (!finalConfig.fda.url);
+                    attachEmulatorListeners(currentEmulator, statusText, isCustomWibOS || isWibOS);
+                } catch (e) {
+                    console.error("V86 Initialization failed:", e);
+                    statusText.innerText = "Error: " + e.message;
+                }
             }
+
+            // Handle loading a local ISO or floppy image file directly from user disk
+            const btnLoadLocal = document.getElementById("btn-load-local");
+            const localFileInput = document.getElementById("local-file-input");
+
+            btnLoadLocal.onclick = function() {
+                localFileInput.click();
+            };
+
+            localFileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                statusText.innerText = "Loading local file: " + file.name + "...";
+                const isImageFile = file.name.endsWith(".img") || file.name.endsWith(".bin");
+
+                // Construct a new config using the local file
+                const localConfig = {
+                    wasm_path: wasmUrl,
+                    memory_size: isImageFile ? 16 * 1024 * 1024 : 256 * 1024 * 1024,
+                    vga_memory_size: isImageFile ? 2 * 1024 * 1024 : 8 * 1024 * 1024,
+                    screen_container: document.getElementById("screen_container"),
+                    bios: { url: biosUrl },
+                    vga_bios: { url: vgaBiosUrl },
+                    autostart: true
+                };
+
+                if (isImageFile) {
+                    localConfig.fda = { file: file };
+                } else {
+                    localConfig.cdrom = { file: file };
+                }
+
+                // Restart emulator with the local file
+                startEmulator(localConfig);
+            };
+
+            // Initial startup
+            startEmulator();
 
             // Scale and Status Bar toggles
             let isScaled = localStorage.getItem('wibscreen_scaled') === 'true';
@@ -352,7 +355,7 @@
 
             document.getElementById("btn-restart").onclick = async function() {
                 statusText.innerText = "Rebooting VM...";
-                window.location.reload();
+                startEmulator();
             };
 
             document.getElementById("btn-fullscreen").onclick = function() {
